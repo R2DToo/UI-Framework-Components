@@ -25,6 +25,8 @@ const view = (state, {updateState, dispatch}) => {
 					<label for="tab2">Tags</label>
 					<input type="radio" name="tabset" id="tab3" aria-controls="additional" onchange={() => {updateState({activeTabIndex: 3})}}/>
 					<label for="tab3">Additional</label>
+					<input type="radio" name="tabset" id="tab4" aria-controls="changes" onchange={() => {updateState({activeTabIndex: 4})}}/>
+					<label for="tab4">Changes</label>
 				</div>
 			</div>
 			<div id="info-cards">
@@ -82,6 +84,11 @@ const view = (state, {updateState, dispatch}) => {
 									)}
 								</div>
 							)}
+							{state.activeTabIndex == 4 && (
+								<div className="card-body">
+									<p><span className="key">Changes:</span> Coming Soon...</p>
+								</div>
+							)}
 						</div>
 					)
 				})}
@@ -133,6 +140,11 @@ const view = (state, {updateState, dispatch}) => {
 											<pre className="">{JSON.stringify(JSON.parse(record.additional_info.displayValue), null, 2)}</pre>
 										</div>
 									)}
+								</div>
+							)}
+							{state.activeTabIndex == 4 && (
+								<div className="card-body">
+									<p><span className="key">Changes:</span> Coming Soon...</p>
 								</div>
 							)}
 						</div>

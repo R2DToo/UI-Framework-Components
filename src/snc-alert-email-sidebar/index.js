@@ -18,18 +18,17 @@ const view = (state, {updateState}) => {
 						image-src={state.properties.currentUser.avatar}
 						presence={state.properties.currentUser.presence}
 					/>
-					AIOps
+					<span className="primary-color">AIOps</span>
 				</div>
 				<menu className="menu-segment">
 					<ul>
-						<li className="active"><a href="#">Alerts<span> (#)</span></a></li>
-						<li><a href="#">Important</a></li>
-						<li><a href="#">Anomalies</a></li>
-						<li><a href="#">Analytics</a></li>
-						<li><a href="#">Chatops</a></li>
+						<li className="active"><a href="#">Active</a></li>
+						<li><a href="#">Unhandled</a></li>
+						<li><a href="#">Maintenance</a></li>
+						<li><a href="#">Resolved</a></li>
 					</ul>
 				</menu>
-				<div className="separator"></div>
+				{/* <div className="separator"></div>
 				<div className="menu-segment">
 					<ul className="labels">
 						<li className="ciName">Labels</li>
@@ -37,8 +36,7 @@ const view = (state, {updateState}) => {
 						<li><a href="#">Metrics <span className="ball green"></span></a></li>
 						<li><a href="#">Logs <span className="ball blue"></span></a></li>
 					</ul>
-				</div>
-				<div className="bottom-padding"></div>
+				</div> */}
 			</div>
 		</aside>
 	);

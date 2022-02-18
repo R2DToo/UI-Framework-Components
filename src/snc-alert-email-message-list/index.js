@@ -127,9 +127,11 @@ const view = (state, {updateState, dispatch}) => {
 					onmousedown={e => startDrag(e, index)}
 					ondrop={e => drop(e, index)}
 				>
-					{fieldObj.label}&nbsp;
+					{fieldObj.label}
 					{sortObj && (
-						<now-icon className="primary-color" icon={sortObj.asc ? "sort-ascending-outline" : "sort-descending-outline"} size="sm"/>
+						<div>
+							<now-icon className="primary-color" icon={sortObj.asc ? "sort-ascending-outline" : "sort-descending-outline"} size="sm"/>
+						</div>
 					)}
 				</th>
 			)
