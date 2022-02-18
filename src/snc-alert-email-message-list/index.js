@@ -25,12 +25,41 @@ const view = (state, {updateState, dispatch}) => {
 	const fireEvent = (event_name, value) => {
 		console.log("%cFiring Event: " + event_name, "color:blue;font-size:20px;");
 		console.log("%cEvent Payload: %o", "color:blue;font-size:20px;", value);
-		dispatch(event_name, {
-			value: value
-		});
+
 		if (event_name == "TABLE_ROW#CLICKED") {
 			updateState({showingNumber: value});
 		}
+		if (event_name == "TABLE_HEADER#CLICKED") {
+			let sortingObjIndex = state.sortingArray.findIndex(obj => obj.field == value);
+			if (sortingObjIndex > -1) {
+				let updatedSorting = state.sortingArray;
+				if (updatedSorting[sortingObjIndex].asc == false) {
+					updatedSorting.splice(sortingObjIndex, 1);
+				} else {
+					updatedSorting[sortingObjIndex].asc = false;
+				}
+				value = updatedSorting;
+				updateState({
+					path: 'sortingArray',
+					value: updatedSorting,
+					operation: "set",
+				});
+				updateState({dummyStateChange: !state.dummyStateChange});
+			} else {
+				let updatedSorting = state.sortingArray;
+				updatedSorting.push( {field: value, asc: true});
+				value = updatedSorting;
+				updateState({
+					path: 'sortingArray',
+					value: updatedSorting,
+					operation: "set",
+				});
+				updateState({dummyStateChange: !state.dummyStateChange});
+			}
+		}
+		dispatch(event_name, {
+			value: value
+		});
 	};
 
 	const allowDrop = (e, droppingColumnIndex) => {
@@ -88,6 +117,7 @@ const view = (state, {updateState, dispatch}) => {
 	const tableHeaders = fieldOrder.map((key, index) => {
 		if (state.properties.tableData[0][key]) {
 			let fieldObj = state.properties.tableData[0][key];
+			let sortObj = state.sortingArray.find(obj => obj.field == key);
 			return (
 				<th
 					draggable="true"
@@ -97,7 +127,10 @@ const view = (state, {updateState, dispatch}) => {
 					onmousedown={e => startDrag(e, index)}
 					ondrop={e => drop(e, index)}
 				>
-					{fieldObj.label}
+					{fieldObj.label}&nbsp;
+					{sortObj && (
+						<now-icon className="primary-color" icon={sortObj.asc ? "sort-ascending-outline" : "sort-descending-outline"} size="sm"/>
+					)}
 				</th>
 			)
 		} else {
@@ -228,7 +261,8 @@ createCustomElement('snc-alert-email-message-list', {
 		return {
 			draggingColumnIndex: 0,
 			showingNumber: "0",
-			dummyStateChange: false
+			dummyStateChange: false,
+			sortingArray: [] //format = [{field: "severity", asc: true}]
 		}
 	},
 	actionHandlers: {
