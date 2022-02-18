@@ -1,0 +1,118 @@
+{
+	"components": {
+		"snc-table-component": {
+			"innerComponents": [
+				"now-input"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Table-Component",
+				"icon": "lightning-fill",
+				"description": "A description of my component",
+				"category": "primitives"
+			},
+			"properties": [
+				{
+					"name": "tableData",
+					"label": "Table Data",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "[]"
+				}
+			]
+		},
+		"snc-side-nav": {
+			"innerComponents": [
+				"now-icon"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Side-Nav",
+				"icon": "menu-fill",
+				"description": "A description of my component",
+				"category": "primitives"
+			},
+			"properties": [
+				{
+					"name": "navigationOptions",
+					"label": "Navigation Options Array",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "[]"
+				}
+			]
+		},
+		"snc-alert-email-view": {
+			"innerComponents": [
+				"now-icon",
+				"now-input",
+				"now-highlighted-value",
+				"now-rich-text",
+				"now-avatar"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Alert-Email-View",
+				"icon": "inbox-fill",
+				"description": "A description of my component",
+				"category": "primitives"
+			},
+			"properties": [
+				{
+					"name": "tableData",
+					"label": "Table Data",
+					"readOnly": false,
+					"required": true,
+					"defaultValue": ""
+				},
+				{
+					"name": "focusedRecord",
+					"label": "Focused Record",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": ""
+				},
+				{
+					"name": "focusedChildRecords",
+					"label": "Focused Child Records",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": ""
+				},
+				{
+					"name": "totalCount",
+					"label": "Record Count",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "0"
+				},
+				{
+					"name": "currentUser",
+					"label": "Current User Lookup",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": ""
+				}
+			],
+			"actions": [
+				{
+					"name": "TABLE_HEADER_CLICKED",
+					"description": "Table header clicked"
+				},
+				{
+					"name": "TABLE_ROW_CLICKED",
+					"description": "The table row was clicked"
+				},
+				{
+					"name": "TABLE_HEADER_DROPPED",
+					"description": "Table header dropped"
+				},
+				{
+					"name": "RECORD_LINK_CLICKED",
+					"description": "Link to record was clicked"
+				}
+			]
+		}
+	},
+	"scopeName": "x_snc_optimizui"
+}

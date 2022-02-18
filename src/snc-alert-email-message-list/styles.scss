@@ -1,0 +1,214 @@
+@import '@servicenow/sass-kit/host';
+
+// @import url('https://fonts.googleapis.com/css?family=Roboto:300&display=swap');
+
+/* Color Variables */
+$accent-color: #61C7B3;
+$color-light-grey: #EFEFEF;
+$color-red: #D23B3D;
+
+$sidebar-width: 300px;
+$sidebar-padding: 50px;
+
+.list2_empty-state-list {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: var(--now-global-font-size--md);
+	text-align: center;
+	padding: var(--now-global-space--xl);
+	width: 100%;
+
+	.list-flavin {
+    margin: 0 auto;
+    background: url("/images/polarisberg/flavin/no-data-lg.svg");
+    width: 350px;
+    height: 318px;
+	}
+}
+
+
+#snc-alert-email-message-list {
+	//width: 50vw;
+	overflow: hidden;
+}
+
+a {
+	color: $accent-color;
+	text-decoration: none;
+	transition-duration: .3s;
+
+	&:hover {
+		color: darken($accent-color, 20%);
+		transition-duration: .05s;
+		text-decoration: none;
+	}
+}
+
+ul {
+  list-style: none;
+}
+
+.circle-icon {
+	width: 30px;
+	height: 30px;
+	text-align: center;
+	line-height: 28px;
+	border: 2px solid #B4BBC1;
+	border-radius: 100px;
+	color: #B4BBC1;
+	cursor: pointer;
+
+	&:hover {
+		color: #57636C;
+		border-color: #57636C;
+	}
+
+	&.red {
+		color: $color-red;
+		border-color: $color-red;
+
+		&:hover {
+			color: #791C1E;
+			border-color: #791C1E;
+		}
+	}
+}
+
+#main {
+	font-family: $now-font-family;
+	color: RGB($now-color_text--primary);
+}
+
+.header {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+	width: 100%;
+  h1 {
+    font-size: 1.625rem;
+		font-weight: 100;
+    line-height: 40px;
+    margin: 0px;
+		now-icon {
+			color: RGB($now-color--primary-1);
+		}
+  }
+}
+
+.action-bar {
+	li {
+		margin-right: 10px;
+		display: inline-block;
+	}
+}
+
+// .search-box {
+//   width: 150px;
+//   height: 40px;
+
+//   input, now-icon {
+//     transition-duration: .3s;
+//   }
+
+//   input {
+//     width: 100%;
+//     border: 0;
+//     padding: 0;
+//     margin: 0;
+//     height: 40px;
+//     z-index: 2;
+//     outline: none;
+//     color: #999;
+//     background: transparent;
+//     border: 2px solid $color-light-grey;
+//     border-radius: 5px;
+//     transition-timing-function: cubic-bezier(.3, 1.5, .6, 1);
+
+//     &:focus {
+//       color: #333;
+//       border-color: darken($color-light-grey, 10%);
+//       width: 150%;
+
+//       & ~ now-icon {
+//         opacity: 1;
+//         z-index: 3;
+//         color: $accent-color;
+//       }
+//     }
+//   }
+
+//   now-icon {
+//     position: absolute;
+//     top: 0;
+//     right: 0;
+//     bottom: 0;
+//     width: 40px;
+//     text-align: center;
+//     line-height: 40px;
+//     z-index: 1;
+//     cursor: pointer;
+//     opacity: .5;
+//   }
+// }
+.table-wrapper {
+	overflow: auto;
+	height: 62vh;
+}
+
+.table-inbox {
+  margin-bottom: 0;
+  border-spacing: 0px;
+  border-collapse: collapse;
+	font-size: 1rem;
+}
+.table-inbox tr {
+  background-color: RGB($now-color_background--primary);
+	transition-duration: 300ms;
+	transition-property: background-color;
+}
+.table-inbox tr th {
+  padding: 12px !important;
+  background-color: RGB($now-color_background--secondary);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  cursor: move;
+  user-select: none;
+	font-weight: normal;
+}
+.table-inbox tr td {
+  padding: 12px !important;
+  cursor: pointer;
+	//max-width: 20rem;
+	text-align: center;
+}
+.table-inbox tr td now-icon {
+  color: #f78a09;
+}
+.table-inbox tr:nth-child(odd) {
+  background-color: RGB($now-color_background--secondary);
+}
+.table-inbox tr td:not(:first-child) {
+  border-left: 1px solid RGB($now-color_divider--tertiary);
+}
+.table-inbox tr:hover {
+  background-color: RGB($now-color_background--tertiary) !important;
+}
+.table-inbox tr.active {
+	background-color: RGB($now-color--primary-0) !important;
+}
+
+.primary-color {
+	color: RGB($now-color--primary-1);
+}
+
+.record-link {
+	color: RGB($now-color--primary-1);
+}
+
+.record-link:hover {
+  color: RGB($now-color--primary-2);
+}

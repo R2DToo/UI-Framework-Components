@@ -1,0 +1,51 @@
+@import '@servicenow/sass-kit/host';
+
+* {
+  box-sizing: border-box;
+}
+
+#snc-alert-email-view {
+  display: flex;
+  align-items: stretch;
+  snc-alert-email-sidebar {
+    width: 10%;
+  }
+  snc-alert-email-message-list {
+    width: 90%;
+    &.showingInfo {
+      width: 50%;
+    }
+  }
+  snc-alert-email-info {
+    width: 40%;
+
+    &.mounted {
+      animation: inAnimation 300ms ease-in;
+    }
+    &.unmounted {
+      animation: outAnimation 300ms ease-out;
+      animation-fill-mode: forwards;
+    }
+  }
+}
+
+@keyframes inAnimation {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes outAnimation {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
