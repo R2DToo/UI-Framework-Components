@@ -51,31 +51,7 @@ ul {
   list-style: none;
 }
 
-.circle-icon {
-	width: 30px;
-	height: 30px;
-	text-align: center;
-	line-height: 28px;
-	border: 2px solid #B4BBC1;
-	border-radius: 100px;
-	color: #B4BBC1;
-	cursor: pointer;
 
-	&:hover {
-		color: #57636C;
-		border-color: #57636C;
-	}
-
-	&.red {
-		color: $color-red;
-		border-color: $color-red;
-
-		&:hover {
-			color: #791C1E;
-			border-color: #791C1E;
-		}
-	}
-}
 
 #main {
 	font-family: $now-font-family;
@@ -93,9 +69,6 @@ ul {
 		font-weight: 100;
     line-height: 40px;
     margin: 0px;
-		now-icon {
-			color: RGB($now-color--primary-1);
-		}
   }
 }
 
@@ -103,6 +76,31 @@ ul {
 	li {
 		margin-right: 10px;
 		display: inline-block;
+	}
+	.circle-icon {
+		width: 30px;
+		height: 30px;
+		text-align: center;
+		line-height: 28px;
+		border: 2px solid #B4BBC1;
+		border-radius: 100px;
+		color: #B4BBC1;
+		cursor: pointer;
+
+		&:hover {
+			color: #57636C;
+			border-color: #57636C;
+		}
+
+		&.red {
+			color: $color-red;
+			border-color: $color-red;
+
+			&:hover {
+				color: #791C1E;
+				border-color: #791C1E;
+			}
+		}
 	}
 }
 
@@ -157,6 +155,24 @@ ul {
 .table-wrapper {
 	overflow: auto;
 	height: 74vh;
+	&::-webkit-scrollbar {
+    width: 16px;
+  }
+  &::-webkit-scrollbar-track {
+    background: RGB($now-color_background--secondary);
+    border-radius: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: RGB($now-color--primary-1);
+    border-radius: 8px;
+    border: 3px solid RGB($now-color_background--secondary);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: RGB($now-color--primary-2);
+  }
+	&::-webkit-scrollbar-corner {
+		opacity: 0;
+	}
 }
 
 .table-inbox {

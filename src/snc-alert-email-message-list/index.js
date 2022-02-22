@@ -6,6 +6,7 @@ import styles from './styles.scss';
 import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
 import '@servicenow/now-avatar';
+import '@servicenow/now-rich-text';
 
 const view = (state, {updateState, dispatch}) => {
 	console.log('snc-alert-email-message-list state: ', state);
@@ -207,8 +208,19 @@ const view = (state, {updateState, dispatch}) => {
 		)
 	});
 
+	const toggleContextMenu = (showMenu, event) => {
+		if (showMenu === true) {
+			event.preventDefault();
+			updateState({showContextMenu: true});
+		} else {
+			if (state.showContextMenu) {
+				updateState({showContextMenu: false});
+			}
+		}
+	};
+
 	return (
-		<div id="snc-alert-email-message-list">
+		<div id="snc-alert-email-message-list" oncontextmenu={(e) => {toggleContextMenu(true, e)}}>
 			<main id="main">
 				<div className="overlay"></div>
 				<header className="header">
@@ -217,7 +229,6 @@ const view = (state, {updateState, dispatch}) => {
 					</h1>
 					<div className="action-bar">
 						<ul>
-							<li><now-icon className="icon circle-icon" icon="chevron-down-fill" size="sm"/></li>
 							<li><now-icon className="icon circle-icon" icon="change-fill" size="sm"/></li>
 							<li><now-icon className="icon circle-icon" icon="sync-fill" size="sm"/></li>
 							<li><now-icon className="icon circle-icon" icon="reply-fill" size="sm"/></li>
@@ -264,7 +275,8 @@ createCustomElement('snc-alert-email-message-list', {
 			draggingColumnIndex: 0,
 			showingNumber: "0",
 			dummyStateChange: false,
-			sortingArray: [] //format = [{field: "severity", asc: true}]
+			sortingArray: [], //format = [{field: "severity", asc: true}],
+			showContextMenu: false
 		}
 	},
 	actionHandlers: {
