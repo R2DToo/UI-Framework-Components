@@ -3,7 +3,7 @@ import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
 import '../snc-alert-email-sidebar';
 import '../snc-alert-email-message-list';
-import '../snc-alert-email-info';
+import '../snc-alert-email-preview';
 
 import {DEFAULT_TABLE_DATA} from '../constants';
 
@@ -16,7 +16,7 @@ const view = (state, {updateState}) => {
 			<snc-alert-email-sidebar currentUser={state.properties.currentUser}></snc-alert-email-sidebar>
 			<snc-alert-email-message-list class={{showingInfo: state.showInfo}} tableData={state.properties.tableData} totalCount={state.properties.totalCount} showInfo={state.showInfo}></snc-alert-email-message-list>
 			{state.showInfo && (
-				<snc-alert-email-info
+				<snc-alert-email-preview
 					focusedChildRecords={state.properties.focusedChildRecords}
 					focusedRecord={state.properties.focusedRecord}
 					className={state.isInfoMounted ? "mounted" : "unmounted"}

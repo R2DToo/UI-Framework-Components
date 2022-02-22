@@ -8,7 +8,7 @@ import '@servicenow/now-highlighted-value';
 import '@servicenow/now-rich-text';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-info state: ', state);
+	console.log('snc-alert-email-preview state: ', state);
 
 	return (
 		<div id="info-container">
@@ -155,7 +155,7 @@ const view = (state, {updateState, dispatch}) => {
 	);
 };
 
-createCustomElement('snc-alert-email-info', {
+createCustomElement('snc-alert-email-preview', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
