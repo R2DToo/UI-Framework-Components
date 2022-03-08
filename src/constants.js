@@ -186,3 +186,7 @@ export const DEFAULT_TABLE_DATA = [
         }
     },
 ];
+
+// export const TAG_COLORS = ["rgba(252, 168, 34, 0.4)", "rgba(255, 222, 29, 0.4)", "rgba(252, 119, 134, 0.4)", "rgba(134, 237, 120, 0.4)", "rgba(36, 194, 206, 0.4)"];
+// export const TAG_COLORS = ["rgba(134, 237, 120, 0.4)", "rgba(36, 194, 206, 0.4)", "rgba(255, 222, 29, 0.4)", "rgba(252, 168, 34, 0.4)", "rgba(252, 119, 134, 0.4)"];
+export const TAG_COLORS = ["rgba(221, 133, 129, 1)", "rgba(234, 186, 117, 1)", "rgba(227, 218, 96, 1)", "rgba(104, 171, 218, 1)", "rgba(119, 178, 123, 1)"];

@@ -1,0 +1,210 @@
+@import '@servicenow/sass-kit/host';
+
+@import url("https://fonts.googleapis.com/css?family=Roboto:100,400,700");
+// .snc-alert-email-timeline {
+//   overflow: auto;
+// }
+
+// $red: #ff6252;
+
+.wrapper {
+	// max-width: 1200px;
+	// min-width: 700px;
+  width: 100%;
+	margin: 0 auto;
+	padding: 24px;
+  font-family: $now-font-family;
+  font-size: 1rem;
+  color: RGB($now-color_text--primary);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+.gantt {
+	display: grid;
+	border: 0;
+	border-radius: 12px;
+	position: relative;
+	overflow-y: hidden;
+	overflow-x: auto;
+	box-sizing: border-box;
+
+	&__row {
+		display: grid;
+		grid-template-columns: 150px 100px;
+		background-color: RGB($now-color_background--tertiary);
+		&:nth-child(odd) {
+			background-color: RGB($now-color_background--secondary);
+		}
+		&:nth-child(3) {
+			.gantt__row-bars {
+				border-top: 0;
+			}
+			.gantt__row-first {
+				border-top: 0;
+			}
+		}
+		// &--empty {
+		// 	background-color: lighten($red, 25%) !important;
+		// 	z-index: 1;
+		// 	.gantt__row-first {
+		// 		border-width: 1px 1px 0 0;
+		// 	}
+		// }
+		&--lines {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			background-color: transparent;
+			// grid-template-columns: 150px repeat(12, 1fr);
+			span {
+				display: block;
+				border-right: 1px solid rgba($now-color_divider--tertiary, 0.5);
+				//border-right: 1px solid rgba(0, 0, 0, 0.1);
+				&:hover {
+					background-color: rgba(10, 52, 68, 0.13);
+				}
+			}
+			&:after {
+				grid-row: 1;
+				grid-column: 0;
+				background-color: #1688b345;
+				z-index: 2;
+				height: 100%;
+			}
+		}
+		&--months {
+			color: #fff;
+			background-color: #0a3444 !important;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+			// grid-template-columns: 150px repeat(12, 1fr);
+			.gantt__row-first {
+				border-top: 0 !important;
+			  background-color: #0a3444 !important;
+			}
+			span {
+				text-align: center;
+				font-size: 13px;
+				align-self: center;
+				font-weight: bold;
+				padding: 20px 0;
+			}
+		}
+		&-first {
+			//background-color: RGB($now-color_background--tertiary);
+			border-width: 1px 0 0 0;
+			border-color: rgba(0, 0, 0, 0.1);
+			border-style: solid;
+			padding: 15px 5px;
+			font-size: 13px;
+			font-weight: bold;
+			text-align: center;
+			position: sticky;
+			left: 0;
+			z-index: 2;
+			// &:nth-child(odd) {
+			// 	background-color: RGB($now-color_background--secondary);
+			// }
+			.key {
+				color: RGB($now-color--primary-1);
+				&.small {
+					font-size: 0.9em;
+				}
+			}
+			.value.big {
+				font-size: 1.3em;
+			}
+		}
+		&-bars {
+			list-style: none;
+			display: grid;
+			padding: 9px 0;
+			margin: 0;
+			// grid-template-columns: repeat(12, 1fr); // Increase the first number to allow bars to move into half days
+			grid-gap: 6px 0;
+			border-width: 1px 0 0 0;
+			border-color: rgba(0, 0, 0, 0.1);
+			border-style: solid;
+			li {
+				align-self: center;
+				font-weight: 500;
+				text-align: left;
+				font-size: 14px;
+				min-height: 25px;
+				//background-color: #55de84;
+				color: #000000;
+				overflow: hidden;
+				position: relative;
+				display: flex;
+				align-items: center;
+				padding-left: 5px;
+				padding-right: 5px;
+
+				.pulsate {
+					border-radius: 30px;
+					height: 25px;
+					width: 25px;
+					position: absolute;
+					top: 0px;
+					animation: pulsate 1s ease-out;
+					animation-iteration-count: infinite;
+					opacity: 0.0;
+					&.left {
+						left: 0px;
+					}
+					&.right {
+						right: 0px;
+					}
+				}
+
+				.dot {
+					border-radius: 50%;
+					min-width: 15px;
+    			height: 15px;
+				}
+
+				.bar-between-dot {
+					width: 100%;
+					height: 6px;
+					background-color: RGB($now-color_divider--primary);
+				}
+
+				// &.stripes {
+				// 	background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.1) 5px, rgba(255,255,255,.1) 12px);
+				// }
+
+				// &:before,
+				// &:after {
+				// 	content: "";
+				// 	height: 100%;
+				// 	top: 0;
+				// 	z-index: 4;
+				// 	position: absolute;
+				// 	background-color: rgba(0, 0, 0, 0.3);
+				// }
+				// &:before {
+				// 	left: 0;
+				// }
+				// &:after {
+				// 	right: 0;
+				// }
+			}
+		}
+	}
+}
+
+.record-link {
+  border-radius:25px;
+	padding:2px 5px;
+  background-color:RGB($now-color--primary-1);
+	cursor: pointer;
+}
+
+.record-link:hover {
+  background-color: RGB($now-color--primary-0);
+}
+
+@keyframes pulsate {
+	0% {-webkit-transform: scale(0.1, 0.1); opacity: 0.0;}
+	50% {opacity: 1.0;}
+	100% {-webkit-transform: scale(1.2, 1.2); opacity: 0.0;}
+}

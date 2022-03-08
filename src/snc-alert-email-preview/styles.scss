@@ -22,16 +22,29 @@
   padding: 12px;
   font-size: 1rem;
   font-family: $now-font-family;
-  #info-header h1 {
-    font-weight: 100;
-    font-size: 1.625rem;
-    margin-top: 0;
+  #info-header {
+    display: flex;
+    justify-content: space-between;
+    margin-right: 5px;
+    h1 {
+      font-weight: 100;
+      font-size: 1.625rem;
+      margin-top: 0;
+    }
+    #right-side {
+      text-align: end;
+    }
     .g-icon {
       margin-right: 10px;
-
+      fill: RGB($now-color_text--primary);
       &:hover {
-        fill: RGB($now-color--primary-2);
+        fill: RGB($now-color_text--tertiary);
       }
+    }
+    .inline-header {
+      //display: inline-block;
+      font-weight: 100;
+      font-size: 1.3rem;
     }
   }
 }
@@ -163,12 +176,11 @@
     }
   }
 
+  .full-width {
+    width: 100%;
+  }
+
   .card-body {
-    &.alerts:after {
-      content: "";
-      display: table;
-      clear: both;
-    }
     &.overflow {
       overflow-x: auto;
     }
@@ -181,8 +193,12 @@
       //font-weight: bold;
       color: RGB($now-color--primary-1);
     }
-    .column {
+    .column-left {
       float: left;
+      width: 50%;
+    }
+    .column-right {
+      float: right;
       width: 50%;
     }
     .description {
@@ -195,24 +211,166 @@
     .bottom {
       margin-bottom: 8px;
     }
+    .green {
+      color: rgba(119, 178, 123, 1);
+    }
+  }
+}
+
+.dials-container {
+  // Colors
+  $greenColor: rgba(119, 178, 123, 1);
+  $orangeColor: rgba(234, 186, 117, 1);
+  $yellowColor: rgba(227, 218, 96, 1);
+  $barColor: var(--bar-color);
+  .green {
+    --bar-color: #{$greenColor};
+  }
+  .orange {
+    --bar-color: #{$orangeColor};
+  }
+  .yellow {
+    --bar-color: #{$yellowColor};
+  }
+  $overlayColor: #fffde8;
+  $dbg: #2f3439;
+  $size: 80px;
+
+  $bg: lighten($dbg,20%);
+  $bdiam: ($size/4)-10;
+
+  float: left;
+  display: flex;
+
+  .dial {
+    padding: 2px;
+    text-align: center;
+  }
+
+  .dial-description {
+    font-size: 0.6em;
+    text-align: center;
+    top: -50px;
+    position: relative;
+  }
+
+  .progress-radial {
+    display: inline-block;
+    margin: 10px;
+    position: relative;
+    width: $size;
+    height: $size;
+    border-radius: 50%;
+    //border: 10px solid $bg; // remove gradient color
+    background-color: $barColor; // default 100%
+    box-shadow: 0 2px 15px rgba(0,0,0,.3);
+    &:after,
+    &:before {
+      content: '';
+      width: $bdiam;
+      height: $bdiam;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      margin-left: -($bdiam/2);
+      margin-top: -($bdiam/2);
+      background: $barColor;
+      position: absolute;
+      z-index: 999;
+      box-shadow: 10px 0 10px rgba(0,0,0,.2);
+    }
+    &:after {
+      z-index: 998;
+      box-shadow: none;
+      transform: translate(0,-($size/2)+($bdiam/2));
+    }
+    b:after {
+      color: $overlayColor;
+      text-shadow: 0 1px 2px rgba(0,0,0,.6);
+      position: absolute;
+      font-weight: 900;
+      left: 50%;
+      top: 50%;
+      width: 50%;
+      height: 50%;
+      background-color: $dbg;
+      border-radius: 50%;
+      margin-left: -25%;
+      margin-top: -25%;
+      text-align: center;
+      line-height: $size / 2;
+      font-size: $size / 6;
+      box-shadow: 0 2px 3px rgba(0,0,0,.3) inset, 0 0 0 10px $bg;
+    }
+  }
+
+  $step: 1;
+  $loops: round(100 / $step);
+  $increment: 360 / $loops;
+  $half: round($loops / 2);
+  @for $i from 0 through $loops {
+    .progress-#{$i*$step} {
+      &:before {
+        transform: rotate(#{$i*3.6}deg) translate(0,-($size/2)+($bdiam/2));
+      }
+      // &.green {
+      //   b:after {
+      //     content: '#{$i}% \A NR';
+      //     white-space: normal;
+      //   }
+      // }
+      // &.orange {
+      //   b:after {
+      //     content: '#{$i}% \A AC';
+      //     white-space: normal;
+      //   }
+      // }
+      // &.yellow {
+      //   b:after {
+      //     content: '#{$i}% \A IR';
+      //     white-space: normal;
+      //   }
+      // }
+      b:after {
+        content: '#{$i}%';
+      }
+      @if $i < $half {
+        $nextdeg: 90deg + ( $increment * $i );
+        background-image:
+          linear-gradient(90deg, $bg 50%, transparent 50%, transparent),
+          linear-gradient($nextdeg, $barColor 50%, $bg 50%, $bg);
+      } @else {
+        $nextdeg: -90deg + ( $increment * ( $i - $half ) );
+        background-image:
+          linear-gradient($nextdeg, $barColor 50%, transparent 50%, transparent),
+          linear-gradient(270deg, $barColor 50%, $bg 50%, $bg);
+      }
+    }
   }
 }
 
 .primary-color {
   color: RGB($now-color--primary-1);
+	fill: RGB($now-color--primary-1) !important;
 }
 
 .record-link {
   border-radius:25px;
 	padding:2px 5px;
   background-color:RGB($now-color--primary-1);
+  cursor: pointer;
 }
-
-// .record-link {
-// 	color: RGB($now-color--primary-1);
-// }
 
 .record-link:hover {
   background-color: RGB($now-color--primary-0);
 }
 
+.circle-tag {
+	background-color: #2f3439;
+	border-radius: 50%;
+	height: 35px;
+	width: 35px;
+	text-align: center;
+	line-height: 35px;
+  display: inline-block;
+}

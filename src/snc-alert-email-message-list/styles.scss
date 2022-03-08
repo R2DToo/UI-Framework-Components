@@ -1,6 +1,5 @@
 @import '@servicenow/sass-kit/host';
-
-// @import url('https://fonts.googleapis.com/css?family=Roboto:300&display=swap');
+@import '@servicenow/sass-utility/index';
 
 /* Color Variables */
 $accent-color: #61C7B3;
@@ -32,6 +31,7 @@ $sidebar-padding: 50px;
 #snc-alert-email-message-list {
 	//width: 50vw;
 	height: 100%;
+	width: 100%;
 	overflow: hidden;
 }
 
@@ -77,31 +77,7 @@ ul {
 		margin-right: 10px;
 		display: inline-block;
 	}
-	.circle-icon {
-		width: 30px;
-		height: 30px;
-		text-align: center;
-		line-height: 28px;
-		border: 2px solid #B4BBC1;
-		border-radius: 100px;
-		color: #B4BBC1;
-		cursor: pointer;
 
-		&:hover {
-			color: #57636C;
-			border-color: #57636C;
-		}
-
-		&.red {
-			color: $color-red;
-			border-color: $color-red;
-
-			&:hover {
-				color: #791C1E;
-				border-color: #791C1E;
-			}
-		}
-	}
 }
 
 // .search-box {
@@ -155,6 +131,8 @@ ul {
 .table-wrapper {
 	overflow: auto;
 	height: 74vh;
+	width: 100%;
+
 	&::-webkit-scrollbar {
     width: 16px;
   }
@@ -187,7 +165,7 @@ ul {
 	transition-property: background-color;
 }
 .table-inbox tr th {
-  padding: 12px !important;
+  padding: 8px !important;
   background-color: RGB($now-color_background--secondary);
   position: sticky;
   top: 0;
@@ -195,12 +173,24 @@ ul {
   cursor: move;
   user-select: none;
 	font-weight: normal;
+	max-width: 400px;
+	min-width: 100px;
 }
 .table-inbox tr td {
-  padding: 12px !important;
+  padding: 8px !important;
   cursor: pointer;
-	//max-width: 20rem;
+	max-width: 400px;
+	min-width: 100px;
 	text-align: center;
+
+	&.no-padding {
+		padding: 0px !important;
+	}
+	&.description {
+		text-align: left;
+		min-width: 600px;
+		max-width: 600px;
+	}
 }
 .table-inbox tr td now-icon {
   color: #f78a09;
@@ -218,8 +208,62 @@ ul {
 	background-color: RGB($now-color--primary-0) !important;
 }
 
+.circle-tags {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.circle-tag {
+	background-color: #2f3439;
+	border-radius: 50%;
+	height: 35px;
+	width: 35px;
+	text-align: center;
+	line-height: 35px;
+}
+
+.tag {
+	border-radius: 4px;
+	padding: 2px 8px;
+	margin-bottom: 8px;
+	word-break: keep-all;
+	color: RGB($now-color_text--primary);
+	text-align: left;
+}
+
+.g-icon {
+	fill: RGB($now-color_text--primary);
+	&:hover {
+		fill: RGB($now-color_text--secondary);
+	}
+}
+
 .primary-color {
 	color: RGB($now-color--primary-1);
+}
+
+.critical {
+	background-color: RGB($now-color_alert--critical-1);
+}
+.high {
+	background-color: RGB($now-color_alert--high-1);
+}
+.warning {
+	background-color: RGB($now-color_alert--warning-1);
+}
+.moderate {
+	background-color: RGB($now-color_alert--moderate-1);
+}
+.positive {
+	background-color: RGB($now-color_alert--positive-1);
+}
+
+.red-color {
+	fill: #AB2938;
+	&:hover {
+		fill: #8a1e2b;
+	}
 }
 
 .record-link {

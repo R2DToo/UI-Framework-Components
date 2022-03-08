@@ -110,6 +110,50 @@
 				{
 					"name": "RECORD_LINK_CLICKED",
 					"description": "Link to record was clicked"
+				},
+				{
+					"name": "RECORD_SUB_LINK_CLICKED",
+					"description": "Link to sub record clicked"
+				},
+				{
+					"name": "RECORD_LINK_CMDB_CI_CLICKED",
+					"description": "Link to CI record clicked"
+				},
+				{
+					"name": "OPEN_TIMELINE_BUTTON_CLICKED",
+					"description": "Open Timeline button clicked"
+				}
+			]
+		},
+		"snc-alert-email-timeline": {
+			"innerComponents": [],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Alert Timeline",
+				"icon": "menu-fill",
+				"description": "A description of my component",
+				"category": "primitives"
+			},
+			"properties": [
+				{
+					"name": "parentRecord",
+					"label": "Parent Record",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "[]"
+				},
+				{
+					"name": "childRecords",
+					"label": "Child Record",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "[]"
+				}
+			],
+			"actions": [
+				{
+					"name": "RECORD_LINK_CLICKED",
+					"description": "Link to record was clicked"
 				}
 			]
 		}

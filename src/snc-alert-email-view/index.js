@@ -87,7 +87,22 @@ createCustomElement('snc-alert-email-view', {
 			console.log("%cRECORD_LINK#CLICKED action handler", "color:cyan;font-size:20px;");
 			console.log("%cEvent Payload: %o", "color:cyan;font-size:20px;", action.payload);
 			dispatch("RECORD_LINK_CLICKED", action.payload);
-		}
+		},
+		'RECORD_SUB_LINK#CLICKED': ({action, dispatch}) => {
+			console.log("%cRECORD_SUB_LINK#CLICKED action handler", "color:cyan;font-size:20px;");
+			console.log("%cEvent Payload: %o", "color:cyan;font-size:20px;", action.payload);
+			dispatch("RECORD_SUB_LINK_CLICKED", action.payload);
+		},
+		'OPEN_TIMELINE_BUTTON#CLICKED': ({action, dispatch}) => {
+			console.log("%cOPEN_TIMELINE_BUTTON#CLICKED action handler", "color:cyan;font-size:20px;");
+			console.log("%cEvent Payload: %o", "color:cyan;font-size:20px;", action.payload);
+			dispatch("OPEN_TIMELINE_BUTTON_CLICKED", action.payload);
+		},
+		'RECORD_LINK_CMDB_CI#CLICKED': ({action, dispatch}) => {
+			console.log("%cRECORD_LINK_CMDB_CI#CLICKED action handler", "color:cyan;font-size:20px;");
+			console.log("%cEvent Payload: %o", "color:cyan;font-size:20px;", action.payload);
+			dispatch("RECORD_LINK_CMDB_CI_CLICKED", action.payload);
+		},
 	},
 	setInitialState() {
 		return {
