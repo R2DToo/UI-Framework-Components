@@ -1,5 +1,5 @@
 import {createCustomElement, actionTypes} from '@servicenow/ui-core';
-const {COMPONENT_PROPERTY_CHANGED} = actionTypes;
+const {COMPONENT_PROPERTY_CHANGED,COMPONENT_ERROR_THROWN} = actionTypes;
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import {createHttpEffect} from '@servicenow/ui-effect-http';
 import styles from './styles.scss';
@@ -23,17 +23,17 @@ const view = (state, {updateState, dispatch}) => {
 		return months[month] || '';
 	}
 
-	var startTime = new Date(state.properties.parentRecord[0].initial_remote_time.displayValue || state.properties.parentRecord[0].sys_created_on.displayValue);
+	var startTime = new Date(state.properties.parentRecord[0].initial_remote_time.display_value || state.properties.parentRecord[0].sys_created_on.display_value);
 	startTime.setSeconds(0);
 	console.log("startTime: ", startTime);
-	var columnDateHeaders = new Date(state.properties.parentRecord[0].initial_remote_time.displayValue || state.properties.parentRecord[0].sys_created_on.displayValue);
+	var columnDateHeaders = new Date(state.properties.parentRecord[0].initial_remote_time.display_value || state.properties.parentRecord[0].sys_created_on.display_value);
 	const numOfColumns = 30;
 
 	const parentComponent = state.properties.parentRecord.map((record) => {
 		const renderEvent = () => {
 			let startPosition = 1;
 			let endPosition = numOfColumns + 1;
-			if (record.events && record.source != "Group Alert") {
+			if (record.events && record.source.display_value != "Group Alert") {
 				return record.events.map((event, i) => {
 					let eventTime = new Date(event.time_of_event.display_value);
 					console.log("parent eventTime: ", eventTime);
@@ -41,26 +41,33 @@ const view = (state, {updateState, dispatch}) => {
 					console.log("parent startPosition: ", startPosition);
 					if (record.events[i + 1]) {
 						endPosition = getDifferenceInMinutes(startTime, new Date(record.events[i + 1].time_of_event.display_value)) + 1;
+						if (endPosition > numOfColumns + 1) {
+							endPosition = numOfColumns + 1;
+						}
 					} else {
 						endPosition = numOfColumns + 1;
 					}
 					console.log("parent endPosition: ", endPosition);
-					return (
-						<li title={`Type: ${record.type.displayValue} - Event Time: ${event.time_of_event.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
-							<div className="pulsate left" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
-							<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
-							<div className="bar-between-dot"></div>
-							<div className="pulsate right" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
-							<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
-						</li>
-					)
+					if (startPosition <= numOfColumns) {
+						return (
+							<li title={`Type: ${record.type.display_value} - Event Time: ${event.time_of_event.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
+								<div className="pulsate left" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+								<div className="bar-between-dot"></div>
+								<div className="pulsate right" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+							</li>
+						)
+					} else {
+						return;
+					}
 				});
 			} else {
-				let eventTime = new Date(record.sys_created_on.displayValue);
+				let eventTime = new Date(record.sys_created_on.display_value);
 				startPosition = getDifferenceInMinutes(startTime, eventTime) + 1;
 				endPosition = startPosition + 1;
 				return (
-					<li title={`Type: ${record.type.displayValue} - Created Time: ${record.sys_created_on.displayValue}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
+					<li title={`Type: ${record.type.display_value} - Created Time: ${record.sys_created_on.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
 						<div className="pulsate left" style={{border: '3px solid #757DE8'}}></div>
 						<div className="dot" style={{backgroundColor: '#757DE8'}}></div>
 						<div className="bar-between-dot"></div>
@@ -73,9 +80,9 @@ const view = (state, {updateState, dispatch}) => {
 		return (
 			<div className="gantt__row">
 				<div className="gantt__row-first">
-					<span className="record-link" title="Open Record" onclick={() => {fireEvent("RECORD_LINK_CLICKED", {value: record._row_data.uniqueValue})}}>{record._row_data.displayValue}</span><br/>
-					<span className="key">CI: </span><span className="value">{record.cmdb_ci.displayValue}</span><br/>
-					<span className="key">Type: </span><span className="value">{record.type.displayValue}</span>
+					<span className="record-link" title="Open Record" onclick={() => {fireEvent("RECORD_LINK_CLICKED", {value: record.sys_id.value})}}>{record.number.display_value}</span><br/>
+					<span className="key">CI: </span><span className="value">{record.cmdb_ci.display_value}</span><br/>
+					<span className="key">Type: </span><span className="value">{record.type.display_value}</span>
 				</div>
 				<ul className="gantt__row-bars" style={{gridTemplateColumns: `repeat(${numOfColumns}, 100px)`}}>
 					{renderEvent()}
@@ -90,9 +97,9 @@ const view = (state, {updateState, dispatch}) => {
 		return (
 			<div className="gantt__row">
 				<div className="gantt__row-first">
-					<span className="record-link" title="Open Record" onclick={() => {fireEvent("RECORD_LINK_CLICKED", {value: record._row_data.uniqueValue})}}>{record._row_data.displayValue}</span><br/>
-					<span className="key">CI: </span><span className="value">{record.cmdb_ci.displayValue}</span><br/>
-					<span className="key">Type: </span><span className="value">{record.type.displayValue}</span>
+					<span className="record-link" title="Open Record" onclick={() => {fireEvent("RECORD_LINK_CLICKED", {value: record.number.display_value})}}>{record.number.display_value}</span><br/>
+					<span className="key">CI: </span><span className="value">{record.cmdb_ci.display_value}</span><br/>
+					<span className="key">Type: </span><span className="value">{record.type.display_value}</span>
 				</div>
 				<ul className="gantt__row-bars" style={{gridTemplateColumns: `repeat(${numOfColumns}, 100px)`}}>
 					{record.events && record.events.map((event, i) => {
@@ -100,16 +107,23 @@ const view = (state, {updateState, dispatch}) => {
 						startPosition = getDifferenceInMinutes(startTime, eventTime) + 1;
 						if (record.events[i + 1]) {
 							endPosition = getDifferenceInMinutes(startTime, new Date(record.events[i + 1].time_of_event.display_value)) + 1;
+							if (endPosition > numOfColumns + 1) {
+								endPosition = numOfColumns + 1;
+							}
 						} else {
 							endPosition = numOfColumns + 1;
 						}
-						return (
-							<li title={`Type: ${record.type.displayValue} - Event Time: ${event.time_of_event.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
-								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
-								<div className="bar-between-dot"></div>
-								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
-							</li>
-						)
+						if (startPosition <= numOfColumns) {
+							return (
+								<li title={`Type: ${record.type.display_value} - Event Time: ${event.time_of_event.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
+									<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+									<div className="bar-between-dot"></div>
+									<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+								</li>
+							)
+						} else {
+							return;
+						}
 					})}
 				</ul>
 			</div>
@@ -123,7 +137,7 @@ const view = (state, {updateState, dispatch}) => {
 					<div className="gantt__row gantt__row--months" style={{gridTemplateColumns: `150px repeat(${numOfColumns}, 100px)`}}>
 						<div className="gantt__row-first">
 							<span className="key small">Clustering:</span><br/>
-							<span className="value big">{state.properties.parentRecord[0].group_source.displayValue || ''}</span>
+							<span className="value big">{state.properties.parentRecord[0].group_source.display_value || ''}</span>
 						</div>
 						{[...Array(numOfColumns)].map((e, i) => {
 							let month = monthIndexToString(columnDateHeaders.getMonth()); //0 - 11
@@ -174,8 +188,8 @@ createCustomElement('snc-alert-email-timeline', {
 				return;
 			}
 			if (action.payload.name == "parentRecord") {
-				if (action.payload.value[0].source.displayValue != "Group Alert") {
-					let parentSysparam = 'alert=' + action.payload.value[0]._row_data.uniqueValue + '^ORDERBYtime_of_event';
+				if (action.payload.value[0].source.display_value != "Group Alert") {
+					let parentSysparam = 'alert=' + action.payload.value[0].sys_id.value + '^ORDERBYtime_of_event';
 					console.log("parentSysparam: ", parentSysparam);
 					dispatch('FETCH_PARENT_EVENTS', {
 						sysparm_query: parentSysparam,
@@ -183,7 +197,7 @@ createCustomElement('snc-alert-email-timeline', {
 						sysparm_display_value: 'all'
 					});
 				}
-				let childSysparam = 'alert.parent=' + action.payload.value[0]._row_data.uniqueValue + '^ORDERBYtime_of_event';
+				let childSysparam = 'alert.parent=' + action.payload.value[0].sys_id.value + '^ORDERBYtime_of_event';
 				console.log("childSysparam: ", childSysparam);
 				dispatch('FETCH_CHILD_EVENTS', {
 					sysparm_query: childSysparam,
@@ -226,7 +240,7 @@ createCustomElement('snc-alert-email-timeline', {
 			if (result.length > 0) {
 				let updatedChild = state.properties.childRecords;
 				result.forEach((row) => {
-					let matchIndex = updatedChild.findIndex((childRow) => childRow._row_data.uniqueValue == row.alert.value);
+					let matchIndex = updatedChild.findIndex((childRow) => childRow.sys_id.value == row.alert.value);
 					if (matchIndex > -1) {
 						updatedChild[matchIndex].events ?
 						updatedChild[matchIndex].events.push(row) :
@@ -237,5 +251,8 @@ createCustomElement('snc-alert-email-timeline', {
 				updateState({dummyStateChange: !state.dummyStateChange});
 			}
 		},
+		[COMPONENT_ERROR_THROWN]: (coeffects) => {
+			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
+		}
 	}
 });

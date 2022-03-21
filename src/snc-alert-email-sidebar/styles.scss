@@ -24,14 +24,12 @@ $sidebar-padding: 20px;
   transition-duration: 1s;
 	height: 100%;
 
-  a {
-    color: RGB($now-color_text--primary);
-    text-decoration: none;
+  .menu-item {
     transition-duration: .3s;
+    cursor: pointer;
 
     &:hover {
       transition-duration: .05s;
-      text-decoration: none;
     }
   }
 
@@ -39,7 +37,6 @@ $sidebar-padding: 20px;
     font-weight: 100;
 		font-size: 1.875rem;
     text-align: center;
-    cursor: pointer;
 		text-align: start;
 		padding-left: 20px;
 		padding-right: 10px;
@@ -84,11 +81,11 @@ $sidebar-padding: 20px;
 				color: RGB($now-color_text--primary);
 			}
 
-			&.active a, &.active a:hover {
+			&.active .menu-item, &.active .menu-item:hover {
 				background: RGB($now-color--primary-1);
 			}
 
-			a {
+			.menu-item {
 				display: block;
         margin-top: 0;
         margin-bottom: 0;

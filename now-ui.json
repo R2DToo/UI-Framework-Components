@@ -59,46 +59,59 @@
 			},
 			"properties": [
 				{
-					"name": "tableData",
-					"label": "Table Data",
-					"readOnly": false,
-					"required": true,
-					"defaultValue": ""
-				},
-				{
-					"name": "focusedRecord",
-					"label": "Focused Record",
-					"readOnly": false,
-					"required": false,
-					"defaultValue": ""
-				},
-				{
-					"name": "focusedChildRecords",
-					"label": "Focused Child Records",
-					"readOnly": false,
-					"required": false,
-					"defaultValue": ""
-				},
-				{
-					"name": "totalCount",
-					"label": "Record Count",
-					"readOnly": false,
-					"required": false,
-					"defaultValue": "0"
-				},
-				{
 					"name": "currentUser",
 					"label": "Current User Lookup",
 					"readOnly": false,
 					"required": false,
 					"defaultValue": ""
+				},
+				{
+					"name": "menuOptions",
+					"label": "Side Menu Options",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "[]"
+				},
+				{
+					"name": "tableName",
+					"label": "Table",
+					"readOnly": false,
+					"required": true,
+					"defaultValue": "em_alert",
+					"fieldType": "table_name",
+					"typeMetadata": {}
+				},
+				{
+					"name": "externalSysparam",
+					"label": "Encoded Sysparam",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": ""
+				},
+				{
+					"name": "tableColumns",
+					"label": "Columns",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "[]"
+				},
+				{
+					"name": "tableLimit",
+					"label": "Number of records per page",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "50"
+				},
+				{
+					"name": "page",
+					"label": "Page number",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "0",
+					"description": "Current page number used for paginating the table with the pagination-control"
 				}
 			],
 			"actions": [
-				{
-					"name": "TABLE_HEADER_CLICKED",
-					"description": "Table header clicked"
-				},
 				{
 					"name": "TABLE_ROW_CLICKED",
 					"description": "The table row was clicked"
@@ -122,6 +135,14 @@
 				{
 					"name": "OPEN_TIMELINE_BUTTON_CLICKED",
 					"description": "Open Timeline button clicked"
+				},
+				{
+					"name": "TABLE_RECORD_COUNT_UPDATED",
+					"description": "Total number of records matching query updated"
+				},
+				{
+					"name": "TABLE_ACTION_BAR_BUTTON_CLICKED",
+					"description": "Table/list action bar button clicked"
 				}
 			]
 		},

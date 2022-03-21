@@ -29,7 +29,8 @@
 		"@servicenow/sass-theme": "quebec",
 		"@servicenow/ui-core": "quebec",
 		"@servicenow/ui-effect-http": "19.4.2",
-		"@servicenow/ui-renderer-snabbdom": "quebec"
+		"@servicenow/ui-renderer-snabbdom": "quebec",
+		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
 		"@servicenow/cli-archetype-dev": "20.0.0",

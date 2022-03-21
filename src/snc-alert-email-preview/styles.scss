@@ -109,18 +109,18 @@
   height: 63vh;
   overflow-y: auto;
 
-  ul {
+  > ul {
     list-style-type:none;
     border-left: 2px solid RGB($now-color--primary-2);
     padding: 0 1em;
     margin-left: 10px;
     margin-right: 0;
   }
-  ul li {
+  > ul .info-card {
     position: relative;
     transition: .5s;
   }
-  ul li:before {
+  > ul .info-card:before {
     position: absolute;
     content: '';
     width: 10px;
@@ -131,7 +131,7 @@
     top: 20px;
     transition:.5s;
   }
-  ul li:hover:before {
+  > ul .info-card:hover:before {
     background-color:#0F0;
 	  box-shadow:0px 0px 5px 2px #0F0;
   }
@@ -214,6 +214,23 @@
     .green {
       color: rgba(119, 178, 123, 1);
     }
+    .tags {
+      display: flex;
+      text-align: center;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .broker-tag {
+      background: #B8DCDB;
+      color: #000000;
+      padding: 4px 2px;
+      margin: 2px;
+      border-radius: 6px;
+      .tag-key {
+        font-weight: bold;
+      }
+    }
   }
 }
 
@@ -252,6 +269,7 @@
     text-align: center;
     top: -50px;
     position: relative;
+    color: $overlayColor;
   }
 
   .progress-radial {
@@ -263,7 +281,7 @@
     border-radius: 50%;
     //border: 10px solid $bg; // remove gradient color
     background-color: $barColor; // default 100%
-    box-shadow: 0 2px 15px rgba(0,0,0,.3);
+    box-shadow: 0 2px 15px rgba($now-color_background--primary, 0.3);
     &:after,
     &:before {
       content: '';
@@ -366,11 +384,19 @@
 }
 
 .circle-tag {
-	background-color: #2f3439;
+	color: #ffffff;
+	background-color: RGB($now-color_divider--primary);
 	border-radius: 50%;
 	height: 35px;
 	width: 35px;
 	text-align: center;
 	line-height: 35px;
   display: inline-block;
+}
+
+.underline-record-link {
+	border-bottom: 2px solid RGB($now-color--primary-1);
+	&:hover {
+		border-color: RGB($now-color--primary-2);
+	}
 }
