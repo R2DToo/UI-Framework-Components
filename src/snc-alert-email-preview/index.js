@@ -68,13 +68,16 @@ const view = (state, {updateState, dispatch}) => {
 				}
 				return Math.round((1 - (1/(parentEventCount + childEventCount))) * 100);
 			case 1:
+				if (state.secondaryRecords.length == 0) {
+					return 0;
+				}
 				if (state.parentRecord.length > 0) {
 					if (state.parentRecord[0].source.display_value != "Group Alert") {
 						parentRecordCount = state.parentRecord.length;
 					}
 				}
 				childRecordCount = state.secondaryRecords.length || 0;
-				return Math.round((1/(parentRecordCount + childRecordCount)) * 100);
+				return Math.round((1 - (1/(parentRecordCount + childRecordCount))) * 100);
 			case 2:
 				if (state.parentRecord.length > 0) {
 					if (state.parentRecord[0].source.display_value != "Group Alert") {
@@ -207,7 +210,7 @@ const view = (state, {updateState, dispatch}) => {
 											<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
 											<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
 											<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
-											<p><span className="key">Assigned Team:</span> <span className="">{record.assignment_group.display_value}</span></p>
+											<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 											<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 											<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
 											<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
@@ -302,7 +305,7 @@ const view = (state, {updateState, dispatch}) => {
 											<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
 											<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
 											<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
-											<p><span className="key">Assigned Team:</span> <span className="">{record.assignment_group.display_value}</span></p>
+											<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 											<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 											<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
 											<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
@@ -371,7 +374,7 @@ const refreshMainQuery = (state, dispatch) => {
 	dispatch('FETCH_PARENT_RECORD', {
 		table: 'em_alert',
 		sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-		sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged',
+		sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged',
 		sysparm_display_value: 'all'
 	});
 }
@@ -406,7 +409,7 @@ createCustomElement('snc-alert-email-preview', {
 			dispatch('FETCH_CHILD_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged',
 				sysparm_display_value: 'all'
 			});
 		},

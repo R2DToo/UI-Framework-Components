@@ -12,12 +12,12 @@ const view = (state, {updateState}) => {
 
 	return (
 		<div id="snc-alert-email-view">
-			<div className=""></div>
-			<snc-alert-email-sidebar currentUser={state.properties.currentUser} menuOptions={state.properties.menuOptions}/>
+			<snc-alert-email-sidebar currentUser={state.properties.currentUser} menuOptions={state.properties.menuOptions} externalSysparam={state.properties.externalSysparam}/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
 				showInfo={state.showInfo}
 				tableName={state.properties.tableName}
+				listSysparam={state.properties.listSysparam}
 				externalSysparam={state.properties.externalSysparam}
 				tableColumns={state.properties.tableColumns}
 				tableLimit={state.properties.tableLimit}
@@ -54,6 +54,9 @@ createCustomElement('snc-alert-email-view', {
 			}
 		},
 		tableName: {
+			default: ''
+		},
+		listSysparam: {
 			default: ''
 		},
 		externalSysparam: {
@@ -113,7 +116,7 @@ createCustomElement('snc-alert-email-view', {
 		},
 		'MENU_ITEM_CLICKED': ({action, properties, updateProperties}) => {
 			logEvent("MENU_ITEM_CLICKED", action.payload);
-			updateProperties({externalSysparam: action.payload.value});
+			updateProperties({listSysparam: action.payload.value});
 		},
 		// 'TABLE_ACTION_BAR_CLOSE#CLICKED': ({action, dispatch}) => {
 		// 	logEvent("TABLE_ACTION_BAR_CLOSE#CLICKED", action.payload);
@@ -126,6 +129,10 @@ createCustomElement('snc-alert-email-view', {
 		'TABLE_ACTION_BAR_BUTTON#CLICKED': ({action, dispatch}) => {
 			logEvent("TABLE_ACTION_BAR_BUTTON#CLICKED", action.payload);
 			dispatch("TABLE_ACTION_BAR_BUTTON_CLICKED", action.payload);
+		},
+		'TABLE_FILTER#UPDATED': ({action, dispatch}) => {
+			logEvent("TABLE_FILTER#UPDATED", action.payload);
+			dispatch("TABLE_FILTER_UPDATED", action.payload);
 		},
 	},
 	setInitialState() {

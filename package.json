@@ -1,8 +1,8 @@
 {
-	"name": "@snc/table-component",
-	"version": "0.0.1",
+	"name": "@snc/optimizui-components",
+	"version": "0.6.0",
 	"private": false,
-	"description": "A custom table component",
+	"description": "Custom components for ServiceNow Next Experience. Developed by Optimiz",
 	"keywords": [
 		"ServiceNow",
 		"Now Experience UI Component",
@@ -25,6 +25,7 @@
 		"@servicenow/now-input": "^19.8.2-ecd",
 		"@servicenow/now-rich-text": "^19.8.2-ecd",
 		"@servicenow/now-template-message": "^19.8.2-ecd",
+		"@servicenow/now-typeahead": "^19.8.2-ecd",
 		"@servicenow/sass-kit": "quebec",
 		"@servicenow/sass-theme": "quebec",
 		"@servicenow/ui-core": "quebec",

@@ -1,5 +1,3 @@
-import '../src/snc-table-component';
-import '../src/snc-side-nav';
 import '../src/snc-alert-email-view';
 import '../src/snc-alert-email-timeline';
 

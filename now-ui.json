@@ -1,54 +1,13 @@
 {
 	"components": {
-		"snc-table-component": {
-			"innerComponents": [
-				"now-input"
-			],
-			"uiBuilder": {
-				"associatedTypes": ["global.core", "global.landing-page"],
-				"label": "Table-Component",
-				"icon": "lightning-fill",
-				"description": "A description of my component",
-				"category": "primitives"
-			},
-			"properties": [
-				{
-					"name": "tableData",
-					"label": "Table Data",
-					"readOnly": false,
-					"required": false,
-					"defaultValue": "[]"
-				}
-			]
-		},
-		"snc-side-nav": {
-			"innerComponents": [
-				"now-icon"
-			],
-			"uiBuilder": {
-				"associatedTypes": ["global.core", "global.landing-page"],
-				"label": "Side-Nav",
-				"icon": "menu-fill",
-				"description": "A description of my component",
-				"category": "primitives"
-			},
-			"properties": [
-				{
-					"name": "navigationOptions",
-					"label": "Navigation Options Array",
-					"readOnly": false,
-					"required": false,
-					"defaultValue": "[]"
-				}
-			]
-		},
 		"snc-alert-email-view": {
 			"innerComponents": [
 				"now-icon",
 				"now-input",
 				"now-highlighted-value",
 				"now-rich-text",
-				"now-avatar"
+				"now-avatar",
+				"now-typeahead"
 			],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
@@ -113,14 +72,6 @@
 			],
 			"actions": [
 				{
-					"name": "TABLE_ROW_CLICKED",
-					"description": "The table row was clicked"
-				},
-				{
-					"name": "TABLE_HEADER_DROPPED",
-					"description": "Table header dropped"
-				},
-				{
 					"name": "RECORD_LINK_CLICKED",
 					"description": "Link to record was clicked"
 				},
@@ -143,6 +94,10 @@
 				{
 					"name": "TABLE_ACTION_BAR_BUTTON_CLICKED",
 					"description": "Table/list action bar button clicked"
+				},
+				{
+					"name": "TABLE_FILTER_UPDATED",
+					"description": "Filters inside the table component have been updated"
 				}
 			]
 		},

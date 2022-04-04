@@ -1,5 +1,5 @@
 import {createCustomElement, actionTypes} from '@servicenow/ui-core';
-const {COMPONENT_ERROR_THROWN} = actionTypes;
+const {COMPONENT_ERROR_THROWN,COMPONENT_PROPERTY_CHANGED,COMPONENT_BOOTSTRAPPED} = actionTypes;
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
 import '@servicenow/now-icon';
@@ -41,23 +41,8 @@ const view = (state, {updateState, dispatch}) => {
 				<menu className="menu-segment">
 					<ul>
 						{menuListItems}
-						{/* <li className="active"><a href="/"><now-rich-text className="g-icon" html=''/> Active</a></li>
-						<li><a href="/"><now-rich-text className="g-icon" html=''/> My Stuff</a></li>
-						<li><a href="/"><now-rich-text className="g-icon" html=''/> High Priority</a></li>
-						<li><a href="/"><now-rich-text className="g-icon" html=''/> Unassigned</a></li>
-						<li><a href="/"><now-rich-text className="g-icon" html=''/> Maintenance</a></li>
-						<li><a href="/"><now-rich-text className="g-icon" html=''/> Resolved</a></li> */}
 					</ul>
 				</menu>
-				{/* <div className="separator"></div>
-				<div className="menu-segment">
-					<ul className="labels">
-						<li className="ciName">Labels</li>
-						<li><a href="#">Tags <span className="ball pink"></span></a></li>
-						<li><a href="#">Metrics <span className="ball green"></span></a></li>
-						<li><a href="#">Logs <span className="ball blue"></span></a></li>
-					</ul>
-				</div> */}
 			</div>
 		</aside>
 	);
@@ -76,14 +61,41 @@ createCustomElement('snc-alert-email-sidebar', {
 		},
 		menuOptions: {
 			default: []
+		},
+		externalSysparam: {
+			default: ""
 		}
 	},
 	setInitialState() {
 		return {
-			activeItem: 0
+			activeItem: 0,
+			checkExternalSysparam: true,
 		}
 	},
 	actionHandlers: {
+		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
+			const {state, updateState} = coeffects;
+			console.log("COMPONENT_BOOTSTRAPPED state: ", state);
+			// if (state.checkExternalSysparam == true && state.properties.externalSysparam) {
+			// 	console.log("menuOptions: ", state.properties.menuOptions);
+			// 	let newActiveItem = state.properties.menuOptions.findIndex((menuOption) => state.properties.externalSysparam.includes(menuOption.sysparm));
+			// 	updateState({checkExternalSysparam: false, activeItem: newActiveItem});
+			// }
+		},
+		[COMPONENT_PROPERTY_CHANGED]:(coeffects) => {
+			const {state, dispatch, action, updateState} = coeffects;
+			console.log("COMPONENT_PROPERTY_CHANGED: ", action.payload.name);
+			console.log("payload: ", action.payload);
+			if (action.payload.name == "menuOptions" && action.payload.previousValue.length == 0) {
+				if (state.checkExternalSysparam == true && state.properties.externalSysparam) {
+					let newActiveItem = action.payload.value.findIndex((menuOption) => state.properties.externalSysparam.includes(menuOption.sysparm));
+					dispatch('MENU_ITEM_CLICKED', {value: action.payload.value[newActiveItem].sysparm});
+					updateState({checkExternalSysparam: false, activeItem: newActiveItem});
+				} else {
+					dispatch('MENU_ITEM_CLICKED', {value: action.payload.value[0].sysparm});
+				}
+			}
+		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
 		},
