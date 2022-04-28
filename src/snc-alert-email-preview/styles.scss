@@ -8,6 +8,9 @@
 
 .g-icon {
   fill: RGB($now-color--primary-1);
+  &.green {
+    fill: rgba(119, 178, 123, 1);
+  }
 }
 
 #info-container {
@@ -45,6 +48,11 @@
       //display: inline-block;
       font-weight: 100;
       font-size: 1.3rem;
+    }
+    .inline-header-2 {
+      font-weight: 100;
+      font-size: 1.1rem;
+      color: rgba(119, 178, 123, 1);
     }
   }
 }
@@ -161,8 +169,8 @@
   border: 1px solid RGB($now-color_border--primary);
   border-radius: 6px;
   padding: 12px;
-  margin-bottom: 8px;
-
+  margin-bottom: 1em;
+  margin-top: 1em;
 
   .card-header {
     display: grid;
@@ -181,6 +189,11 @@
   }
 
   .card-body {
+    .prc-key-value {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
     &.overflow {
       overflow-x: auto;
     }
@@ -214,22 +227,68 @@
     .green {
       color: rgba(119, 178, 123, 1);
     }
-    .tags {
+    .tags, .tags-title {
       display: flex;
       text-align: center;
       flex-wrap: wrap;
       align-items: center;
     }
+    .tags {
+      margin-bottom: 1em;
+    }
 
     .broker-tag {
-      background: #B8DCDB;
-      color: #000000;
-      padding: 2px 2px;
+      background-color: RGB($now-color--primary-1);
+      color: RGB($now-color_text--primary);
+      padding: 0px 2px;
       margin: 2px;
       border-radius: 6px;
       .tag-key {
         font-weight: bold;
         font-size: 0.9em;
+      }
+      &.green {
+        background-color: rgba(119, 178, 123, 1);
+      }
+    }
+    .work-notes {
+      .work-notes-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        color: RGB($now-color--primary-1);
+      }
+    }
+    .work-note {
+      margin-top: 1em;
+      margin-bottom: 1em;
+      .work-note-content {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        column-gap: 8px;
+        // .work-note-avatar {
+        //   border-radius: 50%;
+        //   border: 1px solid RGB($now-color_border--primary);
+        // }
+        .work-note-text {
+          background-color: RGB($now-color_background--tertiary);
+          border: 1px solid RGB($now-color_border--primary);
+          border-radius: 6px;
+          padding: 8px;
+          margin-left: 8px;
+          .work-note-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            .work-note-relative-time {
+              display: flex;
+              align-items: center;
+              color: RGB($now-color--primary-1);
+            }
+          }
+        }
       }
     }
   }
@@ -386,7 +445,7 @@
 
 .circle-tag {
 	color: #ffffff;
-	background-color: RGB($now-color_divider--primary);
+	background-color: rgba(119, 178, 123, 1);
 	border-radius: 50%;
 	height: 35px;
 	width: 35px;

@@ -5,24 +5,29 @@ import '../snc-alert-email-sidebar';
 import '../snc-alert-email-message-list';
 import '../snc-alert-email-preview';
 
-import {DEFAULT_TABLE_DATA} from '../constants';
-
 const view = (state, {updateState}) => {
 	console.log('alert email view state: ', state);
 
 	return (
 		<div id="snc-alert-email-view">
-			<snc-alert-email-sidebar currentUser={state.properties.currentUser} menuOptions={state.properties.menuOptions} externalSysparam={state.properties.externalSysparam}/>
+			<snc-alert-email-sidebar
+				currentUser={state.properties.currentUser}
+				menuOptions={state.properties.menuOptions}
+				externalSysparam={state.properties.externalSysparam}
+				paramListValue={state.properties.paramListValue}
+			/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
 				showInfo={state.showInfo}
 				tableName={state.properties.tableName}
-				listSysparam={state.properties.listSysparam}
 				externalSysparam={state.properties.externalSysparam}
-				tableColumns={state.properties.tableColumns}
+				tableColumns={state.properties.tableColumns.split(",")}
 				tableLimit={state.properties.tableLimit}
 				page={state.properties.page}
 				currentUser={state.properties.currentUser}
+				actionArray={state.properties.actionArray}
+				paramListValue={state.properties.paramListValue}
+				menuOptions={state.properties.menuOptions}
 			/>
 			{state.showInfo && (
 				<snc-alert-email-preview
@@ -56,14 +61,11 @@ createCustomElement('snc-alert-email-view', {
 		tableName: {
 			default: ''
 		},
-		listSysparam: {
-			default: ''
-		},
 		externalSysparam: {
 			default: ''
 		},
 		tableColumns: {
-			default: []
+			default: ''
 		},
 		tableLimit: {
 			default: 0
@@ -73,6 +75,12 @@ createCustomElement('snc-alert-email-view', {
 		},
 		menuOptions: {
 			default: []
+		},
+		actionArray: {
+			default: []
+		},
+		paramListValue: {
+			default: ''
 		}
 	},
 	actionHandlers: {
@@ -114,10 +122,6 @@ createCustomElement('snc-alert-email-view', {
 			logEvent("TABLE_RECORD_COUNT#UPDATED", action.payload);
 			dispatch("TABLE_RECORD_COUNT_UPDATED", action.payload);
 		},
-		'MENU_ITEM_CLICKED': ({action, properties, updateProperties}) => {
-			logEvent("MENU_ITEM_CLICKED", action.payload);
-			updateProperties({listSysparam: action.payload.value});
-		},
 		// 'TABLE_ACTION_BAR_CLOSE#CLICKED': ({action, dispatch}) => {
 		// 	logEvent("TABLE_ACTION_BAR_CLOSE#CLICKED", action.payload);
 		// 	dispatch("TABLE_ACTION_BAR_CLOSE_CLICKED", action.payload);
@@ -130,9 +134,17 @@ createCustomElement('snc-alert-email-view', {
 			logEvent("TABLE_ACTION_BAR_BUTTON#CLICKED", action.payload);
 			dispatch("TABLE_ACTION_BAR_BUTTON_CLICKED", action.payload);
 		},
-		'TABLE_FILTER#UPDATED': ({action, dispatch}) => {
-			logEvent("TABLE_FILTER#UPDATED", action.payload);
-			dispatch("TABLE_FILTER_UPDATED", action.payload);
+		'UPDATE_PAGE#PARAMETER': ({action,dispatch}) => {
+			logEvent("UPDATE_PAGE#PARAMETER", action.payload);
+			dispatch("UPDATE_PAGE_PARAMETER", action.payload);
+		},
+		'DEFINE_TAG#NORMALIZATION': ({action,dispatch}) => {
+			logEvent("DEFINE_TAG#NORMALIZATION", action.payload);
+			dispatch("DEFINE_TAG_NORMALIZATION", action.payload);
+		},
+		'SHOW_MESSAGE#MODAL': ({action,dispatch}) => {
+			logEvent("SHOW_MESSAGE#MODAL", action.payload);
+			dispatch("SHOW_MESSAGE_MODAL", action.payload);
 		},
 	},
 	setInitialState() {

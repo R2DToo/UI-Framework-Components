@@ -4,7 +4,7 @@ import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import {createHttpEffect} from '@servicenow/ui-effect-http';
 import styles from './styles.scss';
 
-import {TAG_COLORS, DEFAULT_TABLE_DATA} from '../constants';
+import {TAG_COLORS} from '../constants';
 
 const view = (state, {updateState, dispatch}) => {
 	console.log('snc-alert-email-timeline state: ', state);

@@ -1,15 +1,6 @@
 @import '@servicenow/sass-kit/host';
 @import '@servicenow/sass-utility/index';
-$accent-color: #61C7B3;
 
-$color-light-grey: #EFEFEF;
-$color-dark-grey: #888;
-$color-red: #D23B3D;
-$color-orange: #E2A917;
-$color-blue: #1BC3E1;
-$color-green: #9AE14F;
-
-$sidebar-dark-text-color: #465162;
 $sidebar-padding: 20px;
 
 * {
@@ -22,7 +13,13 @@ $sidebar-padding: 20px;
   background-color: RGB($now-color_background--secondary);
   color: RGB($now-color_text--primary);
   transition-duration: 1s;
+	min-width: 200px;
 	height: 100%;
+
+	.sticky {
+		position: sticky;
+		top: 0;
+	}
 
   .menu-item {
     transition-duration: .3s;
@@ -36,40 +33,22 @@ $sidebar-padding: 20px;
   .logo-container {
     font-weight: 100;
 		font-size: 1.875rem;
-    text-align: center;
-		text-align: start;
+    display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		column-gap: 16px;
 		padding-left: 20px;
 		padding-right: 10px;
-		padding-top: 4px;
-    .logo {
-      margin-right: 15px;
-			// border: 2px solid RGB($now-color--primary-1);
-			// border-radius: 100px;
-			// text-indent: 1px;
-			// color: RGB($now-color--primary-1);
-    }
+		padding-top: 10px;
   }
 
   .menu-segment {
     padding: 0;
-		margin-top: 9px;
 
     ul {
 			margin: 0;
 			padding: 0;
       list-style: none;
-		}
-
-    .ball {
-			&.pink {
-				border-color: #EA4C89;
-			}
-			&.green {
-				border-color: #9AE14F;
-			}
-			&.blue {
-				border-color: #1BC3E1;
-			}
 		}
 
     li {

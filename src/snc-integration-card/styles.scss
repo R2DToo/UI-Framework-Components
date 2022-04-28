@@ -1,0 +1,131 @@
+@import '@servicenow/sass-kit/host';
+@import '@servicenow/sass-utility/index';
+
+.card {
+	background-color: RGB($now-color_background--secondary);
+	box-shadow: 0 3px 3px 0 rgba($now-color_text--primary, 0.05), 0 5px 15px 0 rgba($now-color_text--primary, 0.05);
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	color: RGB($now-color_text--primary);
+}
+
+.card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem 1.25rem;
+	div {
+		display: flex;
+		align-items: center;
+
+		span {
+			width: 40px;
+			height: 40px;
+			border-radius: 8px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 8px;
+			img {
+				// max-width: 85%;
+				max-height: 100%;
+			}
+		}
+
+		h2 {
+			margin-left: 0.75rem;
+			margin-right: 0;
+			margin-top: 0;
+			margin-bottom: 0;
+			font-weight: 500;
+		}
+	}
+}
+
+.toggle {
+	span {
+		display: block;
+		width: 40px;
+		height: 24px;
+		border-radius: 99em;
+		background-color: RGB($now-color_background--secondary);
+		box-shadow: inset 1px 1px 1px 0 rgba($now-color_text--primary, 0.05);
+		position: relative;
+		transition: 0.15s ease;
+		&:before {
+			content: "";
+			display: block;
+			position: absolute;
+			left: 3px;
+			top: 3px;
+			height: 18px;
+			width: 18px;
+			background-color: RGB($now-color_background--tertiary);
+			border-radius: 50%;
+			box-shadow: 0 1px 3px 0 rgba($now-color_text--primary, 0.15);
+			transition: 0.15s ease;
+		}
+	}
+
+	input {
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		height: 1px;
+		overflow: hidden;
+		position: absolute;
+		white-space: nowrap;
+		width: 1px;
+
+		+ span {
+			box-shadow: 0 0 0 4px RGB($now-color_background--tertiary);
+		}
+
+		&:checked + span {
+			background-color: RGB($now-color_background--secondary);
+			&:before {
+				transform: translateX(calc(100% - 2px));
+				background-color: RGB($now-color--primary-1);
+			}
+		}
+	}
+}
+
+.card-body {
+	padding: 0 1.25rem;
+	font-size: 0.875rem;
+	max-height: 75px;
+	min-height: 75px;
+	p {
+		margin: 0;
+		svg {
+			fill: RGB($now-color--primary-1);
+		}
+	}
+	p, svg {
+		vertical-align: middle;
+	}
+}
+
+.card-footer {
+	margin-top: auto;
+	padding: 1rem 1.25rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-top: 1px solid RGB($now-color_divider--primary);
+
+	span {
+		background-color: RGB($now-color--primary-1);
+		border-radius: 6px;
+		padding: 4px 8px;
+		color: #ffffff;
+	}
+	a {
+		color: RGB($now-color_text--primary);
+		text-decoration: none;
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+}

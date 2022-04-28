@@ -7,12 +7,93 @@ import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
 import '@servicenow/now-avatar';
 import '@servicenow/now-rich-text';
-import '@servicenow/now-typeahead';
-// import _ from 'lodash';
-import {DEFAULT_TABLE_DATA, TAG_COLORS} from '../constants';
+
+import {isEqual} from 'lodash';
+
+import amazonSVG from '../images/amazon-web-services-icon.svg';
+import appDynamicsSVG from '../images/AppDynamics.svg';
+import azureSVG from '../images/microsoft-azure-icon.svg';
+import bmcSVG from '../images/bmc-software-icon.svg';
+import ciscoSVG from '../images/cisco-ar21.svg';
+import datadogSVG from '../images/datadog_new.svg';
+import dynatraceSVG from '../images/dynatrace-icon.svg';
+import emailSVG from '../images/email.svg';
+import googleSVG from '../images/google-cloud-platform.svg';
+import grafanaSVG from '../images/grafana-icon.svg';
+import vmwareSVG from '../images/vmware_v2.svg';
+import ibmSVG from '../images/ibm-icon.svg';
+import icingaSVG from '../images/icinga.svg';
+import genericcodeSVG from '../images/generic-code.svg';
+import lightstepSVG from '../images/Lightstepv2.svg';
+import logicmonitorSVG from '../images/logicmonitor-icon.svg';
+import nagiosSVG from '../images/nagios.svg';
+import newrelicSVG from '../images/new-relic-icon.svg';
+import oracleSVG from '../images/oracle-icon.svg';
+import op5SVG from '../images/op5.svg';
+import prometheusSVG from '../images/prometheus-icon.svg';
+import microfocusSVG from '../images/microfocus_1.svg';
+import pagerdutySVG from '../images/pagerduty.svg';
+import prtgSVG from '../images/prtg.svg';
+import sapSVG from '../images/sap-icon.svg';
+import splunkSVG from '../images/splunk_new.svg';
+import microsoftSVG from '../images/microsoft-icon.svg';
+import solarwindsSVG from '../images/solarwinds-icon.svg';
+import sumologicSVG from '../images/sumo-logic-icon.svg';
+import zabbixSVG from '../images/zabbix-icon.svg';
+import opsviewSVG from '../images/Opsview.svg';
+import webhookSVG from '../images/webhook.svg';
+import catchpointSVG from '../images/catchpoint_new.svg';
+import servicenowSVG from '../images/servicenow_new.svg';
+export const INTEGRATION_ICONS = [
+	{key: 'aws', value: amazonSVG},
+	{key: 'appdynamics', value: appDynamicsSVG},
+	{key: 'azure', value: azureSVG},
+	{key: 'bmc', value: bmcSVG},
+	{key: 'catchpoint', value: catchpointSVG},
+	{key: 'datadog', value: datadogSVG},
+	{key: 'dynatrace', value: dynatraceSVG},
+	{key: 'eif', value: ibmSVG},
+	{key: 'email', value: emailSVG},
+	{key: 'google', value: googleSVG},
+	{key: 'group alert', value: servicenowSVG},
+	{key: 'gcp', value: googleSVG},
+	{key: 'grafana', value: grafanaSVG},
+	{key: 'hpom', value: microfocusSVG},
+	{key: 'hyperic', value: vmwareSVG},
+	{key: 'ibm', value: ibmSVG},
+	{key: 'icinga', value: icingaSVG},
+	{key: 'itom', value: servicenowSVG},
+	{key: 'lightstep', value: lightstepSVG},
+	{key: 'logic monitor', value: logicmonitorSVG},
+	{key: 'logicmonitor', value: logicmonitorSVG},
+	{key: 'nagios', value: nagiosSVG},
+	{key: 'new relic', value: newrelicSVG},
+	{key: 'nnmi', value: microfocusSVG},
+	{key: 'obm', value: microfocusSVG},
+	{key: 'oem', value: oracleSVG},
+	{key: 'omi', value: microfocusSVG},
+	{key: 'op5', value: op5SVG},
+	{key: 'opsview', value: opsviewSVG},
+	{key: 'oracle', value: oracleSVG},
+	{key: 'pagerduty', value: pagerdutySVG},
+	{key: 'prometheus', value: prometheusSVG},
+	{key: 'prtg', value: prtgSVG},
+	{key: 'thousandeyes', value: ciscoSVG},
+	{key: 'sap', value: sapSVG},
+	{key: 'scom', value: microsoftSVG},
+	{key: 'self', value: servicenowSVG},
+	{key: 'solarwinds', value: solarwindsSVG},
+	{key: 'splunk', value: splunkSVG},
+	{key: 'sumologic', value: sumologicSVG},
+	{key: 'vcenter', value: vmwareSVG},
+	{key: 'vrealize', value: vmwareSVG},
+	{key: 'zabbix', value: zabbixSVG},
+	{key: 'generic events', value: webhookSVG},
+];
 
 const view = (state, {updateState, dispatch}) => {
 	console.log('snc-alert-email-message-list state: ', state);
+
 
 	const fireEvent = (event_name, value) => {
 		console.log("%cFiring Event: " + event_name, "color:blue;font-size:20px;");
@@ -99,6 +180,12 @@ const view = (state, {updateState, dispatch}) => {
 	const recordSelectionChanged = (sys_id, tableDataIndex) => {
 		let updatedSelectedRecords = state.selectedRecords;
 		let updatedTableData = state.tableData;
+		let updatedSelectedRecordIndexes = state.selectedRecordIndexes;
+		if (!updatedSelectedRecordIndexes.includes(tableDataIndex)) {
+			updatedSelectedRecordIndexes.push(tableDataIndex);
+		} else {
+			updatedSelectedRecordIndexes.splice(updatedSelectedRecordIndexes.indexOf(tableDataIndex), 1);
+		}
 		if (!updatedSelectedRecords.includes(sys_id)) {
 			updatedSelectedRecords.push(sys_id);
 			updatedTableData[tableDataIndex].selected = true;
@@ -106,19 +193,23 @@ const view = (state, {updateState, dispatch}) => {
 			updatedSelectedRecords.splice(updatedSelectedRecords.indexOf(sys_id), 1);
 			updatedTableData[tableDataIndex].selected = false;
 		}
-		updateState({selectedRecords: updatedSelectedRecords, tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
+		updateState({selectedRecords: updatedSelectedRecords, selectedRecordIndexes: updatedSelectedRecordIndexes, tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
 	};
 
 	const toggleAllSelect = () => {
 		let updatedSelectedRecords = state.selectedRecords;
+		let updatedSelectedRecordIndexes = state.selectedRecordIndexes;
 		let updatedTableData = state.tableData;
-		updatedTableData.forEach((row) => {
+		updatedTableData.forEach((row, index) => {
 			row.selected = !state.allSelectChecked;
 			if (!updatedSelectedRecords.includes(row.sys_id.value)) {
 				updatedSelectedRecords.push(row.sys_id.value);
 			}
+			if (!updatedSelectedRecordIndexes.includes(index)) {
+				updatedSelectedRecordIndexes.push(index);
+			}
 		});
-		updateState({allSelectChecked: !state.allSelectChecked, tableData: updatedTableData, selectedRecords: updatedSelectedRecords});
+		updateState({allSelectChecked: !state.allSelectChecked, tableData: updatedTableData, selectedRecords: updatedSelectedRecords, selectedRecordIndexes: updatedSelectedRecordIndexes});
 	}
 
 	const tableHeaders = () => {
@@ -131,9 +222,7 @@ const view = (state, {updateState, dispatch}) => {
 				switch (key) {
 					case "application_service": label = "Application Service";
 					break;
-					case "secondary_alerts": label = "Secondary Alerts";
-					break;
-					case "tags": label = "Tags";
+					case "itom_tags": label = "ITOM Tags";
 					break;
 				}
 				return (
@@ -179,11 +268,11 @@ const view = (state, {updateState, dispatch}) => {
 					{state.tableOrder.map((key) => {
 						if (row[key]) {
 							if (key == "severity" || key == "sn_priority_group") {
-								return <td><now-highlighted-value label={row[key].display_value ? row[key].display_value : "N/A"} color={getSeverityColor(row[key].value)} variant="secondary"/></td>
-							} else if (key == "sys_updated_on") {
+								return <td>{row[key].display_value && <now-highlighted-value label={row[key].display_value} color={getSeverityColor(row[key].value)} variant="secondary"/>}</td>
+							} else if (key == "sys_updated_on" || key == "sys_created_on") {
 								return <td className="view-message">{makeRelativeTime(row[key].display_value)}</td>
 							} else if (key == "number") {
-								return <td className="view-message record-link" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: row.sys_id.value})}}>{row[key].display_value ? row[key].display_value : "N/A"}</td>
+								return <td className="view-message record-link">{row[key].display_value}</td>
 							} else if (key == "assigned_to") {
 								return <td className="view-message">
 									<now-avatar
@@ -194,7 +283,7 @@ const view = (state, {updateState, dispatch}) => {
 									/>
 								</td>
 							} else if (key == "description") {
-								return <td className="description">{row[key].display_value ? row[key].display_value : "N/A"}</td>
+								return <td className="description">{row[key].display_value}</td>
 							} else if (key == "application_service") {
 								let services = [];
 								row[key].forEach(service => {
@@ -204,28 +293,57 @@ const view = (state, {updateState, dispatch}) => {
 								});
 								var serviceTags = services.map((service, i) => {
 									let url = "/$ngbsm.do?id=" + service.value;
-									return <div className={"tag " + getSeverityColor(service.impact)} onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url})}}>{service.display_value}</div>
+									return <div className={"tag " + getSeverityColor(service.impact)} onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{service.display_value}</div>
 								});
 								return <td className="tags">{serviceTags}</td>
 							} else if (key == "secondary_alerts") {
 								return <td className="tags">
-									<div className="circle-tags">
-										<div className={"circle-tag"}>{row[key]}</div>
-									</div>
+									{row[key].display_value != "0" && <div className="circle-tags">
+										<div className={"circle-tag"}>{row[key].display_value}</div>
+									</div>}
 								</td>
 							} else if (key == "cmdb_ci") {
 								let url = `/now/cmdb/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}`;
-								return <td className="view-message" onclick={(e) => {e.stopPropagation()}}><span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url})}}>{row[key].display_value ? row[key].display_value : "N/A"}</span></td>
-							} else if (key == "tags") {
+								return <td className="view-message">
+									{row[key].value ?
+										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span>
+										: row[key].display_value
+									}
+								</td>
+							} else if (key == "incident") {
+								return <td className="view-message">
+									{row[key].value ?
+										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK#CLICKED", {table: 'task', sys_id: row[key].value});}}>{row[key].display_value}</span>
+										: row[key].display_value
+									}
+								</td>
+							} else if (key == "itom_tags") {
 								return <td className="broker-tags-container">
 									<div className="broker-tags">
-										{row[key].map((tag) =>
-											<div className="broker-tag"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
+										{row[key].map((tag, index) =>
+											<div className="broker-tag" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
 										)}
 									</div>
 								</td>
+							} else if (key == "alert_filter") {
+								return <td className="description break-message">{row[key].display_value}</td>
+							} else if (key == "name") {
+								let url = '/now/nav/ui/classic/params/target/' + state.properties.tableName + '.do%3Fsys_id%3D' + row.sys_id.value;
+								return <td className="name-message break-message"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
+							} else if (key == "alert_correlation_rule") {
+								return <td className="name-message">{row[key].display_value}</td>
+							} else if (key == "node") {
+								return <td className="name-message break-message">{row[key].display_value}</td>
+							} else if (key == "source_icon") {
+								return <td className="view-message"><img className="table-image" src={row[key].value}/></td>
+							} else if (key == "incident.priority") {
+								return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
+							} else if (key == "tag_based_definition") {
+								return <td className="name-message primary-color force-center">{row[key].display_value}</td>
+							} else if (key == "prc") {
+								return <td className="name-message force-center">{row[key].display_value}</td>
 							} else {
-								return <td className="view-message">{row[key].display_value ? row[key].display_value : "N/A"}</td>
+								return <td className="view-message">{row[key].display_value}</td>
 							}
 						} else {
 							if (key == 'Select') {
@@ -240,31 +358,160 @@ const view = (state, {updateState, dispatch}) => {
 		})
 	}
 
-	const contextMenuOptionClicked = (event, option) => {
+	const contextMenuOptionClicked = (event, option, isAction = false) => {
 		//event.stopPropagation();
 		console.log("contextMenuOptionClicked: ", option);
-		console.log("contextMenuRecord: ", state.contextMenuRecord);
-		let contextRecord = state.tableData.find((row) => row.sys_id.value == state.contextMenuRecord);
-		switch (option) {
-			case 'acknowledge': fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [state.contextMenuRecord], table: state.properties.tableName, updateQuery: "acknowledged=true^assigned_to=" + state.properties.currentUser.sys_id});
-			break;
-			case 'close': fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [state.contextMenuRecord], table: state.properties.tableName, updateQuery: "state=Closed"});
-			break;
-			case 'set_to_maintenance': fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [state.contextMenuRecord], table: state.properties.tableName, updateQuery: "maintenance=true"});
-			break;
-			case 'ci_details':
-				if (contextRecord) {
-					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+		console.log("contextMenuRecordIndex: ", state.contextMenuRecordIndex);
+		let contextRecord = state.tableData[state.contextMenuRecordIndex];
+
+
+		if (state.properties.actionArray && isAction == true) {
+			let matchingAction = state.properties.actionArray.find((action) => action.label == option);
+			if (matchingAction) {
+				if (matchingAction.label == "Tag Normalization") {
+					dispatch("DEFINE_TAG#NORMALIZATION", {value: replaceActionQueryVariables(matchingAction.updateQuery, true)});
+				} else if (matchingAction.isUpdate) {
+					fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [contextRecord.sys_id.value], table: state.properties.tableName, updateQuery: matchingAction.updateQuery, isUpdate: matchingAction.isUpdate});
+				} else if (matchingAction.isLink) {
+					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: replaceActionQueryVariables(matchingAction.updateQuery, true)});
 				}
-				break;
-			case 'ci_dependency_view':
-				if (contextRecord) {
-					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/nav/ui/classic/params/target/%24ngbsm.do%3Fid%3D${contextRecord.cmdb_ci.value}`});
-				}
-				break;
-			// case 'event_timeline': fireEvent();
-			// break;"/$ngbsm.do?id=" + service.value
-			default: break;
+			}
+		} else {
+			switch (option) {
+				case 'ci_details':
+					if (contextRecord) {
+						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+					}
+					break;
+				case 'ci_dependency_view':
+					if (contextRecord) {
+						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/nav/ui/classic/params/target/%24ngbsm.do%3Fid%3D${contextRecord.cmdb_ci.value}`});
+					}
+					break;
+				case 'alert_tbac':
+					// if (contextRecord) {
+					// 	dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+					// }
+					break;
+				case 'same_ci':
+					if (contextRecord) {
+						//Add new filter, cmdb_ci=contextRecord
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: 'Configuration Item', value: 'cmdb_ci'},
+								operator: {label: contextRecord.cmdb_ci.value ? 'is' : 'is empty', value: contextRecord.cmdb_ci.value ? '=' : 'ISEMPTY'},
+								value: {label: contextRecord.cmdb_ci.display_value, value: contextRecord.cmdb_ci.value}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				case 'same_node':
+					if (contextRecord) {
+						//Add new filter, cmdb_ci=contextRecord
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: 'Node', value: 'node'},
+								operator: {label: contextRecord.node.value ? 'is' : 'is empty', value: contextRecord.node.value ? '=' : 'ISEMPTY'},
+								value: {label: contextRecord.node.display_value, value: contextRecord.node.value}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				case 'same_ag':
+					if (contextRecord) {
+						//Add new filter, cmdb_ci=contextRecord
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: 'Assignment Group', value: 'assignment_group'},
+								operator: {label: contextRecord.assignment_group.value ? 'is' : 'is empty', value: contextRecord.assignment_group.value ? '=' : 'ISEMPTY'},
+								value: {label: contextRecord.assignment_group.display_value, value: contextRecord.assignment_group.value}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				case 'same_group':
+					if (contextRecord) {
+						//Add new filter, cmdb_ci=contextRecord
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: 'Group', value: 'group_source'},
+								operator: {label: contextRecord.group_source.value ? 'is' : 'is empty', value: contextRecord.group_source.value ? '=' : 'ISEMPTY'},
+								value: {label: contextRecord.group_source.display_value, value: contextRecord.group_source.value}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				case 'same_tag':
+					if (state.contextMenuTag.key && state.contextMenuTag.value) {
+						//Add new filter, cmdb_ci=contextRecord
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: 'ITOM Tags', value: 'u_itom_tags'},
+								operator: {label: "contains", value: "LIKE"},
+								value: {label: `"${state.contextMenuTag.key}": "${state.contextMenuTag.value}"`, value: `"${state.contextMenuTag.key}": "${state.contextMenuTag.value}"`}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				// case 'event_timeline': fireEvent();
+				// break;"/$ngbsm.do?id=" + service.value
+				default: break;
+			}
 		}
 	};
 
@@ -290,7 +537,6 @@ const view = (state, {updateState, dispatch}) => {
 
 	const parseFiltersToSysparm = (filters) => {
 		let encodedSysparm = '';
-		encodedSysparm += state.properties.listSysparam;
 		filters.map((filter) => {
 			encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 		});
@@ -306,7 +552,7 @@ const view = (state, {updateState, dispatch}) => {
 			if (updatedFilters[index].inputs.value.value != ""
 				|| updatedFilters[index].inputs.operator.value == "ISEMPTY"
 				|| updatedFilters[index].inputs.operator.value == "ISNOTEMPTY") {
-				fireEvent('TABLE_FILTER#UPDATED', parseFiltersToSysparm(updatedFilters));
+				dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
 				fireEvent('REFRESH_MAIN_QUERY', {force: true});
 			}
 			updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
@@ -319,7 +565,7 @@ const view = (state, {updateState, dispatch}) => {
 			updatedFilters[index].inputs.value = chosenValue;
 			updatedFilters[index].showResults.value = false;
 			if (updatedFilters[index].inputs.operator.value != "") {
-				fireEvent('TABLE_FILTER#UPDATED', parseFiltersToSysparm(updatedFilters));
+				dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
 				fireEvent('REFRESH_MAIN_QUERY', {force: true});
 			}
 			updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
@@ -334,8 +580,41 @@ const view = (state, {updateState, dispatch}) => {
 			updatedFilters[index].inputs.and_or = {label: 'AND', value: '^'};
 		}
 		updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
-		fireEvent('TABLE_FILTER#UPDATED', parseFiltersToSysparm(updatedFilters));
+		dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
 		fireEvent('REFRESH_MAIN_QUERY', {force: true});
+	}
+
+	const replaceActionQueryVariables = (updateQuery, fromContextMenu = false) => {
+		console.log("replaceActionQueryVariables");
+		if (state.selectedRecordIndexes.length > 0 && fromContextMenu == false) {
+			console.log("starting query: ", updateQuery);
+			while (updateQuery.includes("<") && updateQuery.includes(">")) {
+				let variableStartIndex = updateQuery.indexOf("<");
+				let variableEndIndex = updateQuery.indexOf(">");
+				let rawVariable = updateQuery.substring(variableStartIndex, variableEndIndex + 1);
+				console.log("Raw Variable: ", rawVariable);
+				let variable = rawVariable.slice(1, rawVariable.length - 1);
+				console.log("Variable: ", variable);
+				updateQuery = updateQuery.replace(rawVariable, state.tableData[state.selectedRecordIndexes[0]][variable].value);
+				console.log("replaced query: ", updateQuery);
+			}
+		} else if (fromContextMenu == true) {
+			let matchingTableRecord = state.tableData[state.contextMenuRecordIndex];
+			if (matchingTableRecord) {
+				console.log("starting query: ", updateQuery);
+				while (updateQuery.includes("<") && updateQuery.includes(">")) {
+					let variableStartIndex = updateQuery.indexOf("<");
+					let variableEndIndex = updateQuery.indexOf(">");
+					let rawVariable = updateQuery.substring(variableStartIndex, variableEndIndex + 1);
+					console.log("Raw Variable: ", rawVariable);
+					let variable = rawVariable.slice(1, rawVariable.length - 1);
+					console.log("Variable: ", variable);
+					updateQuery = updateQuery.replace(rawVariable, matchingTableRecord[variable].value);
+					console.log("replaced query: ", updateQuery);
+				}
+			}
+		}
+		return updateQuery;
 	}
 
 	return (
@@ -344,7 +623,7 @@ const view = (state, {updateState, dispatch}) => {
 				<div className="header">
 					<div className="table-title">
 						<h1>
-							Active Alerts (<span className="primary-color">{state.totalCount}</span>)
+							Count (<span className="primary-color">{state.totalCount}</span>)
 						</h1>
 					</div>
 					<div className="filter-container">
@@ -428,15 +707,19 @@ const view = (state, {updateState, dispatch}) => {
 					</div>
 					<div className="action-bar">
 						<ul>
-							<li title="Set to Maintenance" onclick={() => {fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: state.selectedRecords, table: state.properties.tableName, updateQuery: "maintenance=true"})}}>
-								<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", "enable-background": "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><g><path attr-d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10 C22,6.48,17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8c0-4.41,3.59-8,8-8s8,3.59,8,8C20,16.41,16.41,20,12,20z" attr-fill-rule="evenodd"/><path attr-d="M13.49,11.38c0.43-1.22,0.17-2.64-0.81-3.62c-1.11-1.11-2.79-1.3-4.1-0.59 l2.35,2.35l-1.41,1.41L7.17,8.58c-0.71,1.32-0.52,2.99,0.59,4.1c0.98,0.98,2.4,1.24,3.62,0.81l3.41,3.41c0.2,0.2,0.51,0.2,0.71,0 l1.4-1.4c0.2-0.2,0.2-0.51,0-0.71L13.49,11.38z" attr-fill-rule="evenodd"/></g></g></svg>
-							</li>
-							<li title="Close" onclick={() => {fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: state.selectedRecords, table: state.properties.tableName, updateQuery: "state=Closed"})}}>
-								<svg attrs={{class: "g-icon red-color", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none" attr-opacity=".87"/><path attr-d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>
-							</li>
-							<li title="Acknowledge" onclick={() => {fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: state.selectedRecords, table: state.properties.tableName, updateQuery: "acknowledged=true^assigned_to=" + state.properties.currentUser.sys_id})}}>
-								<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none" attr-opacity=".87"/><path attr-d="M21 8h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2c0-1.1-.9-2-2-2zm0 4l-3 7H9V9l4.34-4.34L12.23 10H21v2zM1 9h4v12H1z"/></svg>
-							</li>
+							{state.properties.actionArray.map((action) =>
+								<li title={action.label} onclick={() => {
+									if (action.label == "Tag Normalization") {
+										dispatch("DEFINE_TAG#NORMALIZATION", {value: replaceActionQueryVariables(action.updateQuery, false)});
+									} else if (action.isUpdate) {
+										fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: state.selectedRecords, table: state.properties.tableName, updateQuery: replaceActionQueryVariables(action.updateQuery, false), isUpdate: action.isUpdate});
+									} else if (action.isLink) {
+										dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: replaceActionQueryVariables(action.updateQuery, false)})
+									}
+								}}>
+									<now-rich-text className="g-icon" html={action.svgIcon}/>
+								</li>
+							)}
 						</ul>
 					</div>
 				</div>
@@ -455,26 +738,38 @@ const view = (state, {updateState, dispatch}) => {
 					No records to display
 				</div>}
 			</main>
-			<div class={{'context-menu': true, visible: state.showContextMenu}} style={{top: state.contextMenuTop, left: state.contextMenuLeft}}>
-				<div className="context-option" onclick={(e) => {contextMenuOptionClicked(e, 'acknowledge')}}>
-					Acknowledge
-				</div>
-				<div className="context-option" onclick={(e) => {contextMenuOptionClicked(e, 'close')}}>
-					Close
-				</div>
-				<div className="context-option" onclick={(e) => {contextMenuOptionClicked(e, 'set_to_maintenance')}}>
-					Set to Maintenance
-				</div>
-				<hr></hr>
-				<div className="context-option" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}>
-					CI Details
-				</div>
-				<div className="context-option" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}>
-					CI Dependency View
-				</div>
-				<hr></hr>
-				<div className="context-option" onclick={(e) => {contextMenuOptionClicked(e, 'event_timeline')}}>
-					Event Timeline (WIP)
+			<div class={{'context-menu-container': true, visible: state.showContextMenu}} style={{top: state.contextMenuTop, left: state.contextMenuLeft}} hook-insert={(vnode) => console.log('inserted', vnode.elm.offsetWidth)}>
+				<div className="context-menu">
+					<ul className="context-menu-list">
+						{state.properties.actionArray.map((action) =>
+							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
+						)}
+						{state.properties.tableName == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
+							<ul className="context-menu-sub-list">
+								{state.alertActions.map((alertAction) => {
+									if (alertAction.type == "link") {
+										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>{alertAction.display_value}</button></li>
+									} else {
+										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("START_FLOW", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>{alertAction.display_value}</button></li>
+									}
+								}
+								)}
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M11 15h2v-3h3v-2h-3V7h-2v3H8v2h3zM21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg>CI Details</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24" attr-x="0"/></g><g><path attr-d="M11,18h6v-5h-2.25V9.25h-4V7H13V2H7v5h2.25v2.25h-4V13H3v5h6v-5H6.75v-2.25h6.5V13H11V18z M15.5,14.5v2h-3v-2H15.5z M8.5,5.5v-2h3v2H8.5z M7.5,14.5v2h-3v-2H7.5z"/></g></svg>CI Dependency View</button></li>
+							</ul>
+						</li>}
+					</ul>
+					{state.properties.tableName == "em_alert" && <ul className="context-menu-list">
+						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Quick Search<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
+							<ul className="context-menu-sub-list">
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ci')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same CI</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_node')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same Node</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same AG</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_group')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same Group</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_tag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>Same Tag</button></li>
+							</ul>
+						</li>
+					</ul>}
 				</div>
 			</div>
 		</div>
@@ -493,7 +788,7 @@ const transformTableOrder = (tableOrder, tableData, tableColumns) => {
 		tableOrder.push("Select");
 	}
 	tableColumns.forEach((column) => {
-		if (column == "_row_data" || column == "sys_id" || column == "cmdb_ci.sys_class_name") {
+		if (column == "_row_data" || column == "sys_id" || column == "cmdb_ci.sys_class_name" || column == "additional_info" || column == "u_itom_tags") {
 			return;
 		}
 		if (!tableOrder.includes(column)) {
@@ -503,7 +798,7 @@ const transformTableOrder = (tableOrder, tableData, tableColumns) => {
 	tableData.forEach((tableRow) => {
 		let fields = Object.keys(tableRow);
 		for (let i = 0; i < fields.length; i++) {
-			if (fields[i] == "_row_data" || fields[i] == "sys_id" || fields[i] == "cmdb_ci.sys_class_name" || fields[i] == "selected") {
+			if (fields[i] == "_row_data" || fields[i] == "sys_id" || fields[i] == "cmdb_ci.sys_class_name" || fields[i] == "selected" || fields[i] == "additional_info" || fields[i] == "u_itom_tags") {
 				continue;
 			}
 			if (!tableOrder.includes(fields[i])) {
@@ -525,6 +820,36 @@ const sortingArrayToString = (sortingArray) => {
 		sortString += orderStr + orderObj.field;
 	}
 	return sortString;
+}
+
+const sortTags = (a, b) => {
+	let aKey = a.key.toLowerCase();
+	let aPrefixIndex = aKey.indexOf("sn-");
+	if (aPrefixIndex > -1) {
+		aKey = aKey.substring(aPrefixIndex + 3);
+	}
+	let bKey = b.key.toLowerCase();
+	let bPrefixIndex = bKey.indexOf("sn-");
+	if (bPrefixIndex > -1) {
+		bKey = bKey.substring(bPrefixIndex + 3);
+	}
+
+	if ( aKey < bKey ){
+    return -1;
+  }
+  if ( aKey > bKey ){
+    return 1;
+  }
+  return 0;
+}
+
+const findMatchingSourceIcon = (sourceValue) => {
+	let icon = webhookSVG;
+	let match = INTEGRATION_ICONS.find((integration_icon) => sourceValue.toLowerCase().includes(integration_icon.key));
+	if (match) {
+		icon = match.value;
+	}
+	return icon;
 }
 
 createCustomElement('snc-alert-email-message-list', {
@@ -554,8 +879,14 @@ createCustomElement('snc-alert-email-message-list', {
 		currentUser: {
 			default: {}
 		},
-		listSysparam: {
+		actionArray: {
+			default: []
+		},
+		paramListValue: {
 			default: ''
+		},
+		menuOptions: {
+			default: []
 		},
 	},
 	setInitialState() {
@@ -567,17 +898,22 @@ createCustomElement('snc-alert-email-message-list', {
 				{
 					field: "number",
 					asc: false
+				},
+				{
+					field: "order",
+					asc: true
 				}
 			], //format = [{field: "severity", asc: true}],
 			showContextMenu: false,
 			contextMenuLeft: "0px",
 			contextMenuTop: "0px",
-			contextMenuRecord: "0",
+			contextMenuRecordIndex: 0,
 			tableOrder: [],
 			tableData: [],
 			totalCount: 0,
 			autoRefreshActive: false,
 			selectedRecords: [],
+			selectedRecordIndexes: [],
 			typeaheadColumnOptions: [],//[{label: 'Configuration Item', value: 'cmdb_ci'}]
 			operatorOptions: [
 				{label: 'starts with', value: 'STARTSWITH', types: ["String", "Reference", "Choice"]},
@@ -615,6 +951,9 @@ createCustomElement('snc-alert-email-message-list', {
 			isMainQueryRunning: false,
 			allSelectChecked: false,
 			checkExternalSysparm: true,
+			lastTableData: [],
+			contextMenuTag: {},
+			alertActions: []
 		}
 	},
 	transformState(state) {
@@ -627,8 +966,11 @@ createCustomElement('snc-alert-email-message-list', {
 		[COMPONENT_PROPERTY_CHANGED]: (coeffects) => {
 			const { dispatch, action, state, updateState } = coeffects;
 			console.log('COMPONENT_PROPERTY_CHANGED payload: ', action.payload);
-			if (action.payload.name != "showInfo" && action.payload.name != "currentUser" && action.payload.name != "listSysparam") {
-				dispatch('REFRESH_MAIN_QUERY');
+			if (action.payload.name != "showInfo" && action.payload.name != "currentUser") {
+				if (action.payload.name == "menuOptions" || action.payload.name == "paramListValue") {
+					console.log("list properties: ", state.properties);
+				}
+				dispatch('REFRESH_MAIN_QUERY', {force: action.payload.name == "paramListValue" || action.payload.name == "menuOptions"});
 			} else if (action.payload.name == "tableName") {
 				let labelSysparm = `name=${state.properties.tableName}^elementISNOTEMPTY`;
 				console.log("labelSysparm: ", labelSysparm);
@@ -638,23 +980,11 @@ createCustomElement('snc-alert-email-message-list', {
 					sysparm_fields: 'element,column_label,name',
 					sysparm_display_value: 'true'
 				});
-			} else if (action.payload.name == "listSysparam") {
-				let encodedSysparm = '';
-				encodedSysparm += action.payload.value;
-				//encodedSysparm += state.properties.externalSysparam;
-				state.filters.map((filter) => {
-					encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
-				});
-				encodedSysparm += sortingArrayToString(state.sortingArray);
-				dispatch('TABLE_FILTER#UPDATED', {value: encodedSysparm});
-				dispatch('REFRESH_MAIN_QUERY', {force: true});
 			}
 		},
 		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
 			const { state, dispatch, updateState } = coeffects;
 			console.log("COMPONENT_BOOTSTRAPPED");
-
-			//dispatch('REFRESH_MAIN_QUERY');
 
 			let labelSysparm = `name=${state.properties.tableName}^elementISNOTEMPTY`;
 			console.log("labelSysparm: ", labelSysparm);
@@ -664,6 +994,7 @@ createCustomElement('snc-alert-email-message-list', {
 				sysparm_fields: 'element,column_label,internal_type',
 				sysparm_display_value: 'true'
 			});
+			dispatch('REFRESH_MAIN_QUERY', {force: false});
 		},
 		'QUERY_ERROR': (coeffects) => {
 			const { updateState, action } = coeffects;
@@ -676,6 +1007,7 @@ createCustomElement('snc-alert-email-message-list', {
 			if (action.payload) {
 				isForced = action.payload.force;
 			}
+			console.log("%cparamListValue: %o", "color: green;font-size:1.2em;", state.properties.paramListValue);
 			console.log("isForced: ", isForced);
 			if (state.isMainQueryRunning == false || isForced == true) {
 				updateState({isMainQueryRunning: true});
@@ -685,9 +1017,18 @@ createCustomElement('snc-alert-email-message-list', {
 				let encodedSysparm = '';
 				if (state.checkExternalSysparm == true && state.properties.externalSysparam) {
 					updateState({checkExternalSysparm: false});
-					encodedSysparm = state.properties.externalSysparam;
 
-					let tempSysparm = encodedSysparm.replace(state.properties.listSysparam, "");
+					if (state.properties.paramListValue) {
+						let matchingMenuOption = state.properties.menuOptions.find((menuOption) => menuOption.name.toLowerCase() == state.properties.paramListValue.toLowerCase());
+						if (matchingMenuOption) {
+							encodedSysparm = matchingMenuOption.listValue;
+						}
+					} else {
+						encodedSysparm = state.properties.menuOptions[0].listValue;
+					}
+					encodedSysparm += state.properties.externalSysparam;
+
+					let tempSysparm = state.properties.externalSysparam;
 					if (tempSysparm.includes("^ORDERBY")) {
 						let orderBySysparm = tempSysparm.substring(tempSysparm.indexOf("^ORDERBY"));
 						let orderSysparmArray = orderBySysparm.split("^");
@@ -743,8 +1084,14 @@ createCustomElement('snc-alert-email-message-list', {
 
 					updateState({filters: updatedFilters});
 				} else {
-					encodedSysparm += state.properties.listSysparam;
-					//encodedSysparm += state.properties.externalSysparam;
+					if (state.properties.paramListValue) {
+						let matchingMenuOption = state.properties.menuOptions.find((menuOption) => menuOption.name.toLowerCase() == state.properties.paramListValue.toLowerCase());
+						if (matchingMenuOption) {
+							encodedSysparm += matchingMenuOption.listValue;
+						}
+					} else {
+						encodedSysparm += state.properties.menuOptions[0].listValue;
+					}
 					state.filters.map((filter) => {
 						encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 					});
@@ -752,6 +1099,7 @@ createCustomElement('snc-alert-email-message-list', {
 				}
 
 				console.log("refresh sysparam: ", encodedSysparm);
+				console.log("%cparamListValue: %o", "color: green;font-size:1.2em;", state.properties.paramListValue);
 				dispatch('FETCH_MAIN_TABLE', {
 					table: state.properties.tableName,
 					sysparm_query: encodedSysparm,
@@ -774,7 +1122,8 @@ createCustomElement('snc-alert-email-message-list', {
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value', 'sysparm_limit', 'sysparm_offset'],
 			successActionType: 'FETCH_MAIN_TABLE_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
 		}),
 		'FETCH_MAIN_TABLE_SUCCESS': (coeffects) => {
 			const { action, state, updateState, dispatch } = coeffects;
@@ -782,16 +1131,50 @@ createCustomElement('snc-alert-email-message-list', {
 			console.log('%cFETCH_MAIN_TABLE_SUCCESS', 'color:green');
 			console.log("%cpayload: %o", 'color:green', result);
 			console.log("action: ", action);
+			let updatedTableOrder = state.tableOrder;
 			result.forEach((resultRow) => {
 				if (state.selectedRecords.includes(resultRow.sys_id.value)) {
 					resultRow.selected = true;
 				} else {
 					resultRow.selected = false;
 				}
+
+				if (resultRow.u_itom_tags) {
+					resultRow.itom_tags = [];
+					if (resultRow.u_itom_tags.value) {
+						try {
+							let itom_tags = JSON.parse(resultRow.u_itom_tags.value);
+							let itom_tag_keys = Object.keys(itom_tags);
+							itom_tag_keys.forEach((tag_key) => {
+								resultRow.itom_tags.push({key: tag_key, value: itom_tags[tag_key]});
+							});
+						} catch (e) {
+
+						}
+						resultRow.itom_tags.sort(sortTags);
+					}
+					if (!updatedTableOrder.includes("itom_tags")) {
+						updatedTableOrder.splice(8, 0, "itom_tags");
+					}
+				}
+				if (resultRow.source) {
+					resultRow.source_icon = {
+						label: 'Source Icon',
+						value: findMatchingSourceIcon(resultRow.source.display_value)
+					};
+					if (!updatedTableOrder.includes("source_icon")) {
+						updatedTableOrder.splice(4, 0, "source_icon");
+					}
+				}
+				if (resultRow.group_source) {
+					if (resultRow.group_source.value == "2") {
+						resultRow.group_source.display_value = "Tag-based";
+					}
+				}
 			});
 
 			dispatch('TABLE_RECORD_COUNT#UPDATED', {value: parseInt(action.meta.responseHeaders['x-total-count'])});
-			updateState({tableData: result, totalCount: parseInt(action.meta.responseHeaders['x-total-count']), isMainQueryRunning: result.length == 0 ? false : true});
+			updateState({tableData: result, tableOrder: updatedTableOrder, totalCount: parseInt(action.meta.responseHeaders['x-total-count']), isMainQueryRunning: result.length == 0 ? false : true});
 			dispatch('START_FETCH_COLUMN_LABELS');
 		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
@@ -801,24 +1184,29 @@ createCustomElement('snc-alert-email-message-list', {
 			const { state, dispatch } = coeffects;
 			let ciArray = [];
 			state.tableData.forEach((row) => {
-				if (!ciArray.includes(row.cmdb_ci.value) && row.cmdb_ci.value != "") {
+				if (row.cmdb_ci && row.cmdb_ci.value != "" && !ciArray.includes(row.cmdb_ci.value)) {
 					ciArray.push(row.cmdb_ci.value);
 				}
 			});
-			let sysparm = "ci_idIN" + ciArray.toString();
-			dispatch('FETCH_APP_SERVICES', {
-				table: 'svc_ci_assoc',
-				sysparm_query: sysparm,
-				sysparm_fields: 'service_id,ci_id',
-				sysparm_display_value: 'all'
-			});
+			if (ciArray.length > 0) {
+				let sysparm = "ci_idIN" + ciArray.toString();
+				dispatch('FETCH_APP_SERVICES', {
+					table: 'svc_ci_assoc',
+					sysparm_query: sysparm,
+					sysparm_fields: 'service_id,ci_id',
+					sysparm_display_value: 'all'
+				});
+			} else {
+				dispatch('START_FETCH_SECONDARY_ALERTS');
+			}
 		},
 		'FETCH_APP_SERVICES': createHttpEffect('/api/now/table/:table', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_APP_SERVICES_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
 		}),
 		'FETCH_APP_SERVICES_SUCCESS': (coeffects) => {
 			const { action, state, updateState, dispatch } = coeffects;
@@ -840,7 +1228,7 @@ createCustomElement('snc-alert-email-message-list', {
 			if (action.payload.result.length > 0) {
 				let updatedTableOrder = state.tableOrder;
 				if (!updatedTableOrder.includes("application_service")) {
-					updatedTableOrder.splice(7, 0, "application_service");
+					updatedTableOrder.splice(11, 0, "application_service");
 				}
 				updateState({tableData: updatedTableData, tableOrder: updatedTableOrder});
 				dispatch('FETCH_APP_SERVICE_IMPACT', {
@@ -855,7 +1243,8 @@ createCustomElement('snc-alert-email-message-list', {
 			method: 'GET',
 			queryParams: ['sysparm_query', 'sysparm_fields'],
 			successActionType: 'FETCH_APP_SERVICE_IMPACT_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
 		}),
 		'FETCH_APP_SERVICE_IMPACT_SUCCESS': (coeffects) => {
 			const { action, state, updateState, dispatch } = coeffects;
@@ -889,13 +1278,12 @@ createCustomElement('snc-alert-email-message-list', {
 				updatedSorting.push({field: action.payload.value, asc: true});
 			}
 			updateState({sortingArray: updatedSorting, dummyStateChange: !state.dummyStateChange});
-			let encodedSysparm = state.properties.listSysparam;
-			//encodedSysparm += state.properties.externalSysparam;
+			let encodedSysparm = "";
 			state.filters.map((filter) => {
 				encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 			});
 			encodedSysparm += sortingArrayToString(updatedSorting);
-			dispatch('TABLE_FILTER#UPDATED', {value: encodedSysparm});
+			dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: encodedSysparm}});
 			dispatch('REFRESH_MAIN_QUERY', {force: true});
 		},
 		'START_FETCH_COLUMN_LABELS': (coeffects) => {
@@ -916,149 +1304,328 @@ createCustomElement('snc-alert-email-message-list', {
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_COLUMN_LABELS_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
 		}),
 		'FETCH_COLUMN_LABELS_SUCCESS': (coeffects) => {
 			const { action, updateState, state, dispatch } = coeffects;
+			console.log("FETCH_COLUMN_LABELS_SUCCESS payload: ", action.payload);
 			let updatedTableData = state.tableData;
 			updatedTableData.forEach((tableRow) => {
 				action.payload.result.forEach((result) => {
 					tableRow[result.element].label = result.column_label;
 				});
+				if (tableRow['incident.priority']) {
+					tableRow['incident.priority'].label = "Task Priority";
+				}
+				if (tableRow['incident.assignment_group']) {
+					tableRow['incident.assignment_group'].label = "Task Assignment Group";
+				}
+				if (tableRow['sys_created_on']) {
+					tableRow['sys_created_on'].label = "Created";
+				}
+				if (tableRow['sys_updated_on']) {
+					tableRow['sys_updated_on'].label = "Updated";
+				}
 			});
 			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
-			dispatch('START_FETCH_ASSIGNED_TO_AVATARS');
+			dispatch('START_FETCH_AVATARS');
 		},
 		'START_FETCH_SECONDARY_ALERTS': (coeffects) => {
-			const { dispatch, state } = coeffects;
+			const { dispatch, state, updateState } = coeffects;
 			let parentList = [];
 			let secondarySysparm = "parentIN";
 			state.tableData.forEach((tableRow) => {
-				if (tableRow.group_source.display_value != "None" && tableRow.group_source.display_value != "Secondary") {
+				if (tableRow.group_source && tableRow.group_source.display_value != "None" && tableRow.group_source.display_value != "Secondary") {
 					parentList.push(tableRow.sys_id.value);
 				}
 			});
-			dispatch('FETCH_SECONDARY_ALERTS', {
-				table: 'em_alert',
-				sysparm_query: secondarySysparm + parentList.toString(),
-				sysparm_count: 'true',
-				sysparm_group_by: 'parent'
-			});
+			if (parentList.length > 0) {
+				dispatch('FETCH_SECONDARY_ALERTS', {
+					table: 'em_alert',
+					sysparm_query: secondarySysparm + parentList.toString(),
+					sysparm_count: 'true',
+					sysparm_group_by: 'parent'
+				});
+			} else {
+				//dispatch('START_FETCH_TAGS');
+				dispatch('START_FETCH_TAG_BASED_DEFINITION');
+			}
 		},
 		'FETCH_SECONDARY_ALERTS': createHttpEffect('/api/now/stats/:table', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_count', 'sysparm_group_by'],
 			successActionType: 'FETCH_SECONDARY_ALERTS_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
 		}),
 		'FETCH_SECONDARY_ALERTS_SUCCESS': (coeffects) => {
 			const { action, updateState, state, dispatch } = coeffects;
+			console.log("FETCH_SECONDARY_ALERTS_SUCCESS payload: ", action.payload);
+			let updatedTableData = state.tableData;
+			let updatedTableOrder = state.tableOrder;
 			if (action.payload.result.length > 0) {
-				let updatedTableData = state.tableData;
 				updatedTableData.forEach((tableRow) => {
+					tableRow.secondary_alerts = {display_value: "0", value: "0", label: "Secondary Alerts"};
 					let matchingResult = action.payload.result.find((result) => tableRow.sys_id.value == result.groupby_fields[0].value);
 					if (matchingResult) {
-						tableRow.secondary_alerts = matchingResult.stats.count;
-					} else {
-						tableRow.secondary_alerts = '0';
+						tableRow.secondary_alerts.display_value = matchingResult.stats.count;
+						tableRow.secondary_alerts.value = matchingResult.stats.count;
 					}
 				});
-				let updatedTableOrder = state.tableOrder;
 				if (!updatedTableOrder.includes("secondary_alerts")) {
-					updatedTableOrder.splice(7, 0, "secondary_alerts");
+					updatedTableOrder.splice(8, 0, "secondary_alerts");
 				}
-				updateState({tableData: updatedTableData, tableOrder: updatedTableOrder});
 			}
-			dispatch('START_FETCH_TAGS');
+			if (isEqual(state.lastTableData, updatedTableData) == false) {
+				updateState({tableData: updatedTableData, tableOrder: updatedTableOrder, isMainQueryRunning: false});
+			}
+			dispatch('START_FETCH_TAG_BASED_DEFINITION');
+			//dispatch('START_FETCH_TAGS');
 		},
-		'START_FETCH_ASSIGNED_TO_AVATARS': (coeffects) => {
-			const { dispatch, state } = coeffects;
-			let assignedToArray = [];
-			let assignedSysparm = "sys_idIN";
+		'START_FETCH_TAG_BASED_DEFINITION': (coeffects) => {
+			const { state, dispatch, updateState } = coeffects;
+			let sysparm = "name=em_alert^element_idIN";
+			let tagBasedAlerts = [];
 			state.tableData.forEach((tableRow) => {
-				if (tableRow.assigned_to.value != '' && !assignedToArray.includes(tableRow.assigned_to.value)) {
-					assignedToArray.push(tableRow.assigned_to.value);
+				if (tableRow.group_source && tableRow.group_source.value == '2') {
+					tagBasedAlerts.push(tableRow.sys_id.value);
 				}
 			});
-			dispatch('FETCH_ASSIGNED_TO_AVATARS', {
-				sysparm_query: assignedSysparm + assignedToArray.toString(),
-				sysparm_fields: "sys_id,avatar"
-			});
-		},
-		'FETCH_ASSIGNED_TO_AVATARS': createHttpEffect('api/now/table/sys_user', {
-			method: 'GET',
-			queryParams: ['sysparm_query', 'sysparm_fields'],
-			successActionType: 'FETCH_ASSIGNED_TO_AVATARS_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
-		}),
-		'FETCH_ASSIGNED_TO_AVATARS_SUCCESS': (coeffects) => {
-			const { action, state, dispatch, updateState } = coeffects;
-			const { result } = action.payload;
-			let updatedTableData = state.tableData;
-			updatedTableData.forEach((tableRow) => {
-				let matchingResult = result.find((field) => field.sys_id == tableRow.assigned_to.value);
-				if (matchingResult) {
-					tableRow.assigned_to.avatar = matchingResult.avatar + ".iix?t=small";
-				}
-			});
-			updateState({tableData: updatedTableData});
-			dispatch('START_FETCH_APP_SERVICES');
-		},
-		'START_FETCH_TAGS': (coeffects) => {
-			const { dispatch, state, updateState } = coeffects;
-			let ciArray = [];
-			let sysparm = "configuration_itemIN"
-			state.tableData.forEach((tableRow) => {
-				if (tableRow.cmdb_ci.value != "") {
-					ciArray.push(tableRow.cmdb_ci.value);
-				}
-			});
-			if (ciArray.length > 0) {
-				dispatch('FETCH_TAGS', {
-					table: 'cmdb_key_value',
-					sysparm_query: sysparm + ciArray.toString() + "^ORDERBYkey",
-					sysparm_fields: 'configuration_item,key,value',
-					sysparm_display_value: 'all'
+			if (tagBasedAlerts.length > 0) {
+				dispatch('FETCH_TAG_BASED_DEFINITION', {
+					table: 'sys_journal_field',
+					sysparm_query: sysparm + tagBasedAlerts.toString() + "^ORDERBYDESCsys_created_on^ORDERBYelement_id",
+					sysparm_fields: 'value,element_id',
+					sysparm_display_value: 'false'
 				});
 			} else {
-				updateState({dummyStateChange: !state.dummyStateChange, isMainQueryRunning: false});
+				dispatch("START_FETCH_PRC");
 			}
 		},
-		'FETCH_TAGS': createHttpEffect('/api/now/table/:table', {
+		'FETCH_TAG_BASED_DEFINITION': createHttpEffect('/api/now/table/:table', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_TAGS_SUCCESS',
-			errorActionType: 'QUERY_ERROR'
+			successActionType: 'FETCH_TAG_BASED_DEFINITION_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
 		}),
-		'FETCH_TAGS_SUCCESS': (coeffects) => {
-			const { dispatch, state, updateState, action } = coeffects;
-			console.log('FETCH_TAGS_SUCCESS');
-			console.log("payload: ", action.payload);
+		'FETCH_TAG_BASED_DEFINITION_SUCCESS': (coeffects) => {
+			const { action, state, updateState, dispatch } = coeffects;
+			console.log("FETCH_TAG_BASED_DEFINITION_SUCCESS payload: ", action.payload);
 			let updatedTableData = state.tableData;
-			updatedTableData.forEach((tableRow) => {
-				if (!tableRow.tags) {
-					tableRow.tags = [];
+			if (action.payload && action.payload.result) {
+				updatedTableData.forEach((tableRow) => {
+					tableRow.tag_based_definition = {display_value: "", value: "", label: 'Tag-based Definition'};
+					if (tableRow.group_source.value == "2") {
+						action.payload.result.forEach((result) => {
+							if (tableRow.tag_based_definition.display_value.length == 0 && tableRow.sys_id.value == result.element_id) {
+								let method = result.value.match(/(?<=<a.*>\[Tag Based\]).*(?=<\/a>)/gi);
+								if (method && method[0]) {
+									tableRow.tag_based_definition.display_value = method[0];
+									tableRow.tag_based_definition.value = method[0];
+								}
+							}
+						});
+					}
+				});
+				let updatedTableOrder = state.tableOrder;
+				if (!updatedTableOrder.includes("tag_based_definition")) {
+					updatedTableOrder.splice(10, 0, "tag_based_definition");
 				}
-				action.payload.result.map((result) => {
-					if (result.configuration_item.value == tableRow.cmdb_ci.value && tableRow.tags.filter((tag) => tag.key == result.key.display_value && tag.value == result.value.display_value).length == 0) {
-						tableRow.tags.push({key: result.key.display_value, value: result.value.display_value});
+				updateState({tableOrder: updatedTableOrder});
+			}
+			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
+			dispatch("START_FETCH_PRC");
+		},
+		'START_FETCH_PRC': (coeffects) => {
+			const { state, dispatch, updateState } = coeffects;
+			let nonSecondaryAlerts = [];
+			state.tableData.filter(tableRow => tableRow.group_source && tableRow.group_source.value != "5").forEach(tableRow => {
+				nonSecondaryAlerts.push(tableRow.sys_id.value);
+			});
+			console.log("PRC sysparm: ", 'parent_alert=' + nonSecondaryAlerts.toString());
+			if (nonSecondaryAlerts.length > 0) {
+				dispatch('FETCH_PRC', {
+					table: 'em_root_cause',
+					sysparm_query: 'parent_alertIN' + nonSecondaryAlerts.toString() + "^ORDERBYDESCsys_updated_on",
+					sysparm_fields: 'root_cause_task,description,reasoning,parent_alert',
+					sysparm_display_value: 'all'
+				});
+			} else {
+				// console.log("%cCheck TableData isEqual: %o", "color:blue;font-size:12px;", isEqual(state.lastTableData, state.tableData));
+				// console.log(state.lastTableData, "vs", state.tableData);
+				updateState({lastTableData: state.tableData, isMainQueryRunning: false});
+			}
+		},
+		'FETCH_PRC': createHttpEffect('/api/now/table/:table', {
+			batch: false,
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_PRC_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'FETCH_PRC_SUCCESS': (coeffects) => {
+			const { state, dispatch, updateState, action } = coeffects;
+			console.log("FETCH_PRC_SUCCESS payload: ", action.payload);
+			let updatedTableData = state.tableData;
+			if (action.payload && action.payload.result) {
+				updatedTableData.forEach(tableRow => {
+					tableRow.prc = {display_value: "", value: "", label: "PRC"};
+					action.payload.result.every(result => {
+						if (result.parent_alert.value == tableRow.sys_id.value) {
+							let value = "";
+							if (result.root_cause_task.display_value) {
+								value += result.root_cause_task.display_value + " -- ";
+							}
+							if (result.description.display_value) {
+								value += result.description.display_value;
+							}
+							if (result.reasoning.display_value) {
+								value += " -- " + result.reasoning.display_value;
+							}
+							tableRow.prc.display_value = value;
+							tableRow.prc.value = value;
+						}
+						if (tableRow.prc.display_value && tableRow.prc.value) {
+							return false;
+						} else {
+							return true;
+						}
+					});
+				});
+				// console.log("%cCheck TableData isEqual: %o", "color:blue;font-size:12px;", isEqual(state.lastTableData, state.tableData));
+				// console.log(state.lastTableData, "vs", state.tableData);
+				updateState({lastTableData: state.tableData, isMainQueryRunning: false, tableData: updatedTableData});
+			}
+		},
+		'START_FETCH_AVATARS': (coeffects) => {
+			const { dispatch, state } = coeffects;
+			const avatarFields = ["assigned_to", "sys_created_by", "sys_updated_by"];
+			let userArray = [];
+			let avatarSysparm = "sys_idIN";
+			state.tableData.forEach((tableRow) => {
+				avatarFields.forEach((avatarField) => {
+					if (tableRow[avatarField] && tableRow[avatarField].value != '' && !userArray.includes(tableRow[avatarField].value)) {
+						userArray.push(tableRow[avatarField].value);
 					}
 				});
 			});
-			let updatedTableOrder = state.tableOrder;
-			if (!updatedTableOrder.includes("tags")) {
-				updatedTableOrder.splice(updatedTableOrder.length - 1, 0, "tags");
-			}
-			updateState({tableData: updatedTableData, tableOrder: updatedTableOrder, dummyStateChange: !state.dummyStateChange, isMainQueryRunning: false});
+			dispatch('FETCH_AVATARS', {
+				sysparm_query: avatarSysparm + userArray.toString(),
+				sysparm_fields: "sys_id,photo"
+			});
 		},
+		'FETCH_AVATARS': createHttpEffect('api/now/table/sys_user', {
+			method: 'GET',
+			queryParams: ['sysparm_query', 'sysparm_fields'],
+			successActionType: 'FETCH_AVATARS_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'FETCH_AVATARS_SUCCESS': (coeffects) => {
+			const { action, state, dispatch, updateState } = coeffects;
+			const avatarFields = ["assigned_to", "sys_created_by", "sys_updated_by"];
+			console.log("FETCH_AVATARS_SUCCESS payload: ", action.payload);
+			if (action.payload && action.payload.result) {
+				let updatedTableData = state.tableData;
+				action.payload.result.forEach((result) => {
+					console.log("result: ", result);
+					updatedTableData.forEach((tableRow) => {
+						avatarFields.forEach((avatarField) => {
+							if (tableRow[avatarField] && tableRow[avatarField].value == result.sys_id) {
+								tableRow[avatarField].avatar = result.photo + ".iix";
+							}
+						})
+					});
+				});
+				updateState({tableData: updatedTableData});
+			}
+			// updatedTableData.forEach((tableRow) => {
+			// 	let matchingResult = result.find((field) => field.sys_id == tableRow.assigned_to.value);
+			// 	if (matchingResult) {
+			// 		tableRow.assigned_to.avatar = matchingResult.avatar + ".iix?t=small";
+			// 	}
+			// });
+
+			dispatch('START_FETCH_APP_SERVICES');
+		},
+		// 'START_FETCH_TAGS': (coeffects) => {
+		// 	const { dispatch, state, updateState } = coeffects;
+		// 	let ciArray = [];
+		// 	let sysparm = "configuration_itemIN"
+		// 	state.tableData.forEach((tableRow) => {
+		// 		if (tableRow.cmdb_ci && tableRow.cmdb_ci.value != "") {
+		// 			ciArray.push(tableRow.cmdb_ci.value);
+		// 		}
+		// 	});
+		// 	if (ciArray.length > 0) {
+		// 		dispatch('FETCH_TAGS', {
+		// 			table: 'cmdb_key_value',
+		// 			sysparm_query: sysparm + ciArray.toString() + "^ORDERBYkey",
+		// 			sysparm_fields: 'configuration_item,key,value',
+		// 			sysparm_display_value: 'all'
+		// 		});
+		// 	} else {
+		// 		updateState({dummyStateChange: !state.dummyStateChange, isMainQueryRunning: false});
+		// 	}
+		// },
+		// 'FETCH_TAGS': createHttpEffect('/api/now/table/:table', {
+		// 	method: 'GET',
+		// 	pathParams: ['table'],
+		// 	queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+		// 	successActionType: 'FETCH_TAGS_SUCCESS',
+		// 	errorActionType: 'QUERY_ERROR',
+		// 	cacheable: true
+		// }),
+		// 'FETCH_TAGS_SUCCESS': (coeffects) => {
+		// 	const { dispatch, state, updateState, action } = coeffects;
+		// 	console.log('FETCH_TAGS_SUCCESS');
+		// 	console.log("payload: ", action.payload);
+		// 	let updatedTableData = state.tableData;
+		// 	updatedTableData.forEach((tableRow) => {
+		// 		if (!tableRow.tags) {
+		// 			tableRow.tags = [];
+		// 		}
+		// 		if (tableRow.additional_info && tableRow.additional_info.value) {
+		// 			try {
+		// 				let add_info = JSON.parse(tableRow.additional_info.value);
+		// 				if (add_info.itom_tags) {
+		// 					let itom_tag_keys = Object.keys(add_info.itom_tags);
+		// 					itom_tag_keys.forEach((tag_key) => {
+		// 						if (!tableRow.tags.find((tags) => tags.key == tag_key)) {
+		// 							tableRow.tags.push({key: tag_key, value: add_info.itom_tags[tag_key]});
+		// 						}
+		// 					});
+		// 				}
+		// 			} catch (e) {
+
+		// 			}
+		// 		}
+		// 		action.payload.result.map((result) => {
+		// 			if (result.configuration_item.value == tableRow.cmdb_ci.value && tableRow.tags.filter((tag) => tag.key == result.key.display_value && tag.value == result.value.display_value).length == 0) {
+		// 				tableRow.tags.push({key: result.key.display_value, value: result.value.display_value});
+		// 			}
+		// 		});
+		// 		tableRow.tags.sort(sortTags);
+		// 	});
+		// 	let updatedTableOrder = state.tableOrder;
+		// 	if (!updatedTableOrder.includes("tags")) {
+		// 		updatedTableOrder.splice(updatedTableOrder.length - 1, 0, "tags");
+		// 	}
+		// 	updateState({tableData: updatedTableData, tableOrder: updatedTableOrder, dummyStateChange: !state.dummyStateChange, isMainQueryRunning: false});
+		// },
 		'FETCH_ALL_TABLE_COLUMNS': createHttpEffect('/api/now/table/:table', {
 			batch: false,
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_ALL_TABLE_COLUMNS_SUCCESS'
+			successActionType: 'FETCH_ALL_TABLE_COLUMNS_SUCCESS',
+			cacheable: true
 		}),
 		'FETCH_ALL_TABLE_COLUMNS_SUCCESS': (coeffects) => {
 			const { action, state, updateState, dispatch } = coeffects;
@@ -1079,7 +1646,8 @@ createCustomElement('snc-alert-email-message-list', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_CHOICES_SUCCESS'
+			successActionType: 'FETCH_CHOICES_SUCCESS',
+			cacheable: true
 		}),
 		'FETCH_CHOICES_SUCCESS': (coeffects) => {
 			const { action, state, updateState } = coeffects;
@@ -1202,34 +1770,113 @@ createCustomElement('snc-alert-email-message-list', {
 			updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
 
 			let encodedSysparm = '';
-			encodedSysparm += state.properties.listSysparam;
-			//encodedSysparm += state.properties.externalSysparam;
 			updatedFilters.map((filter) => {
 				encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 			});
 			encodedSysparm += sortingArrayToString(state.sortingArray);
-			dispatch('TABLE_FILTER#UPDATED', {value: encodedSysparm});
+			dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: encodedSysparm}});
 			dispatch('REFRESH_MAIN_QUERY', {force: true});
 		},
+		'START_FETCH_ALERT_ACTIONS': (coeffects) => {
+			const {action, dispatch} = coeffects;
+			if (action.payload.value) {
+				dispatch('FETCH_ALERT_ACTIONS', {
+					retrieveLaunchApplications: true,
+					retrieveRemediations: true,
+					retrieveSubflows: true,
+					alertId: action.payload.value
+				});
+			}
+		},
+		'FETCH_ALERT_ACTIONS': createHttpEffect('/api/now/em_actions/getManualActionsForAlert', {
+			batch: false,
+			method: 'GET',
+			queryParams: ['retrieveLaunchApplications', 'retrieveRemediations', 'retrieveSubflows', 'alertId'],
+			successActionType: 'FETCH_ALERT_ACTIONS_SUCCESS',
+			cacheable: true
+		}),
+		'FETCH_ALERT_ACTIONS_SUCCESS': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			console.log("FETCH_ALERT_ACTIONS_SUCCESS payload: ", action.payload);
+			if (action.payload && action.payload.result && action.payload.result.toolsForAlert) {
+				let newAlertActions = [];
+				action.payload.result.toolsForAlert.forEach((alertActionEntry) => newAlertActions.push({display_value: alertActionEntry.displayName, value: alertActionEntry.url, type: "link"}));
+				action.payload.result.manualRemediationData.forEach((flowAction) => newAlertActions.push({display_value: flowAction.workflowName, value: flowAction, type: "flow"}));
+				updateState({alertActions: newAlertActions, dummyStateChange: !state.dummyStateChange});
+			}
+		},
+		'START_FLOW': (coeffects) => {
+			const { action, dispatch, state } = coeffects;
+			console.log("START_FLOW: ", action.payload.value);
+			dispatch('RUN_FLOW', {
+				data: {
+					subflow: action.payload.value.workflowId,
+					inputs: {
+						ah_alertgr: action.payload.value.alertSysId,
+						ah_alertruleid: action.payload.value.rule,
+						ah_alertrulename: action.payload.value.ruleName,
+						//executionId: '',
+						ah_userdisplayname: state.properties.currentUser.fullName,
+						ah_username: state.properties.currentUser.userName
+					}
+				}
+			});
+		},
+		'RUN_FLOW': createHttpEffect('/api/x_snc_optimiz_wo_0/workspaceflowcaller/start-subflow', {
+			batch: false,
+			method: 'POST',
+			dataParam: 'data',
+			successActionType: 'RUN_FLOW_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'RUN_FLOW_SUCCESS': (coeffects) => {
+			const { action, dispatch } = coeffects;
+			console.log("RUN_FLOW_SUCCESS payload: ", action.payload);
+			if (action.payload && action.payload.result) {
+				dispatch("SHOW_MESSAGE#MODAL", {header: 'Flow Action Outputs', content: JSON.stringify(action.payload.result)});
+			}
+		}
 	},
 	eventHandlers: [
 		{
 			events: ['contextmenu'],
-			effect({state, updateState, action: {payload: {event}}}) {
+			effect({state, updateState, dispatch, action: {payload: {event}}}) {
 				event.preventDefault();
+				console.log(event.path);
 				console.log("contextmenu");
 				console.log(event);
 				let clickedRecordSysID = "0"
+				let contextMenuTag = {};
+				let contextMenuRecordIndex = 0;
 				if (state.showContextMenu == false) {
-					try {
-						let clickedRecordElement = event.path.find((element) => element.id && element.id.includes("sys_id-"));
-						console.log("clickedRecordElement: ", clickedRecordElement);
+					let clickedRecordElement = event.path.find((element) => element.id && element.id.includes("sys_id-"));
+					console.log("clickedRecordElement: ", clickedRecordElement);
+					if (clickedRecordElement) {
 						clickedRecordSysID = clickedRecordElement.id.substring(clickedRecordElement.id.indexOf("-") + 1);
-					} catch (e) {}
+						if (state.properties.tableName == "em_alert") {
+							dispatch("START_FETCH_ALERT_ACTIONS", {value: clickedRecordSysID});
+						}
+						let clickedRecordIndex = state.tableData.findIndex((tableRow) => tableRow.sys_id.value == clickedRecordSysID);
+						if (clickedRecordIndex > -1) {
+							contextMenuRecordIndex = clickedRecordIndex;
+
+							let clickedTag = event.path.find((element) => element.id && element.id.includes("tagindex-"));
+							if (clickedTag) {
+								let clickedTagIndex = clickedTag.id.substring(clickedTag.id.indexOf("-") + 1);
+								contextMenuTag = state.tableData[contextMenuRecordIndex].itom_tags[clickedTagIndex];
+							}
+						}
+					}
 					console.log('%cclickedRecordSysID: %o', 'color:green;font-size:12px;', clickedRecordSysID);
-					updateState({showContextMenu: true, contextMenuLeft: event.clientX + "px", contextMenuTop: event.offsetY + "px", contextMenuRecord: clickedRecordSysID});
+					console.log('%ccontextMenuRecordIndex: %o', 'color:green;font-size:12px;', contextMenuRecordIndex);
+
+					// console.log("view innerWidth: ", event.view.innerWidth);
+					// if ((event.view.innerWidth - event.clientX) > )
+
+					updateState({showContextMenu: true, contextMenuLeft: event.x + "px", contextMenuTop: event.y - 140 + "px", contextMenuRecordIndex: contextMenuRecordIndex, contextMenuTag: contextMenuTag});
 				} else {
-					updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px", contextMenuRecord: clickedRecordSysID});
+					updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px", contextMenuRecordIndex: contextMenuRecordIndex, contextMenuTag: contextMenuTag});
 				}
 			}
 		},
