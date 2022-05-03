@@ -51,11 +51,11 @@ const view = (state, {updateState, dispatch}) => {
 					if (startPosition <= numOfColumns) {
 						return (
 							<li title={`Type: ${record.type.display_value} - Event Time: ${event.time_of_event.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
-								<div className="pulsate left" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 4]}}></div>
-								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 4]}}></div>
+								<div className="pulsate left" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
 								<div className="bar-between-dot"></div>
-								<div className="pulsate right" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 4]}}></div>
-								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 4]}}></div>
+								<div className="pulsate right" style={{border: '3px solid ' + TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
+								<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
 							</li>
 						)
 					} else {
@@ -116,9 +116,9 @@ const view = (state, {updateState, dispatch}) => {
 						if (startPosition <= numOfColumns) {
 							return (
 								<li title={`Type: ${record.type.display_value} - Event Time: ${event.time_of_event.display_value}`} style={{gridColumn: `${startPosition}/${endPosition}`}}>
-									<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 4]}}></div>
+									<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
 									<div className="bar-between-dot"></div>
-									<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 4]}}></div>
+									<div className="dot" style={{backgroundColor: TAG_COLORS[event.severity.value? parseInt(event.severity.value) - 1 : 5]}}></div>
 								</li>
 							)
 						} else {

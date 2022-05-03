@@ -12,6 +12,7 @@ import servicenowSVG from '../images/servicenow_new.svg';
 
 const view = (state, {updateState, dispatch}) => {
 	console.log('snc-alert-email-preview state: ', state);
+	const ZOOM_LEVEL = '1.6'; // 1 = base level zoom
 
 	const fireEvent = (event_name, value) => {
 		console.log("%cFiring Event: " + event_name, "color:blue;font-size:20px;");
@@ -159,13 +160,55 @@ const view = (state, {updateState, dispatch}) => {
 		)
 	};
 
+	const imageZoomMouseOver = (index, isParent) => {
+		console.log('imageZoomMouseOver');
+		if (isParent) {
+			let updatedParentRecord = state.parentRecord;
+			updatedParentRecord[index].snapshotImage.scale = ZOOM_LEVEL;
+			updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
+		} else {
+			let updatedSecondaryRecords = state.secondaryRecords;
+			updatedSecondaryRecords[index].snapshotImage.scale = ZOOM_LEVEL;
+			updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
+		}
+	};
+
+	const imageZoomMouseOut = (index, isParent) => {
+		console.log('imageZoomMouseOut');
+		if (isParent) {
+			let updatedParentRecord = state.parentRecord;
+			updatedParentRecord[index].snapshotImage.scale = 1;
+			updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
+		} else {
+			let updatedSecondaryRecords = state.secondaryRecords;
+			updatedSecondaryRecords[index].snapshotImage.scale = 1;
+			updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
+		}
+	};
+
+	const imageZoomMouseMove = (event, index, isParent) => {
+		console.log('imageZoomMouseMove event: ', event);
+		//let imageElement = event.path[0];
+		let imageWrapperElement = event.path[1];
+		let rect = imageWrapperElement.getBoundingClientRect();
+		if (isParent) {
+			let updatedParentRecord = state.parentRecord;
+			updatedParentRecord[index].snapshotImage.transform_origin = ((event.clientX - rect.left) / imageWrapperElement.offsetWidth) * 100 + '% ' + ((event.clientY - rect.top) / imageWrapperElement.offsetHeight) * 100 + '%';
+			updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
+		} else {
+			let updatedSecondaryRecords = state.secondaryRecords;
+			updatedSecondaryRecords[index].snapshotImage.transform_origin = ((event.clientX - rect.left) / imageWrapperElement.offsetWidth) * 100 + '% ' + ((event.clientY - rect.top) / imageWrapperElement.offsetHeight) * 100 + '%';
+			updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
+		}
+	};
+
 	return (
 		<div id="info-container">
 			<div id="info-header">
 				<div>
 					<h1><now-rich-text title="Close Preview" className="g-icon primary-color" onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} html='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0zm0 0h24v24H0V0zm0 0h24v24H0V0zm0 0h24v24H0V0z" fill="none"/><path d="M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6zm-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.05-1.07.14zM2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45 2.01 3.87zm7.5 7.5l2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13zm-3.4-3.4l1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53z"/></svg>'/> 360&#176; View</h1>
 					<div className="inline-header">Secondary Alerts <div className="circle-tag">{state.secondaryRecords.length}</div></div>
-					{state.tagClusteringMethod && <div className="inline-header-2">{state.tagClusteringMethod}</div>}
+					{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
 					{state.parentRecord && state.parentRecord[0] && state.parentRecord[0].group_source && state.parentRecord[0].group_source.display_value && <div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>}
 				</div>
 				<div id="right-side">
@@ -251,7 +294,7 @@ const view = (state, {updateState, dispatch}) => {
 							</li>
 						)
 					})}
-					{state.activeTabIndex != 4 && state.parentRecord.map((record) => {
+					{state.activeTabIndex != 4 && state.parentRecord.map((record, index) => {
 						let color = 'low';
 						switch (record.severity.value) {
 							case "5": color = 'low';
@@ -276,26 +319,45 @@ const view = (state, {updateState, dispatch}) => {
 								{state.activeTabIndex == 0 && (
 									<div className="card-body alerts">
 										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="column-left">
-											<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}><span className="key">CI:</span> <span className="underline-record-link">{record.cmdb_ci.display_value}</span></p>
-											<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
-											<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
-											<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
-											<p><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
-											<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-											<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+										<div className="card-row">
+											<div className="card-column">
+												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}><span className="key">CI:</span> <span className="underline-record-link">{record.cmdb_ci.display_value}</span></p>
+												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
+												<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
+												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
+												<p><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
+												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+												<p><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+											</div>
+											<div className="card-column">
+												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+												<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
+												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
+												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
+												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.repeated_alerts.url})}}><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary">{record.repeated_alerts ? record.repeated_alerts.display_value : '0'}</div></p>
+												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
+											</div>
 										</div>
-										<div className="column-right">
-											<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-											<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-											<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
-											<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
-											<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
-											<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-											<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
-										</div>
-										<div className="full-width">
-											<p><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+										<div className="card-center">
+											{record.snapshotImage && <div className="card-image-wrapper">
+												<div
+													className="card-image"
+													style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
+													onmouseover={() => {imageZoomMouseOver(index, true)}}
+													onmouseout={() => {imageZoomMouseOut(index, true)}}
+													onmousemove={(e) => {imageZoomMouseMove(e, index, true)}}
+												></div>
+											</div>}
+											{/* {record.snapshotImage && <img
+												className="card-image"
+												onmouseover={() => imageZoomMouseOver(index, true)}
+												onmouseout={() => imageZoomMouseOut(index, true)}
+												src={record.snapshotImage.display_value}
+												style={{transform: `scale(${record.snapshotImage.scale})`}}
+											></img>} */}
 										</div>
 									</div>
 								)}
@@ -353,7 +415,7 @@ const view = (state, {updateState, dispatch}) => {
 							</li>
 						)
 					})}
-					{state.activeTabIndex != 4 && state.secondaryRecords.map((record) => {
+					{state.activeTabIndex != 4 && state.secondaryRecords.map((record, index) => {
 						let color = 'low';
 						switch (record.severity.value) {
 							case "5": color = 'low';
@@ -378,26 +440,46 @@ const view = (state, {updateState, dispatch}) => {
 								{state.activeTabIndex == 0 && (
 									<div className="card-body alerts">
 										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="column-left">
-											<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}><span className="key">CI:</span> <span className="underline-record-link">{record.cmdb_ci.display_value}</span></p>
-											<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
-											<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
-											<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
-											<p><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
-											<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-											<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+										<div className="card-row">
+											<div className="card-column">
+												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}><span className="key">CI:</span> <span className="underline-record-link">{record.cmdb_ci.display_value}</span></p>
+												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
+												<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
+												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
+												<p><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
+												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+												<p><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+											</div>
+											<div className="card-column">
+												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+												<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
+												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
+												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
+												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.repeated_alerts.url})}}><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary">{record.repeated_alerts ? record.repeated_alerts.display_value : '0'}</div></p>
+												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
+											</div>
 										</div>
-										<div className="column-right">
-											<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-											<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-											<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
-											<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
-											<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
-											<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-											<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
-										</div>
-										<div className="full-width">
-											<p><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+
+										<div className="card-center">
+											{record.snapshotImage && <div className="card-image-wrapper">
+												<div
+													className="card-image"
+													style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
+													onmouseover={() => {imageZoomMouseOver(index, false)}}
+													onmouseout={() => {imageZoomMouseOut(index, false)}}
+													onmousemove={(e) => {imageZoomMouseMove(e, index, false)}}
+												></div>
+											</div>}
+											{/* {record.snapshotImage && <img
+												className="card-image"
+												onmouseover={() => imageZoomMouseOver(index, false)}
+												onmouseout={() => imageZoomMouseOut(index, false)}
+												src={record.snapshotImage.display_value}
+												style={{transform: `scale(${record.snapshotImage.scale})`}}
+											></img>} */}
 										</div>
 									</div>
 								)}
@@ -504,12 +586,19 @@ createCustomElement('snc-alert-email-preview', {
 			dispatch('FETCH_PARENT_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning',
+				sysparm_display_value: 'all'
+			});
+			dispatch('FETCH_CHILD_RECORD', {
+				table: 'em_alert',
+				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning',
 				sysparm_display_value: 'all'
 			});
 		},
 		'FETCH_PARENT_RECORD': createHttpEffect('/api/now/table/:table', {
-			batch: false,
+			batch: true,
+			cacheable: true,
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
@@ -534,15 +623,11 @@ createCustomElement('snc-alert-email-preview', {
 				}
 			}
 			updateState({parentRecord: newParentRecord});
-			dispatch('FETCH_CHILD_RECORD', {
-				table: 'em_alert',
-				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags',
-				sysparm_display_value: 'all'
-			});
+			dispatch('START_FETCH_EXTRA_DATA');
 		},
 		'FETCH_CHILD_RECORD': createHttpEffect('/api/now/table/:table', {
-			batch: false,
+			batch: true,
+			cacheable: true,
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
@@ -574,41 +659,127 @@ createCustomElement('snc-alert-email-preview', {
 				});
 			}
 			updateState({secondaryRecords: newSecondaryRecords});
-			dispatch('START_FETCH_WORK_NOTES');
-			dispatch('START_FETCH_KEYS');
-			dispatch('START_FETCH_PRC');
+			// dispatch('START_FETCH_WORK_NOTES');
+			// dispatch('START_FETCH_KEYS');
+			// dispatch('START_FETCH_PRC');
 		},
-		'START_FETCH_WORK_NOTES': (coeffects) => {
-			const { state, dispatch } = coeffects;
+		'START_FETCH_EXTRA_DATA': (coeffects) => {
+			const { state, dispatch, updateState } = coeffects;
+
 			let recordIDs = [];
-			let sysparm = "name=em_alert^element_idIN";
+			let ciArray = [];
 			state.parentRecord.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
+				if (record.cmdb_ci.value != "") {
+					ciArray.push(record.cmdb_ci.value);
+				}
+				if (record.additional_info.value.includes("snapshot") && (record.source.value == "Datadog" || record.source.value == "Demo")) {
+					dispatch('FETCH_DATADOG_SNAPSHOT', {
+						retrieveLaunchApplications: true,
+						retrieveRemediations: false,
+						retrieveSubflows: false,
+						alertId: record.sys_id.value
+					});
+				}
+				let repeatedAlertsSysparm = '';
+				console.log("BSR is_group_alert: ", record.is_group_alert);
+				console.log("BSR message_key: ", record.message_key);
+				if (record.is_group_alert && record.message_key && record.message_key.value) {
+					if (record.is_group_alert.value == 'true') {
+						let baseRecord = state.secondaryRecords.find(secondaryRecord => secondaryRecord.sys_id.value == record.message_key.value);
+						if (baseRecord) {
+							repeatedAlertsSysparm = "message_key=" + baseRecord.message_key.value + "^sys_id!=" + baseRecord.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
+						}
+					} else {
+						repeatedAlertsSysparm = "message_key=" + record.message_key.value + "^sys_id!=" + record.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
+					}
+				}
+				console.log("BSR repeatedAlertsSysparm: ", repeatedAlertsSysparm);
+				if (repeatedAlertsSysparm.length > 0) {
+					dispatch('FETCH_REPEATED_ALERTS', {
+						table: 'em_alert',
+						sysparm_query: repeatedAlertsSysparm,
+						sysparm_fields: 'number',
+						sysparm_display_value: 'all',
+						ABCorigin_sys_idABC: record.sys_id.value
+					});
+				}
 			});
 			state.secondaryRecords.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
+				if (record.cmdb_ci.value != "") {
+					ciArray.push(record.cmdb_ci.value);
+				}
+				if (record.additional_info.value.includes("snapshot") && (record.source.value == "Datadog" || record.source.value == "Demo")) {
+					dispatch('FETCH_DATADOG_SNAPSHOT', {
+						retrieveLaunchApplications: true,
+						retrieveRemediations: false,
+						retrieveSubflows: false,
+						alertId: record.sys_id.value
+					});
+				}
+				let repeatedAlertsSysparm = '';
+				console.log("BSR is_group_alert: ", record.is_group_alert);
+				console.log("BSR message_key: ", record.message_key);
+				if (record.is_group_alert && record.message_key && record.message_key.value) {
+					if (record.is_group_alert.value == 'false') {
+						repeatedAlertsSysparm = "message_key=" + record.message_key.value + "^sys_id!=" + record.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
+					}
+				}
+				console.log("BSR repeatedAlertsSysparm: ", repeatedAlertsSysparm);
+				if (repeatedAlertsSysparm.length > 0) {
+					dispatch('FETCH_REPEATED_ALERTS', {
+						table: 'em_alert',
+						sysparm_query: repeatedAlertsSysparm,
+						sysparm_fields: 'number',
+						sysparm_display_value: 'all',
+						ABCorigin_sys_idABC: record.sys_id.value
+					});
+				}
 			});
-			dispatch('FETCH_WORK_NOTES', {
-				table: 'sys_journal_field',
-				sysparm_query: sysparm + recordIDs.toString() + "^ORDERBYDESCsys_created_on",
-				sysparm_fields: 'sys_created_on,value,element_id,sys_created_by',
-				sysparm_display_value: 'all'
-			});
+
+			if (recordIDs.length > 0) {
+				dispatch('FETCH_WORK_NOTES', {
+					table: 'sys_journal_field',
+					sysparm_query: "name=em_alert^element_idIN" + recordIDs.toString() + "^ORDERBYDESCsys_created_on",
+					sysparm_fields: 'sys_created_on,value,element_id,sys_created_by',
+					sysparm_display_value: 'all'
+				});
+			}
+
+			if (ciArray.length > 0) {
+				dispatch('FETCH_KEYS', {
+					table: 'cmdb_key_value',
+					sysparm_query: "configuration_itemIN" + ciArray.toString() + "^ORDERBYkey",
+					sysparm_fields: 'configuration_item,key,value',
+					sysparm_display_value: 'all'
+				});
+			}
+
+			if (state.parentRecord.length > 0) {
+				dispatch('FETCH_PRC', {
+					table: 'em_root_cause',
+					sysparm_query: 'parent_alert=' + state.parentRecord[0].sys_id.value + "^ORDERBYDESCsys_updated_on",
+					sysparm_fields: 'root_cause_task,description,score,type,reasoning',
+					sysparm_display_value: 'all'
+				});
+			}
 		},
 		'FETCH_WORK_NOTES': createHttpEffect('/api/now/table/:table', {
-			batch: false,
+			batch: true,
+			cacheable: true,
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_WORK_NOTES_SUCCESS'
 		}),
 		'FETCH_WORK_NOTES_SUCCESS': (coeffects) => {
-			const { action, state, updateProperties, updateState, dispatch } = coeffects;
+			const { action, state, updateState, dispatch } = coeffects;
 			console.log('FETCH_WORK_NOTES_SUCCESS');
 			console.log("result: ", action.payload.result);
 			let updatedParentRecord = state.parentRecord;
 			let updatedSecondaryRecords = state.secondaryRecords;
-			let foundClusteringMethod = false;
+			//let foundClusteringMethod = false;
 			action.payload.result.forEach((result) => {
 				result.value.display_value = result.value.display_value.replaceAll("[code]","");
 				result.value.display_value = result.value.display_value.replaceAll("[/code]","");
@@ -619,11 +790,11 @@ createCustomElement('snc-alert-email-preview', {
 				}
 				let parentMatchIndex = updatedParentRecord.findIndex((record) => record.sys_id.value == result.element_id.value);
 				if (parentMatchIndex > -1) {
-					if (foundClusteringMethod == false) {
-						foundClusteringMethod = true;
-						let clusteringMethod = result.value.display_value.match(/(?<=<a.*>\[Tag Based\]).*(?=<\/a>)/gi);
-						updateState({tagClusteringMethod: clusteringMethod});
-					}
+					// if (foundClusteringMethod == false) {
+					// 	foundClusteringMethod = true;
+					// 	let clusteringMethod = result.value.display_value.match(/(?<=<a.*>\[Tag Based\]).*(?=<\/a>)/gi);
+					// 	updateState({tagClusteringMethod: clusteringMethod});
+					// }
 					if (updatedParentRecord[parentMatchIndex].work_notes) {
 						updatedParentRecord[parentMatchIndex].work_notes.push(result);
 					} else {
@@ -643,29 +814,9 @@ createCustomElement('snc-alert-email-preview', {
 			updateState({parentRecord: updatedParentRecord, secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
 			dispatch('START_FETCH_WORK_NOTE_AVATARS', {value: action.payload.result});
 		},
-		'START_FETCH_KEYS': (coeffects) => {
-			const { state, dispatch } = coeffects;
-			let ciArray = [];
-			let sysparm = "configuration_itemIN";
-			state.parentRecord.forEach((record) => {
-				if (record.cmdb_ci.value != "") {
-					ciArray.push(record.cmdb_ci.value);
-				}
-			});
-			state.secondaryRecords.forEach((record) => {
-				if (record.cmdb_ci.value != "") {
-					ciArray.push(record.cmdb_ci.value);
-				}
-			});
-			dispatch('FETCH_KEYS', {
-				table: 'cmdb_key_value',
-				sysparm_query: sysparm + ciArray.toString() + "^ORDERBYkey",
-				sysparm_fields: 'configuration_item,key,value',
-				sysparm_display_value: 'all'
-			});
-		},
 		'FETCH_KEYS': createHttpEffect('/api/now/table/:table', {
-			batch: false,
+			batch: true,
+			cacheable: true,
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
@@ -753,19 +904,9 @@ createCustomElement('snc-alert-email-preview', {
 			});
 			updateState({parentRecord: updatedParentRecord, secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
 		},
-		'START_FETCH_PRC': (coeffects) => {
-			const { state, dispatch } = coeffects;
-			if (state.parentRecord.length > 0) {
-				dispatch('FETCH_PRC', {
-					table: 'em_root_cause',
-					sysparm_query: 'parent_alert=' + state.parentRecord[0].sys_id.value + "^ORDERBYDESCsys_updated_on",
-					sysparm_fields: 'root_cause_task,description,score,type,reasoning',
-					sysparm_display_value: 'all'
-				});
-			}
-		},
 		'FETCH_PRC': createHttpEffect('/api/now/table/:table', {
-			batch: false,
+			batch: true,
+			cacheable: true,
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
@@ -783,6 +924,75 @@ createCustomElement('snc-alert-email-preview', {
 				updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
 			}
 		},
+		'FETCH_DATADOG_SNAPSHOT': createHttpEffect('/api/now/em_actions/getManualActionsForAlert', {
+			batch: true,
+			cacheable: true,
+			method: 'GET',
+			queryParams: ['retrieveLaunchApplications', 'retrieveRemediations', 'retrieveSubflows', 'alertId'],
+			successActionType: 'FETCH_DATADOG_SNAPSHOT_SUCCESS'
+		}),
+		'FETCH_DATADOG_SNAPSHOT_SUCCESS': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			console.log("FETCH_DATADOG_SNAPSHOT_SUCCESS payload: ", action.payload);
+			console.log("FETCH_DATADOG_SNAPSHOT_SUCCESS meta: ", action.meta.request.params.alertId);
+			if (action.payload && action.payload.result && action.payload.result.toolsForAlert) {
+				let updatedParentRecord = state.parentRecord;
+				let matchingParentIndex = updatedParentRecord.findIndex(parent => parent.sys_id.value == action.meta.request.params.alertId);
+				if (matchingParentIndex > -1) {
+					let snapshot_action = action.payload.result.toolsForAlert.find(alert_tools => alert_tools.displayName == "Open Datadog Snapshot");
+					if (snapshot_action) {
+						updatedParentRecord[matchingParentIndex].snapshotImage = {display_value: snapshot_action.url, scale: '1', transform_origin: 'initial'};
+						updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
+					}
+				} else {
+					let updatedSecondaryRecords = state.secondaryRecords;
+					let matchingSecondaryIndex = updatedSecondaryRecords.findIndex(secondary => secondary.sys_id.value == action.meta.request.params.alertId);
+					if (matchingSecondaryIndex > -1) {
+						let snapshot_action = action.payload.result.toolsForAlert.find(alert_tools => alert_tools.displayName == "Open Datadog Snapshot");
+						if (snapshot_action) {
+							updatedSecondaryRecords[matchingSecondaryIndex].snapshotImage = {display_value: snapshot_action.url, scale: '1', transform_origin: 'initial'};
+							updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
+						}
+					}
+				}
+			}
+		},
+		'FETCH_REPEATED_ALERTS': createHttpEffect('/api/now/table/:table', {
+			batch: true,
+			cacheable: true,
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value', 'ABCorigin_sys_idABC'],
+			successActionType: 'FETCH_REPEATED_ALERTS_SUCCESS'
+		}),
+		'FETCH_REPEATED_ALERTS_SUCCESS': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			console.log("BSR FETCH_REPEATED_ALERTS_SUCCESS payload: ", action.payload);
+			console.log("BSR FETCH_REPEATED_ALERTS_SUCCESS meta: ", action.meta);
+			if (action.meta.responseHeaders['X-Total-Count'] && action.meta.request.params.sysparm_query && action.meta.request.params.ABCorigin_sys_idABC) {
+				let updatedParentRecord = state.parentRecord;
+				let matchParentIndex = updatedParentRecord.findIndex(record => record.sys_id.value == action.meta.request.params.ABCorigin_sys_idABC);
+				if (matchParentIndex > -1) {
+					updatedParentRecord[matchParentIndex].repeated_alerts = {
+						url: `/now/optimiz-workspace/home/params/list/all/sysparm/^${action.meta.request.params.sysparm_query}`,
+						display_value: action.meta.responseHeaders['X-Total-Count'],
+						value: action.meta.responseHeaders['X-Total-Count']
+					};
+					updateState({parentRecord: updatedParentRecord});
+				} else {
+					let updatedSecondaryRecords = state.secondaryRecords;
+					let matchSecondaryIndex = updatedSecondaryRecords.findIndex(record => record.sys_id.value == action.meta.request.params.ABCorigin_sys_idABC);
+					if (matchSecondaryIndex > -1) {
+						updatedSecondaryRecords[matchSecondaryIndex].repeated_alerts = {
+							url: `/now/optimiz-workspace/home/params/list/all/sysparm/^${action.meta.request.params.sysparm_query}`,
+							display_value: action.meta.responseHeaders['X-Total-Count'],
+							value: action.meta.responseHeaders['X-Total-Count']
+						};
+						updateState({secondaryRecords: updatedSecondaryRecords});
+					}
+				}
+			}
+		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
 		},
@@ -798,7 +1008,8 @@ createCustomElement('snc-alert-email-preview', {
 			dummyStateChange: false,
 			parentRecord: [],
 			secondaryRecords: [],
-			tagClusteringMethod: ''
+			//tagClusteringMethod: '',
+			//repeatedAlertsURL: '',
 		}
 	}
 });

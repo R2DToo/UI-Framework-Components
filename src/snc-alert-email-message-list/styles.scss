@@ -307,7 +307,7 @@ ul {
 	margin-bottom: 8px;
 	word-break: keep-all;
 	color: RGB($now-color_text--primary);
-	text-align: left;
+	text-align: center;
 }
 
 .broker-tags-container {
@@ -404,6 +404,10 @@ ul {
 		}
 		.context-menu-item {
 			position: relative;
+		}
+		.context-menu-link {
+			text-decoration: none;
+			color: inherit;
 		}
 		.context-menu-button {
 			font: inherit;

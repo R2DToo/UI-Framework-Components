@@ -20,7 +20,7 @@ import dynatraceSVG from '../images/dynatrace-icon.svg';
 import emailSVG from '../images/email.svg';
 import googleSVG from '../images/google-cloud-platform.svg';
 import grafanaSVG from '../images/grafana-icon.svg';
-import vmwareSVG from '../images/vmware_v2.svg';
+import vmwareSVG from '../images/vmware_v7.svg';
 import ibmSVG from '../images/ibm-icon.svg';
 import icingaSVG from '../images/icinga.svg';
 import genericcodeSVG from '../images/generic-code.svg';
@@ -35,7 +35,7 @@ import microfocusSVG from '../images/microfocus_1.svg';
 import pagerdutySVG from '../images/pagerduty.svg';
 import prtgSVG from '../images/prtg.svg';
 import sapSVG from '../images/sap-icon.svg';
-import splunkSVG from '../images/splunk_new.svg';
+import splunkSVG from '../images/splunk_v6.svg';
 import microsoftSVG from '../images/microsoft-icon.svg';
 import solarwindsSVG from '../images/solarwinds-icon.svg';
 import sumologicSVG from '../images/sumo-logic-icon.svg';
@@ -338,7 +338,7 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className="view-message"><img className="table-image" src={row[key].value}/></td>
 							} else if (key == "incident.priority") {
 								return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
-							} else if (key == "tag_based_definition") {
+							} else if (key == "u_tbac_reasoning") {
 								return <td className="name-message primary-color force-center">{row[key].display_value}</td>
 							} else if (key == "prc") {
 								return <td className="name-message force-center">{row[key].display_value}</td>
@@ -617,13 +617,75 @@ const view = (state, {updateState, dispatch}) => {
 		return updateQuery;
 	}
 
+	const getCSVLink = () => {
+		let csvContent = 'data:text/csv;charset=utf-8,';
+		// console.log("getCSVLink");
+		// console.log("CSV state.tableData: ", state.tableData);
+		for(let row = 0; row < state.tableData.length; row++) {
+			// console.log("CSV row: ", row);
+			let keysAmount = Object.keys(state.tableData[row]).length;
+			let keysCounter = 0;
+
+			if (row == 0) {
+				for(let key in state.tableData[row]) {
+					if (key != "selected" && key != "source_icon" && key != "additional_info") {
+						csvContent += '"' + key + '"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+					}
+					keysCounter++;
+				}
+			}
+			keysCounter = 0;
+			for(let key in state.tableData[row]) {
+				//console.log("CSV key: ", key);
+				if (typeof state.tableData[row][key].display_value != "undefined") {
+					if (state.tableData[row][key].display_value) {
+						//console.log("CSV display_value: ", state.tableData[row][key].display_value);
+						if (key == "additional_info") {
+							//csvContent += state.tableData[row][key].display_value.replaceAll('"', '""').replaceAll('#', '/').replaceAll('{', '"{').replaceAll('}', '}"') + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+						} else if (key == "u_itom_tags") {
+							csvContent += '"' + state.tableData[row][key].display_value.replaceAll('"', '""').replaceAll('#', '/').replaceAll(/\n/g, '').replaceAll(/\t/g, '') + '"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+						} else {
+							csvContent += '"' + state.tableData[row][key].display_value.replaceAll('"', '""').replaceAll('#', '/').replaceAll(/\n/g, '').replaceAll(/\t/g, '') + '"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+						}
+					} else {
+						csvContent += '""' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+					}
+				} else {
+					if (key == "application_service") {
+						let array = [];
+						state.tableData[row][key].forEach(app_service => {
+							if (!array.includes(app_service.display_value)) {
+								array.push(app_service.display_value);
+							}
+						});
+						csvContent += '"[' + array.toString() + ']"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+					} else if (key == "itom_tags") {
+						let array = [];
+						state.tableData[row][key].forEach(itom_tag => {
+							array.push(`${itom_tag.key}: ${itom_tag.value}`);
+						});
+						csvContent += '"[' + array.toString() + ']"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+					} else {
+						if (key != "selected" && key != "source_icon") {
+							csvContent += '"WIP"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+						}
+					}
+				}
+				keysCounter++;
+			}
+			keysCounter = 0;
+		}
+		// console.log("CSV Content: ", csvContent);
+		return csvContent;
+	}
+
 	return (
 		<div id="snc-alert-email-message-list">
 			<main id="main">
 				<div className="header">
 					<div className="table-title">
 						<h1>
-							Count (<span className="primary-color">{state.totalCount}</span>)
+							Count (<span className="primary-color">{state.totalCount.toLocaleString()}</span>)
 						</h1>
 					</div>
 					<div className="filter-container">
@@ -720,6 +782,12 @@ const view = (state, {updateState, dispatch}) => {
 									<now-rich-text className="g-icon" html={action.svgIcon}/>
 								</li>
 							)}
+
+							<li title="Export CSV">
+								<a href={getCSVLink()} download={`itom_${state.properties.tableName}_${Date.now()}.csv`}>
+									<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g></svg>
+								</a>
+							</li>
 						</ul>
 					</div>
 				</div>
@@ -744,6 +812,7 @@ const view = (state, {updateState, dispatch}) => {
 						{state.properties.actionArray.map((action) =>
 							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
 						)}
+						<li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.properties.tableName}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g></svg>Export CSV</button></a></li>
 						{state.properties.tableName == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
 								{state.alertActions.map((alertAction) => {
@@ -1154,7 +1223,7 @@ createCustomElement('snc-alert-email-message-list', {
 						resultRow.itom_tags.sort(sortTags);
 					}
 					if (!updatedTableOrder.includes("itom_tags")) {
-						updatedTableOrder.splice(8, 0, "itom_tags");
+						updatedTableOrder.splice(9, 0, "itom_tags");
 					}
 				}
 				if (resultRow.source) {
@@ -1349,7 +1418,8 @@ createCustomElement('snc-alert-email-message-list', {
 				});
 			} else {
 				//dispatch('START_FETCH_TAGS');
-				dispatch('START_FETCH_TAG_BASED_DEFINITION');
+				//dispatch('START_FETCH_TAG_BASED_DEFINITION');
+				dispatch("START_FETCH_PRC");
 			}
 		},
 		'FETCH_SECONDARY_ALERTS': createHttpEffect('/api/now/stats/:table', {
@@ -1381,8 +1451,9 @@ createCustomElement('snc-alert-email-message-list', {
 			if (isEqual(state.lastTableData, updatedTableData) == false) {
 				updateState({tableData: updatedTableData, tableOrder: updatedTableOrder, isMainQueryRunning: false});
 			}
-			dispatch('START_FETCH_TAG_BASED_DEFINITION');
+			//dispatch('START_FETCH_TAG_BASED_DEFINITION');
 			//dispatch('START_FETCH_TAGS');
+			dispatch("START_FETCH_PRC");
 		},
 		'START_FETCH_TAG_BASED_DEFINITION': (coeffects) => {
 			const { state, dispatch, updateState } = coeffects;
@@ -1798,10 +1869,14 @@ createCustomElement('snc-alert-email-message-list', {
 		'FETCH_ALERT_ACTIONS_SUCCESS': (coeffects) => {
 			const {action, state, updateState} = coeffects;
 			console.log("FETCH_ALERT_ACTIONS_SUCCESS payload: ", action.payload);
-			if (action.payload && action.payload.result && action.payload.result.toolsForAlert) {
+			if (action.payload && action.payload.result) {
 				let newAlertActions = [];
-				action.payload.result.toolsForAlert.forEach((alertActionEntry) => newAlertActions.push({display_value: alertActionEntry.displayName, value: alertActionEntry.url, type: "link"}));
-				action.payload.result.manualRemediationData.forEach((flowAction) => newAlertActions.push({display_value: flowAction.workflowName, value: flowAction, type: "flow"}));
+				if (action.payload.result.toolsForAlert) {
+					action.payload.result.toolsForAlert.forEach((alertActionEntry) => newAlertActions.push({display_value: alertActionEntry.displayName, value: alertActionEntry.url, type: "link"}));
+				}
+				if (action.payload.result.manualRemediationData) {
+					action.payload.result.manualRemediationData.forEach((flowAction) => newAlertActions.push({display_value: flowAction.workflowName, value: flowAction, type: "flow"}));
+				}
 				updateState({alertActions: newAlertActions, dummyStateChange: !state.dummyStateChange});
 			}
 		},
