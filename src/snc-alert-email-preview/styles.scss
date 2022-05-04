@@ -211,6 +211,9 @@
     }
     .card-column {
       flex: 50%;
+      p {
+        word-break: break-word;
+      }
     }
     .card-center {
       display: flex;
@@ -222,7 +225,7 @@
       overflow: hidden;
       width: 452px;
       height: 185px;
-      border: 4px solid RGB($now-color--primary-1);
+      border: 2px solid RGB($now-color--primary-1);
     }
     .card-image {
       position: absolute;
@@ -468,7 +471,7 @@
 }
 
 .circle-tag {
-	color: #ffffff;
+	color: RGB($now-color_text--primary);
 	background-color: rgba(119, 178, 123, 1);
 	border-radius: 50%;
 	height: 35px;

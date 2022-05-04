@@ -202,6 +202,20 @@ const view = (state, {updateState, dispatch}) => {
 		}
 	};
 
+	const shortNumFormat = (num) => {
+		let returnValue = '';
+		num = parseInt(num);
+		if (num > 999 && num < 1000000) {
+			returnValue = (num/1000).toFixed(1) + 'K'; // convert to K for number from > 1000 < 1 million
+		} else if (num > 1000000) {
+			returnValue = (num/1000000).toFixed(1) + 'M'; // convert to M for number from > 1 million
+		} else if (num <= 999) {
+			returnValue = num; // if value < 1000, nothing to do
+		}
+		console.log("shortNumFormat: ", returnValue);
+		return returnValue;
+	};
+
 	return (
 		<div id="info-container">
 			<div id="info-header">
@@ -337,7 +351,8 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.repeated_alerts.url})}}><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary">{record.repeated_alerts ? record.repeated_alerts.display_value : '0'}</div></p>
+												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
+												<p><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary">{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div></p>
 												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
@@ -458,7 +473,8 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Ticket Assignment Group:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.repeated_alerts.url})}}><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary">{record.repeated_alerts ? record.repeated_alerts.display_value : '0'}</div></p>
+												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
+												<p><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary">{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div></p>
 												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
@@ -586,13 +602,13 @@ createCustomElement('snc-alert-email-preview', {
 			dispatch('FETCH_PARENT_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
 				sysparm_display_value: 'all'
 			});
 			dispatch('FETCH_CHILD_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
 				sysparm_display_value: 'all'
 			});
 		},
@@ -622,6 +638,18 @@ createCustomElement('snc-alert-email-preview', {
 
 				}
 			}
+			// if (newParentRecord[0] && newParentRecord[0].is_group_alert && newParentRecord[0].message_key && newParentRecord[0].u_repeated_alerts) {
+			// 	let repeatedAlertsSysparm = '';
+			// 	if (newParentRecord[0].is_group_alert.value == 'true') {
+			// 		let baseRecord = state.secondaryRecords.find(secondaryRecord => secondaryRecord.sys_id.value == newParentRecord[0].message_key.value);
+			// 		if (baseRecord) {
+			// 			repeatedAlertsSysparm = "message_key=" + baseRecord.message_key.value + "^sys_id!=" + baseRecord.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
+			// 		}
+			// 	} else {
+			// 		repeatedAlertsSysparm = "message_key=" + newParentRecord[0].message_key.value + "^sys_id!=" + newParentRecord[0].sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
+			// 	}
+			// 	newParentRecord[0].u_repeated_alerts.url = encodeURI(`/now/optimiz-workspace/home/params/list/all/sysparm/^${repeatedAlertsSysparm}`);
+			// }
 			updateState({parentRecord: newParentRecord});
 			dispatch('START_FETCH_EXTRA_DATA');
 		},
@@ -656,6 +684,15 @@ createCustomElement('snc-alert-email-preview', {
 
 						}
 					}
+					// if (secondaryRecord.is_group_alert && secondaryRecord.message_key && secondaryRecord.u_repeated_alerts) {
+					// 	let repeatedAlertsSysparm = '';
+					// 	if (secondaryRecord.is_group_alert && secondaryRecord.message_key && secondaryRecord.message_key.value) {
+					// 		if (secondaryRecord.is_group_alert.value == 'false') {
+					// 			repeatedAlertsSysparm = "message_key=" + secondaryRecord.message_key.value + "^sys_id!=" + secondaryRecord.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
+					// 		}
+					// 	}
+					// 	secondaryRecord.u_repeated_alerts.url = encodeURI(`/now/optimiz-workspace/home/params/list/all/sysparm/^${repeatedAlertsSysparm}`);
+					// }
 				});
 			}
 			updateState({secondaryRecords: newSecondaryRecords});
@@ -681,29 +718,7 @@ createCustomElement('snc-alert-email-preview', {
 						alertId: record.sys_id.value
 					});
 				}
-				let repeatedAlertsSysparm = '';
-				console.log("BSR is_group_alert: ", record.is_group_alert);
-				console.log("BSR message_key: ", record.message_key);
-				if (record.is_group_alert && record.message_key && record.message_key.value) {
-					if (record.is_group_alert.value == 'true') {
-						let baseRecord = state.secondaryRecords.find(secondaryRecord => secondaryRecord.sys_id.value == record.message_key.value);
-						if (baseRecord) {
-							repeatedAlertsSysparm = "message_key=" + baseRecord.message_key.value + "^sys_id!=" + baseRecord.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
-						}
-					} else {
-						repeatedAlertsSysparm = "message_key=" + record.message_key.value + "^sys_id!=" + record.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
-					}
-				}
-				console.log("BSR repeatedAlertsSysparm: ", repeatedAlertsSysparm);
-				if (repeatedAlertsSysparm.length > 0) {
-					dispatch('FETCH_REPEATED_ALERTS', {
-						table: 'em_alert',
-						sysparm_query: repeatedAlertsSysparm,
-						sysparm_fields: 'number',
-						sysparm_display_value: 'all',
-						ABCorigin_sys_idABC: record.sys_id.value
-					});
-				}
+
 			});
 			state.secondaryRecords.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
@@ -716,24 +731,6 @@ createCustomElement('snc-alert-email-preview', {
 						retrieveRemediations: false,
 						retrieveSubflows: false,
 						alertId: record.sys_id.value
-					});
-				}
-				let repeatedAlertsSysparm = '';
-				console.log("BSR is_group_alert: ", record.is_group_alert);
-				console.log("BSR message_key: ", record.message_key);
-				if (record.is_group_alert && record.message_key && record.message_key.value) {
-					if (record.is_group_alert.value == 'false') {
-						repeatedAlertsSysparm = "message_key=" + record.message_key.value + "^sys_id!=" + record.sys_id.value + "^sys_updated_on>=javascript:gs.beginningOfLast30Days()";
-					}
-				}
-				console.log("BSR repeatedAlertsSysparm: ", repeatedAlertsSysparm);
-				if (repeatedAlertsSysparm.length > 0) {
-					dispatch('FETCH_REPEATED_ALERTS', {
-						table: 'em_alert',
-						sysparm_query: repeatedAlertsSysparm,
-						sysparm_fields: 'number',
-						sysparm_display_value: 'all',
-						ABCorigin_sys_idABC: record.sys_id.value
 					});
 				}
 			});
@@ -953,42 +950,6 @@ createCustomElement('snc-alert-email-preview', {
 							updatedSecondaryRecords[matchingSecondaryIndex].snapshotImage = {display_value: snapshot_action.url, scale: '1', transform_origin: 'initial'};
 							updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
 						}
-					}
-				}
-			}
-		},
-		'FETCH_REPEATED_ALERTS': createHttpEffect('/api/now/table/:table', {
-			batch: true,
-			cacheable: true,
-			method: 'GET',
-			pathParams: ['table'],
-			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value', 'ABCorigin_sys_idABC'],
-			successActionType: 'FETCH_REPEATED_ALERTS_SUCCESS'
-		}),
-		'FETCH_REPEATED_ALERTS_SUCCESS': (coeffects) => {
-			const {action, state, updateState} = coeffects;
-			console.log("BSR FETCH_REPEATED_ALERTS_SUCCESS payload: ", action.payload);
-			console.log("BSR FETCH_REPEATED_ALERTS_SUCCESS meta: ", action.meta);
-			if (action.meta.responseHeaders['X-Total-Count'] && action.meta.request.params.sysparm_query && action.meta.request.params.ABCorigin_sys_idABC) {
-				let updatedParentRecord = state.parentRecord;
-				let matchParentIndex = updatedParentRecord.findIndex(record => record.sys_id.value == action.meta.request.params.ABCorigin_sys_idABC);
-				if (matchParentIndex > -1) {
-					updatedParentRecord[matchParentIndex].repeated_alerts = {
-						url: `/now/optimiz-workspace/home/params/list/all/sysparm/^${action.meta.request.params.sysparm_query}`,
-						display_value: action.meta.responseHeaders['X-Total-Count'],
-						value: action.meta.responseHeaders['X-Total-Count']
-					};
-					updateState({parentRecord: updatedParentRecord});
-				} else {
-					let updatedSecondaryRecords = state.secondaryRecords;
-					let matchSecondaryIndex = updatedSecondaryRecords.findIndex(record => record.sys_id.value == action.meta.request.params.ABCorigin_sys_idABC);
-					if (matchSecondaryIndex > -1) {
-						updatedSecondaryRecords[matchSecondaryIndex].repeated_alerts = {
-							url: `/now/optimiz-workspace/home/params/list/all/sysparm/^${action.meta.request.params.sysparm_query}`,
-							display_value: action.meta.responseHeaders['X-Total-Count'],
-							value: action.meta.responseHeaders['X-Total-Count']
-						};
-						updateState({secondaryRecords: updatedSecondaryRecords});
 					}
 				}
 			}

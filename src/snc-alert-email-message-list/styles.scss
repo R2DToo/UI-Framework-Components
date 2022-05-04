@@ -299,6 +299,10 @@ ul {
 	width: 35px;
 	text-align: center;
 	line-height: 35px;
+
+	&.secondary {
+    background-color: RGB($now-color_alert--moderate-1);
+  }
 }
 
 .tag {

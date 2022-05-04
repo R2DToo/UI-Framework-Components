@@ -261,6 +261,20 @@ const view = (state, {updateState, dispatch}) => {
 		})
 	}
 
+	const shortNumFormat = (num) => {
+		let returnValue = '';
+		num = parseInt(num);
+		if (num > 999 && num < 1000000) {
+			returnValue = (num/1000).toFixed(1) + 'K'; // convert to K for number from > 1000 < 1 million
+		} else if (num > 1000000) {
+			returnValue = (num/1000000).toFixed(1) + 'M'; // convert to M for number from > 1 million
+		} else if (num <= 999) {
+			returnValue = num; // if value < 1000, nothing to do
+		}
+		console.log("shortNumFormat: ", returnValue);
+		return returnValue;
+	};
+
 	const tableData = () => {
 		return state.tableData.map((row, index) => {
 			return (
@@ -342,6 +356,12 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className="name-message primary-color force-center">{row[key].display_value}</td>
 							} else if (key == "prc") {
 								return <td className="name-message force-center">{row[key].display_value}</td>
+							} else if (key == "u_repeated_alerts") {
+								return <td className="tags">
+									<div className="circle-tags">
+										<div className={"circle-tag secondary"}>{shortNumFormat(row[key].value)}</div>
+									</div>
+								</td>
 							} else {
 								return <td className="view-message">{row[key].display_value}</td>
 							}
