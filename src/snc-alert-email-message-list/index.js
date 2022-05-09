@@ -297,7 +297,7 @@ const view = (state, {updateState, dispatch}) => {
 									/>
 								</td>
 							} else if (key == "description") {
-								return <td className="description">{row[key].display_value}</td>
+								return <td className="description break-message">{row[key].display_value}</td>
 							} else if (key == "application_service") {
 								let services = [];
 								row[key].forEach(service => {
