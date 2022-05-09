@@ -12,9 +12,8 @@ const view = (state, {updateState}) => {
 		<div id="snc-alert-email-view">
 			<snc-alert-email-sidebar
 				currentUser={state.properties.currentUser}
-				menuOptions={state.properties.menuOptions}
-				externalSysparam={state.properties.externalSysparam}
 				paramListValue={state.properties.paramListValue}
+				menuConfigurationId={state.properties.menuConfigurationId}
 			/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
@@ -81,6 +80,9 @@ createCustomElement('snc-alert-email-view', {
 		},
 		paramListValue: {
 			default: ''
+		},
+		menuConfigurationId: {
+			default: '4691d65c87ed411007570d0d0ebb3529'
 		}
 	},
 	actionHandlers: {

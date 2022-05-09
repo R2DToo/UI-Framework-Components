@@ -25,6 +25,20 @@
 					"defaultValue": ""
 				},
 				{
+					"name": "menuConfigurationId",
+					"label": "Menu Configuration",
+					"fieldType": "reference",
+					"readOnly": false,
+					"typeMetadata": {
+						"reference": "sys_ux_list_menu_config"
+					},
+					"defaultValue": "4691d65c87ed411007570d0d0ebb3529",
+					"description": "The configuration you want to use to populate the menu",
+					"selectable": false,
+					"valueType": "string",
+					"mandatory": true
+				},
+				{
 					"name": "menuOptions",
 					"label": "Side Menu Options",
 					"fieldType": "json",
