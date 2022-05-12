@@ -326,6 +326,10 @@ ul {
 	align-items: center;
 }
 
+.broker-tags.centered {
+	justify-content: center;
+}
+
 .broker-tag {
 	background: RGB($now-color--primary-1);
 	color: RGB($now-color_text--primary);

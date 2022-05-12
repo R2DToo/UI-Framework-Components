@@ -101,7 +101,7 @@ createCustomElement('snc-optimiz-sidemenu', {
 			const {state, action, dispatch, updateState} = coeffects;
 			updateState({activeItem: action.payload.value});
 			if (state.properties.menuOptions[action.payload.value].isLink) {
-				dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: state.properties.menuOptions[action.payload.value].listValue});
+				dispatch("RECORD_LINK_CMDB_CI_CLICKED", {value: state.properties.menuOptions[action.payload.value].listValue});
 			} else {
 				dispatch('MENU_ITEM_CLICKED', {value: state.properties.menuOptions[action.payload.value].listValue});
 			}

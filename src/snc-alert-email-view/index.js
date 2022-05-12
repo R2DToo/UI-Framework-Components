@@ -13,20 +13,19 @@ const view = (state, {updateState}) => {
 			<snc-alert-email-sidebar
 				currentUser={state.properties.currentUser}
 				paramListValue={state.properties.paramListValue}
-				menuConfigurationId={state.properties.menuConfigurationId}
+				defaultListId={state.properties.defaultListId}
 			/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
 				showInfo={state.showInfo}
 				tableName={state.properties.tableName}
-				externalSysparam={state.properties.externalSysparam}
-				tableColumns={state.properties.tableColumns.split(",")}
+				paramSysparmValue={state.properties.paramSysparmValue}
 				tableLimit={state.properties.tableLimit}
 				page={state.properties.page}
 				currentUser={state.properties.currentUser}
 				actionArray={state.properties.actionArray}
 				paramListValue={state.properties.paramListValue}
-				menuOptions={state.properties.menuOptions}
+				defaultListId={state.properties.defaultListId}
 			/>
 			{state.showInfo && (
 				<snc-alert-email-preview
@@ -60,10 +59,7 @@ createCustomElement('snc-alert-email-view', {
 		tableName: {
 			default: ''
 		},
-		externalSysparam: {
-			default: ''
-		},
-		tableColumns: {
+		paramSysparmValue: {
 			default: ''
 		},
 		tableLimit: {
@@ -72,17 +68,14 @@ createCustomElement('snc-alert-email-view', {
 		page: {
 			default: 0
 		},
-		menuOptions: {
-			default: []
-		},
 		actionArray: {
 			default: []
 		},
 		paramListValue: {
 			default: ''
 		},
-		menuConfigurationId: {
-			default: '4691d65c87ed411007570d0d0ebb3529'
+		defaultListId: {
+			default: '7443faee47574550d0bc5c62e36d4319'
 		}
 	},
 	actionHandlers: {

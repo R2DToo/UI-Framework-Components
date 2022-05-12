@@ -17,33 +17,8 @@
 .sidebar.close{
   width: 78px;
 }
-.sidebar .logo-details{
-  height: 60px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-.sidebar .logo-details svg{
-  font-size: 30px;
-  fill: RGB($now-color_text--primary);
-  min-width: 78px;
-  text-align: center;
-  line-height: 50px;
-}
-.sidebar .logo-details .logo_name{
-  font-size: 22px;
-  color: RGB($now-color_text--primary);
-  font-weight: 600;
-  transition: 0.3s ease;
-  transition-delay: 0.1s;
-}
-.sidebar.close .logo-details .logo_name{
-  transition-delay: 0s;
-  opacity: 0;
-  pointer-events: none;
-}
 .sidebar .nav-links{
-  padding: 30px 0px 0px;
+  padding-top: 16px;
   overflow: auto;
 }
 .sidebar.close .nav-links{
@@ -60,6 +35,9 @@
 .sidebar .nav-links li:hover{
   background-color: RGB($now-color--primary-1);
 }
+.sidebar .nav-links li.active{
+  background-color: RGB($now-color--primary-1);
+}
 .sidebar .nav-links li .icon-link{
   display: flex;
   align-items: center;
@@ -70,8 +48,8 @@
 .sidebar.close .nav-links li .icon-link{
   display: block
 }
-.sidebar .nav-links li svg{
-  min-width: 78px;
+.sidebar .nav-links li svg,
+.sidebar .nav-links li now-rich-text{
   text-align: center;
   line-height: 50px;
   fill: RGB($now-color_text--primary);
@@ -90,8 +68,12 @@
   align-items: center;
   text-decoration: none;
 }
+.sidebar .nav-links li .link_text now-rich-text{
+  display: flex;
+  padding-left: 4px;
+}
 .sidebar .nav-links li .link_name{
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   color: RGB($now-color_text--primary);
   transition: all 0.4s ease;
@@ -101,7 +83,7 @@
   pointer-events: none;
 }
 .sidebar .nav-links li .sub-menu{
-  padding: 6px 6px 6px 80px;
+  padding: 6px 6px 6px 20px;
   background-color: RGB($now-color_background--tertiary);
   display: none;
 }
@@ -157,14 +139,11 @@
   transform: translateY(-50%);
 }
 .sidebar .profile-details{
-  position: absolute;
-  bottom: 0;
   //width: 260px;
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background-color: RGB($now-color_background--tertiary);
+  justify-content: flex-start;
   padding: 12px 4px;
   transition: all 0.5s ease;
 }

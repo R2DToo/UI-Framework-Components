@@ -66,7 +66,7 @@ const view = (state, {updateState, dispatch}) => {
 				state.secondaryRecords.forEach((record) => {
 					childEventCount += parseInt(record.event_count.value) || 0;
 				});
-				if (childEventCount == 0) {
+				if (childEventCount == 0 && state.parentRecord[0].group_source.value != 5 && state.parentRecord[0].group_source.value != 6) {
 					return 0;
 				}
 				return Math.round((1 - (1/(parentEventCount + childEventCount))) * 100);
@@ -778,9 +778,9 @@ createCustomElement('snc-alert-email-preview', {
 			let updatedSecondaryRecords = state.secondaryRecords;
 			//let foundClusteringMethod = false;
 			action.payload.result.forEach((result) => {
-				result.value.display_value = result.value.display_value.replaceAll("[code]","");
+				result.value.display_value = "<style>a {color: rgba(119, 178, 123, 1);}</style>" + result.value.display_value.replaceAll("[code]","");
 				result.value.display_value = result.value.display_value.replaceAll("[/code]","");
-				result.value.value = result.value.value.replaceAll("[code]","");
+				result.value.value = "<style>a {color: rgba(119, 178, 123, 1);}</style>" + result.value.value.replaceAll("[code]","");
 				result.value.value = result.value.value.replaceAll("[/code]","");
 				if (result.sys_created_by.value == "system") {
 					result.sys_created_by.avatar = servicenowSVG;
