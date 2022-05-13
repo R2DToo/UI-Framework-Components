@@ -347,7 +347,7 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "alert_correlation_rule") {
 								return <td className="name-message">{row[key].display_value}</td>
 							} else if (key == "node") {
-								return <td className="name-message break-message">{row[key].display_value}</td>
+								return <td className="name-message break-message force-center">{row[key].display_value}</td>
 							} else if (key == "source_icon") {
 								return <td className="view-message"><img className="table-image" src={row[key].value}/></td>
 							} else if (key == "incident.priority") {
@@ -412,6 +412,19 @@ const view = (state, {updateState, dispatch}) => {
 					// if (contextRecord) {
 					// 	dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
 					// }
+					break;
+				case 'interactive_analysis':
+					var sysparm = "";
+					if (state.properties.paramListValue) {
+						let matchingMenuOption = state.properties.menuOptions.find((menuOption) => menuOption.name.toLowerCase() == state.properties.paramListValue.toLowerCase());
+						if (matchingMenuOption) {
+							sysparm = matchingMenuOption.listValue;
+						}
+					} else {
+						sysparm = state.properties.menuOptions[0].listValue;
+					}
+					sysparm += parseFiltersToSysparm(state.filters);
+					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/$interactive_analysis.do?sysparm_field=source&sysparm_table=${state.properties.tableName}&sysparm_from_list=true&sysparm_query=${sysparm}&sysparm_list_view=`});
 					break;
 				case 'same_ci':
 					if (contextRecord) {
@@ -833,6 +846,7 @@ const view = (state, {updateState, dispatch}) => {
 							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
 						)}
 						<li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.properties.tableName}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g></svg>Export CSV</button></a></li>
+						<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "interactive_analysis")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3 20Q2.175 20 1.588 19.413Q1 18.825 1 18Q1 17.175 1.588 16.587Q2.175 16 3 16Q3.15 16 3.263 16Q3.375 16 3.5 16.05L8.05 11.5Q8 11.375 8 11.262Q8 11.15 8 11Q8 10.175 8.588 9.587Q9.175 9 10 9Q10.825 9 11.413 9.587Q12 10.175 12 11Q12 11.05 11.95 11.5L14.5 14.05Q14.625 14 14.738 14Q14.85 14 15 14Q15.15 14 15.262 14Q15.375 14 15.5 14.05L19.05 10.5Q19 10.375 19 10.262Q19 10.15 19 10Q19 9.175 19.587 8.587Q20.175 8 21 8Q21.825 8 22.413 8.587Q23 9.175 23 10Q23 10.825 22.413 11.412Q21.825 12 21 12Q20.85 12 20.738 12Q20.625 12 20.5 11.95L16.95 15.5Q17 15.625 17 15.738Q17 15.85 17 16Q17 16.825 16.413 17.413Q15.825 18 15 18Q14.175 18 13.588 17.413Q13 16.825 13 16Q13 15.85 13 15.738Q13 15.625 13.05 15.5L10.5 12.95Q10.375 13 10.262 13Q10.15 13 10 13Q9.95 13 9.5 12.95L4.95 17.5Q5 17.625 5 17.738Q5 17.85 5 18Q5 18.825 4.412 19.413Q3.825 20 3 20ZM15 9 14.05 6.95 12 6 14.05 5.05 15 3 15.95 5.05 18 6 15.95 6.95ZM4 9.975 3.375 8.625 2.025 8 3.375 7.375 4 6.025 4.625 7.375 5.975 8 4.625 8.625Z"/></svg>Interactive Analysis</button></li>
 						{state.properties.tableName == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
 								{state.alertActions.map((alertAction) => {
