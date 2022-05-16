@@ -1274,6 +1274,26 @@ createCustomElement('snc-alert-email-message-list', {
 						resultRow.group_source.display_value = "Tag-based";
 					}
 				}
+				//Temp Uniqueness column
+				if (resultRow.u_repeated_alerts) {
+					let uniquenessString = "Causal";
+					if (resultRow.u_repeated_alerts.value != "") {
+						let numOfRepeatedAlerts = parseInt(resultRow.u_repeated_alerts.value);
+						if (numOfRepeatedAlerts <= 5) {
+							uniquenessString = "Causal";
+						} else if (numOfRepeatedAlerts <= 15) {
+							uniquenessString = "Impacting";
+						} else if (numOfRepeatedAlerts <= 30) {
+							uniquenessString = "Related";
+						} else {
+							uniquenessString = "Noise";
+						}
+					}
+					resultRow.temp_uniqueness = {display_value: uniquenessString, value: uniquenessString, label: "Uniqueness"};
+					if (!updatedTableOrder.includes("temp_uniqueness")) {
+						updatedTableOrder.splice(10, 0, "temp_uniqueness");
+					}
+				}
 			});
 
 			dispatch('TABLE_RECORD_COUNT#UPDATED', {value: parseInt(action.meta.responseHeaders['x-total-count'])});
