@@ -97,6 +97,11 @@
   white-space: nowrap;
   //opacity: 0.6;
   transition: all 0.3s ease;
+  justify-content: space-between;
+
+  .delete-list-icon {
+    fill: red;
+  }
 }
 .sidebar .nav-links li .sub-menu .link_text:hover{
   opacity: 1;

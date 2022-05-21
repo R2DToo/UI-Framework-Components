@@ -14,6 +14,7 @@ const view = (state, {updateState}) => {
 				currentUser={state.properties.currentUser}
 				paramListValue={state.properties.paramListValue}
 				defaultListId={state.properties.defaultListId}
+				excludedMenuCategories={state.properties.excludedMenuCategories}
 			/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
@@ -76,7 +77,10 @@ createCustomElement('snc-alert-email-view', {
 		},
 		defaultListId: {
 			default: '7443faee47574550d0bc5c62e36d4319'
-		}
+		},
+		excludedMenuCategories: {
+			default: []
+		},
 	},
 	actionHandlers: {
 		'TABLE_ROW#CLICKED': ({action, dispatch, updateState, state}) => {
@@ -140,6 +144,10 @@ createCustomElement('snc-alert-email-view', {
 		'SHOW_MESSAGE#MODAL': ({action,dispatch}) => {
 			logEvent("SHOW_MESSAGE#MODAL", action.payload);
 			dispatch("SHOW_MESSAGE_MODAL", action.payload);
+		},
+		'CREATE_MY_WORKSPACE_LIST#MODAL': ({action,dispatch}) => {
+			logEvent("CREATE_MY_WORKSPACE_LIST#MODAL", action.payload);
+			dispatch("CREATE_MY_WORKSPACE_LIST_MODAL", action.payload);
 		},
 	},
 	setInitialState() {

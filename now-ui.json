@@ -39,6 +39,25 @@
 					"mandatory": true
 				},
 				{
+					"name": "excludedMenuCategories",
+					"label": "Excluded Menu Categories",
+					"fieldType": "json",
+					"readOnly": false,
+					"typeMetadata": {
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"defaultValue": "[]",
+					"description": "Array of Workspace List Categories (sys_aw_list_category) to be excluded from the list. Each entry should be the sys_id of the category you would like to exclude.",
+					"selectable": false,
+					"valueType": "string",
+					"mandatory": true
+				},
+				{
 					"name": "paramListValue",
 					"label": "List Parameter Value",
 					"readOnly": false,
@@ -147,6 +166,12 @@
 					"name": "SHOW_MESSAGE_MODAL",
 					"label": "SHOW_MESSAGE_MODAL",
 					"description": "Display a modal with the contents in payload",
+					"payload": []
+				},
+				{
+					"name": "CREATE_MY_WORKSPACE_LIST_MODAL",
+					"label": "CREATE_MY_WORKSPACE_LIST_MODAL",
+					"description": "Open modal which allows the user to save custom lists",
 					"payload": []
 				}
 			]

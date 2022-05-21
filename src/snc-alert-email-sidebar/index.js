@@ -24,7 +24,12 @@ const view = (state, {updateState, dispatch}) => {
 				<ul className="sub-menu">
 					<li><div className="link_name">{category.categoryTitle}</div></li>
 					{category.listOptions.map((list, listIndex) =>
-						<li class={{'active': state.properties.paramListValue == list.sys_id}}><div className="link_text" onclick={() => {dispatch("LIST_OPTION_CLICKED", {categoryIndex: index, listIndex: listIndex})}}>{list.title}</div></li>
+						<li class={{'active': state.properties.paramListValue == list.sys_id}}>
+							<div className="link_text" onclick={() => {dispatch("LIST_OPTION_CLICKED", {categoryIndex: index, listIndex: listIndex})}}>
+								<div>{list.title}</div>
+								{category.categoryId == "0" && <svg onclick={(e) => {e.stopPropagation(); dispatch("DELETE_MY_LIST", {sys_id: list.sys_id});}} attrs={{class: "delete-list-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg>}
+							</div>
+						</li>
 					)}
 				</ul>
 			</li>
@@ -87,7 +92,10 @@ createCustomElement('snc-alert-email-sidebar', {
 		},
 		defaultListId: {
 			default: '7443faee47574550d0bc5c62e36d4319'
-		}
+		},
+		excludedMenuCategories: {
+			default: []
+		},
 	},
 	setInitialState() {
 		return {
@@ -103,7 +111,7 @@ createCustomElement('snc-alert-email-sidebar', {
 			console.log("snc-alert-email-sidebar COMPONENT_BOOTSTRAPPED state: ", state);
 			dispatch('FETCH_LIST_CATEGORIES', {
 				table: 'sys_aw_list_category',
-				sysparm_query: `workspace=${state.properties.workspaceId}^active=true^ORDERBYorder`,
+				sysparm_query: `workspace=${state.properties.workspaceId}^sys_idNOT IN${state.properties.excludedMenuCategories.toString()}^active=true^ORDERBYorder`,
 				sysparm_fields: 'title,sys_id',
 				sysparm_display_value: 'true'
 			});
@@ -126,7 +134,17 @@ createCustomElement('snc-alert-email-sidebar', {
 		},
 		'LIST_OPTION_CLICKED': (coeffects) => {
 			const {action, updateState, state, dispatch} = coeffects;
-			dispatch("UPDATE_PAGE#PARAMETER", {params: {list: state.optionsArray[action.payload.categoryIndex].listOptions[action.payload.listIndex].sys_id}});
+			console.log("LIST_OPTION_CLICKED payload: ", action.payload);
+
+			if (state.optionsArray[action.payload.categoryIndex].listOptions[action.payload.listIndex].u_link == "") {
+				dispatch("UPDATE_PAGE#PARAMETER", {params: {list: state.optionsArray[action.payload.categoryIndex].listOptions[action.payload.listIndex].sys_id}});
+			} else {
+				if (state.optionsArray[action.payload.categoryIndex].listOptions[action.payload.listIndex].u_link) {
+					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: state.optionsArray[action.payload.categoryIndex].listOptions[action.payload.listIndex].u_link});
+				} else {
+					dispatch("UPDATE_PAGE#PARAMETER", {params: {list: state.optionsArray[action.payload.categoryIndex].listOptions[action.payload.listIndex].sys_id}});
+				}
+			}
 		},
 		'FETCH_LIST_CATEGORIES': createHttpEffect('/api/now/table/:table', {
 			batch: false,
@@ -151,13 +169,13 @@ createCustomElement('snc-alert-email-sidebar', {
 					dispatch('FETCH_LIST_OPTIONS', {
 						table: 'sys_aw_list',
 						sysparm_query: `categoryIN${categoryIDs.toString()}^workspace=${state.properties.workspaceId}^active=true^ORDERBYorder`,
-						sysparm_fields: 'columns,condition,table,title,category,sys_id',
+						sysparm_fields: 'columns,condition,table,title,category,sys_id,u_link',
 						sysparm_display_value: 'false'
 					});
 				}
 				dispatch('FETCH_MY_LIST_OPTIONS', {
 					table: 'sys_aw_my_list',
-					sysparm_query: `active=true^ORDERBYorder`,
+					sysparm_query: `sys_created_by=${state.properties.currentUser.userName}^active=true^ORDERBYorder`,
 					sysparm_fields: 'columns,condition,table,title,sys_id',
 					sysparm_display_value: 'false'
 				});
@@ -205,6 +223,30 @@ createCustomElement('snc-alert-email-sidebar', {
 				updatedOptionsArray.push(myListCategory);
 				updateState({optionsArray: updatedOptionsArray, dummyStateChange: !state.dummyStateChange});
 			}
+		},
+		'DELETE_MY_LIST': createHttpEffect('/api/now/table/sys_aw_my_list/:sys_id', {
+			batch: false,
+			cacheable: false,
+			method: 'DELETE',
+			pathParams: ['sys_id'],
+			successActionType: "DELETE_MY_LIST_SUCCESS",
+		}),
+		'DELETE_MY_LIST_SUCCESS': (coeffects) => {
+			const { action, state, updateState, dispatch } = coeffects;
+			console.log("DELETE_MY_LIST_SUCCESS payload: ", action.payload);
+
+			let updatedOptionsArray = state.optionsArray;
+			let myListCategoryIndex = updatedOptionsArray.findIndex((categoryObj) => categoryObj.categoryId == "0");
+			if (myListCategoryIndex > -1) {
+				updatedOptionsArray.splice(myListCategoryIndex, 1);
+			}
+			updateState({optionsArray: updatedOptionsArray, dummyStateChange: !state.dummyStateChange});
+			dispatch('FETCH_MY_LIST_OPTIONS', {
+				table: 'sys_aw_my_list',
+				sysparm_query: `sys_created_by=${state.properties.currentUser.userName}^active=true^ORDERBYorder`,
+				sysparm_fields: 'columns,condition,table,title,sys_id',
+				sysparm_display_value: 'false'
+			});
 		}
 	}
 });
