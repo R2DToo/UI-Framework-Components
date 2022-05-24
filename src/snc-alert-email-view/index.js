@@ -12,22 +12,21 @@ const view = (state, {updateState}) => {
 		<div id="snc-alert-email-view">
 			<snc-alert-email-sidebar
 				currentUser={state.properties.currentUser}
-				menuOptions={state.properties.menuOptions}
-				externalSysparam={state.properties.externalSysparam}
 				paramListValue={state.properties.paramListValue}
+				defaultListId={state.properties.defaultListId}
+				excludedMenuCategories={state.properties.excludedMenuCategories}
 			/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
 				showInfo={state.showInfo}
 				tableName={state.properties.tableName}
-				externalSysparam={state.properties.externalSysparam}
-				tableColumns={state.properties.tableColumns.split(",")}
+				paramSysparmValue={state.properties.paramSysparmValue}
 				tableLimit={state.properties.tableLimit}
 				page={state.properties.page}
 				currentUser={state.properties.currentUser}
 				actionArray={state.properties.actionArray}
 				paramListValue={state.properties.paramListValue}
-				menuOptions={state.properties.menuOptions}
+				defaultListId={state.properties.defaultListId}
 			/>
 			{state.showInfo && (
 				<snc-alert-email-preview
@@ -61,10 +60,7 @@ createCustomElement('snc-alert-email-view', {
 		tableName: {
 			default: ''
 		},
-		externalSysparam: {
-			default: ''
-		},
-		tableColumns: {
+		paramSysparmValue: {
 			default: ''
 		},
 		tableLimit: {
@@ -73,15 +69,18 @@ createCustomElement('snc-alert-email-view', {
 		page: {
 			default: 0
 		},
-		menuOptions: {
-			default: []
-		},
 		actionArray: {
 			default: []
 		},
 		paramListValue: {
 			default: ''
-		}
+		},
+		defaultListId: {
+			default: '7443faee47574550d0bc5c62e36d4319'
+		},
+		excludedMenuCategories: {
+			default: []
+		},
 	},
 	actionHandlers: {
 		'TABLE_ROW#CLICKED': ({action, dispatch, updateState, state}) => {
@@ -145,6 +144,10 @@ createCustomElement('snc-alert-email-view', {
 		'SHOW_MESSAGE#MODAL': ({action,dispatch}) => {
 			logEvent("SHOW_MESSAGE#MODAL", action.payload);
 			dispatch("SHOW_MESSAGE_MODAL", action.payload);
+		},
+		'CREATE_MY_WORKSPACE_LIST#MODAL': ({action,dispatch}) => {
+			logEvent("CREATE_MY_WORKSPACE_LIST#MODAL", action.payload);
+			dispatch("CREATE_MY_WORKSPACE_LIST_MODAL", action.payload);
 		},
 	},
 	setInitialState() {

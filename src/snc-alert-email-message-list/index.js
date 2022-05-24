@@ -50,6 +50,7 @@ export const INTEGRATION_ICONS = [
 	{key: 'azure', value: azureSVG},
 	{key: 'bmc', value: bmcSVG},
 	{key: 'catchpoint', value: catchpointSVG},
+	{key: 'cisco', value: ciscoSVG},
 	{key: 'datadog', value: datadogSVG},
 	{key: 'dynatrace', value: dynatraceSVG},
 	{key: 'eif', value: ibmSVG},
@@ -130,7 +131,8 @@ const view = (state, {updateState, dispatch}) => {
 		let newFieldOrder = state.tableOrder;
 		let movingField = newFieldOrder.splice(oIndex, 1);
 		newFieldOrder.splice(nIndex, 0, movingField[0]);
-		updateState({fieldOrder: newFieldOrder});
+		console.log("new column order: ", newFieldOrder);
+		updateState({fieldOrder: newFieldOrder, dummyStateChange: !state.dummyStateChange});
 	}
 
 	const makeRelativeTime = (time) => {
@@ -176,6 +178,25 @@ const view = (state, {updateState, dispatch}) => {
 		}
 		return color;
 	};
+
+	const getTaskPriorityColor = (priorityValue) => {
+		let color = 'planning';
+		switch (parseInt(priorityValue)) {
+			case 1: color = 'critical';
+			break;
+			case 2: color = 'high';
+			break;
+			case 3: color = 'moderate';
+			break;
+			case 4: color = 'low';
+			break;
+			case 5: color = 'planning';
+			break;
+			default: color = 'planning';
+			break;
+		}
+		return color;
+	}
 
 	const recordSelectionChanged = (sys_id, tableDataIndex) => {
 		let updatedSelectedRecords = state.selectedRecords;
@@ -271,7 +292,6 @@ const view = (state, {updateState, dispatch}) => {
 		} else if (num <= 999) {
 			returnValue = num; // if value < 1000, nothing to do
 		}
-		console.log("shortNumFormat: ", returnValue);
 		return returnValue;
 	};
 
@@ -283,10 +303,19 @@ const view = (state, {updateState, dispatch}) => {
 						if (row[key]) {
 							if (key == "severity" || key == "sn_priority_group") {
 								return <td>{row[key].display_value && <now-highlighted-value label={row[key].display_value} color={getSeverityColor(row[key].value)} variant="secondary"/>}</td>
+							} else if (key == "incident.priority") {
+								return <td className="">
+									<div className="broker-tags">
+										<div className={"broker-tag " + getTaskPriorityColor(row[key].value)}><span className="tag-key">{row[key].display_value}</span></div>
+									</div>
+								</td>
 							} else if (key == "sys_updated_on" || key == "sys_created_on") {
 								return <td className="view-message">{makeRelativeTime(row[key].display_value)}</td>
 							} else if (key == "number") {
 								return <td className="view-message record-link">{row[key].display_value}</td>
+							} else if (key == "u_number") {
+								let url = '/now/nav/ui/classic/params/target/' + state.currentList.table + '.do%3Fsys_id%3D' + row.sys_id.value;
+								return <td className="name-message break-message"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
 							} else if (key == "assigned_to") {
 								return <td className="view-message">
 									<now-avatar
@@ -342,7 +371,7 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "alert_filter") {
 								return <td className="description break-message">{row[key].display_value}</td>
 							} else if (key == "name") {
-								let url = '/now/nav/ui/classic/params/target/' + state.properties.tableName + '.do%3Fsys_id%3D' + row.sys_id.value;
+								let url = '/now/nav/ui/classic/params/target/' + state.currentList.table + '.do%3Fsys_id%3D' + row.sys_id.value;
 								return <td className="name-message break-message"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
 							} else if (key == "alert_correlation_rule") {
 								return <td className="name-message">{row[key].display_value}</td>
@@ -350,8 +379,8 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className="name-message break-message force-center">{row[key].display_value}</td>
 							} else if (key == "source_icon") {
 								return <td className="view-message"><img className="table-image" src={row[key].value}/></td>
-							} else if (key == "incident.priority") {
-								return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
+							// } else if (key == "incident.priority") {
+							// 	return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
 							} else if (key == "u_tbac_reasoning") {
 								return <td className="name-message primary-color force-center">{row[key].display_value}</td>
 							} else if (key == "prc") {
@@ -362,6 +391,14 @@ const view = (state, {updateState, dispatch}) => {
 										<div className={"circle-tag secondary"}>{shortNumFormat(row[key].value)}</div>
 									</div>
 								</td>
+							} else if (key == "u_normalized_key") {
+								return <td className="view-message">
+									<div className="broker-tags centered">
+										<div className="broker-tag"><span className="tag-key">{row[key].display_value}</span></div>
+									</div>
+								</td>
+							} else if (key == "u_flattened_data") {
+								return <td className="broker-tags-container break-message">{row[key].display_value}</td>
 							} else {
 								return <td className="view-message">{row[key].display_value}</td>
 							}
@@ -391,7 +428,7 @@ const view = (state, {updateState, dispatch}) => {
 				if (matchingAction.label == "Tag Normalization") {
 					dispatch("DEFINE_TAG#NORMALIZATION", {value: replaceActionQueryVariables(matchingAction.updateQuery, true)});
 				} else if (matchingAction.isUpdate) {
-					fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [contextRecord.sys_id.value], table: state.properties.tableName, updateQuery: matchingAction.updateQuery, isUpdate: matchingAction.isUpdate});
+					fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [contextRecord.sys_id.value], table: state.currentList.table, updateQuery: matchingAction.updateQuery, isUpdate: matchingAction.isUpdate});
 				} else if (matchingAction.isLink) {
 					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: replaceActionQueryVariables(matchingAction.updateQuery, true)});
 				}
@@ -415,16 +452,14 @@ const view = (state, {updateState, dispatch}) => {
 					break;
 				case 'interactive_analysis':
 					var sysparm = "";
-					if (state.properties.paramListValue) {
-						let matchingMenuOption = state.properties.menuOptions.find((menuOption) => menuOption.name.toLowerCase() == state.properties.paramListValue.toLowerCase());
-						if (matchingMenuOption) {
-							sysparm = matchingMenuOption.listValue;
-						}
-					} else {
-						sysparm = state.properties.menuOptions[0].listValue;
-					}
 					sysparm += parseFiltersToSysparm(state.filters);
-					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/$interactive_analysis.do?sysparm_field=source&sysparm_table=${state.properties.tableName}&sysparm_from_list=true&sysparm_query=${sysparm}&sysparm_list_view=`});
+					if (sysparm.length > 0 && state.currentList.condition.length > 0) {
+						if (state.currentList.condition.indexOf("^") != 0) {
+							sysparm += "^";
+						}
+					}
+					sysparm += state.currentList.condition;
+					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/$interactive_analysis.do?sysparm_field=source&sysparm_table=${state.currentList.table}&sysparm_from_list=true&sysparm_query=${sysparm}&sysparm_list_view=`});
 					break;
 				case 'same_ci':
 					if (contextRecord) {
@@ -446,7 +481,7 @@ const view = (state, {updateState, dispatch}) => {
 						});
 						updateState({filters: updatedFilters});
 						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
 					}
 					break;
 				case 'same_node':
@@ -469,7 +504,7 @@ const view = (state, {updateState, dispatch}) => {
 						});
 						updateState({filters: updatedFilters});
 						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
 					}
 					break;
 				case 'same_ag':
@@ -492,7 +527,7 @@ const view = (state, {updateState, dispatch}) => {
 						});
 						updateState({filters: updatedFilters});
 						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
 					}
 					break;
 				case 'same_group':
@@ -515,7 +550,7 @@ const view = (state, {updateState, dispatch}) => {
 						});
 						updateState({filters: updatedFilters});
 						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
 					}
 					break;
 				case 'same_tag':
@@ -538,7 +573,7 @@ const view = (state, {updateState, dispatch}) => {
 						});
 						updateState({filters: updatedFilters});
 						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-						fireEvent('REFRESH_MAIN_QUERY', {force: true});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
 					}
 					break;
 				// case 'event_timeline': fireEvent();
@@ -570,8 +605,8 @@ const view = (state, {updateState, dispatch}) => {
 
 	const parseFiltersToSysparm = (filters) => {
 		let encodedSysparm = '';
-		filters.map((filter) => {
-			encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
+		filters.map((filter, i) => {
+			encodedSysparm += `${i != 0 ? filter.inputs.and_or.value : ''}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 		});
 		encodedSysparm += sortingArrayToString(state.sortingArray);
 		return encodedSysparm;
@@ -586,7 +621,7 @@ const view = (state, {updateState, dispatch}) => {
 				|| updatedFilters[index].inputs.operator.value == "ISEMPTY"
 				|| updatedFilters[index].inputs.operator.value == "ISNOTEMPTY") {
 				dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-				fireEvent('REFRESH_MAIN_QUERY', {force: true});
+				dispatch('REFRESH_MAIN_QUERY', {force: true});
 			}
 			updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
 		}
@@ -599,7 +634,7 @@ const view = (state, {updateState, dispatch}) => {
 			updatedFilters[index].showResults.value = false;
 			if (updatedFilters[index].inputs.operator.value != "") {
 				dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-				fireEvent('REFRESH_MAIN_QUERY', {force: true});
+				dispatch('REFRESH_MAIN_QUERY', {force: true});
 			}
 			updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
 		}
@@ -614,7 +649,7 @@ const view = (state, {updateState, dispatch}) => {
 		}
 		updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
 		dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
-		fireEvent('REFRESH_MAIN_QUERY', {force: true});
+		dispatch('REFRESH_MAIN_QUERY', {force: true});
 	}
 
 	const replaceActionQueryVariables = (updateQuery, fromContextMenu = false) => {
@@ -793,12 +828,11 @@ const view = (state, {updateState, dispatch}) => {
 										</ul>}
 									</div>
 								</div>}
-								<svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path d="M0 0h24v24H0V0z" fill="none"/><path attr-d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>
+								<svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>
 								{/* <svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M13.89 8.7L12 10.59 10.11 8.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 8.7 13.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l1.89 1.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l1.89-1.89c.39-.39.39-1.02 0-1.41-.39-.38-1.03-.38-1.41 0zM12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg> */}
 							</div>
 						)}
-						{/* <svg attrs={{xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", fill: "#6e6e6e"}} style={{margin: "0 6px"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M11 15h2v-3h3v-2h-3V7h-2v3H8v2h3zM21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg> */}
-						<svg attrs={{xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", fill: "#6e6e6e", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><path attr-d="M21,12.4V7l-4-4H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h7.4l2-2H5V5h11.17L19,7.83v6.57L21,12.4z M15,15 c0,1.66-1.34,3-3,3s-3-1.34-3-3s1.34-3,3-3S15,13.34,15,15z M6,6h9v4H6V6z M19.99,16.25l1.77,1.77L16.77,23H15v-1.77L19.99,16.25z M23.25,16.51l-0.85,0.85l-1.77-1.77l0.85-0.85c0.2-0.2,0.51-0.2,0.71,0l1.06,1.06C23.45,16,23.45,16.32,23.25,16.51z"/></g></svg>
+						<svg onclick={() => {dispatch('SAVE_MY_LIST')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><path attr-d="M21,12.4V7l-4-4H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h7.4l2-2H5V5h11.17L19,7.83v6.57L21,12.4z M15,15 c0,1.66-1.34,3-3,3s-3-1.34-3-3s1.34-3,3-3S15,13.34,15,15z M6,6h9v4H6V6z M19.99,16.25l1.77,1.77L16.77,23H15v-1.77L19.99,16.25z M23.25,16.51l-0.85,0.85l-1.77-1.77l0.85-0.85c0.2-0.2,0.51-0.2,0.71,0l1.06,1.06C23.45,16,23.45,16.32,23.25,16.51z"/></g></svg>
 					</div>
 					<div className="action-bar">
 						<ul>
@@ -807,7 +841,7 @@ const view = (state, {updateState, dispatch}) => {
 									if (action.label == "Tag Normalization") {
 										dispatch("DEFINE_TAG#NORMALIZATION", {value: replaceActionQueryVariables(action.updateQuery, false)});
 									} else if (action.isUpdate) {
-										fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: state.selectedRecords, table: state.properties.tableName, updateQuery: replaceActionQueryVariables(action.updateQuery, false), isUpdate: action.isUpdate});
+										fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: state.selectedRecords, table: state.currentList.table, updateQuery: replaceActionQueryVariables(action.updateQuery, false), isUpdate: action.isUpdate});
 									} else if (action.isLink) {
 										dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: replaceActionQueryVariables(action.updateQuery, false)})
 									}
@@ -817,9 +851,13 @@ const view = (state, {updateState, dispatch}) => {
 							)}
 
 							<li title="Export CSV">
-								<a href={getCSVLink()} download={`itom_${state.properties.tableName}_${Date.now()}.csv`}>
-									<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g></svg>
+								<a href={getCSVLink()} download={`itom_${state.currentList.table}_${Date.now()}.csv`}>
+									<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12 15.625 7.725 11.35 8.775 10.25 11.25 12.725V4.325H12.75V12.725L15.225 10.25L16.275 11.35ZM6.3 19.5Q5.55 19.5 5.025 18.975Q4.5 18.45 4.5 17.7V15H6V17.7Q6 17.8 6.1 17.9Q6.2 18 6.3 18H17.7Q17.8 18 17.9 17.9Q18 17.8 18 17.7V15H19.5V17.7Q19.5 18.45 18.975 18.975Q18.45 19.5 17.7 19.5Z"/></svg>
+									{/* <svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g></svg> */}
 								</a>
+							</li>
+							<li title="Refresh Table" onclick={() => {dispatch("REFRESH_MAIN_QUERY", {force: true})}}>
+								<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12.05 19.5Q8.9 19.5 6.725 17.325Q4.55 15.15 4.55 12Q4.55 8.85 6.725 6.675Q8.9 4.5 12.05 4.5Q13.8 4.5 15.363 5.275Q16.925 6.05 17.95 7.475V4.5H19.45V10.625H13.35V9.125H17.3Q16.5 7.675 15.1 6.838Q13.7 6 12.05 6Q9.55 6 7.8 7.75Q6.05 9.5 6.05 12Q6.05 14.5 7.8 16.25Q9.55 18 12.05 18Q13.975 18 15.525 16.9Q17.075 15.8 17.7 14H19.275Q18.6 16.45 16.588 17.975Q14.575 19.5 12.05 19.5Z"/></svg>
 							</li>
 						</ul>
 					</div>
@@ -845,31 +883,31 @@ const view = (state, {updateState, dispatch}) => {
 						{state.properties.actionArray.map((action) =>
 							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
 						)}
-						<li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.properties.tableName}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g></svg>Export CSV</button></a></li>
-						<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "interactive_analysis")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3 20Q2.175 20 1.588 19.413Q1 18.825 1 18Q1 17.175 1.588 16.587Q2.175 16 3 16Q3.15 16 3.263 16Q3.375 16 3.5 16.05L8.05 11.5Q8 11.375 8 11.262Q8 11.15 8 11Q8 10.175 8.588 9.587Q9.175 9 10 9Q10.825 9 11.413 9.587Q12 10.175 12 11Q12 11.05 11.95 11.5L14.5 14.05Q14.625 14 14.738 14Q14.85 14 15 14Q15.15 14 15.262 14Q15.375 14 15.5 14.05L19.05 10.5Q19 10.375 19 10.262Q19 10.15 19 10Q19 9.175 19.587 8.587Q20.175 8 21 8Q21.825 8 22.413 8.587Q23 9.175 23 10Q23 10.825 22.413 11.412Q21.825 12 21 12Q20.85 12 20.738 12Q20.625 12 20.5 11.95L16.95 15.5Q17 15.625 17 15.738Q17 15.85 17 16Q17 16.825 16.413 17.413Q15.825 18 15 18Q14.175 18 13.588 17.413Q13 16.825 13 16Q13 15.85 13 15.738Q13 15.625 13.05 15.5L10.5 12.95Q10.375 13 10.262 13Q10.15 13 10 13Q9.95 13 9.5 12.95L4.95 17.5Q5 17.625 5 17.738Q5 17.85 5 18Q5 18.825 4.412 19.413Q3.825 20 3 20ZM15 9 14.05 6.95 12 6 14.05 5.05 15 3 15.95 5.05 18 6 15.95 6.95ZM4 9.975 3.375 8.625 2.025 8 3.375 7.375 4 6.025 4.625 7.375 5.975 8 4.625 8.625Z"/></svg>Interactive Analysis</button></li>
-						{state.properties.tableName == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
+						<li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.currentList.table}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12 15.625 7.725 11.35 8.775 10.25 11.25 12.725V4.325H12.75V12.725L15.225 10.25L16.275 11.35ZM6.3 19.5Q5.55 19.5 5.025 18.975Q4.5 18.45 4.5 17.7V15H6V17.7Q6 17.8 6.1 17.9Q6.2 18 6.3 18H17.7Q17.8 18 17.9 17.9Q18 17.8 18 17.7V15H19.5V17.7Q19.5 18.45 18.975 18.975Q18.45 19.5 17.7 19.5Z"/></svg>Export CSV</button></a></li>
+						<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "interactive_analysis")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3 19.75Q2.275 19.75 1.762 19.238Q1.25 18.725 1.25 18Q1.25 17.275 1.762 16.762Q2.275 16.25 3 16.25Q3.175 16.25 3.312 16.262Q3.45 16.275 3.575 16.35L8.35 11.575Q8.275 11.45 8.262 11.312Q8.25 11.175 8.25 11Q8.25 10.275 8.762 9.762Q9.275 9.25 10 9.25Q10.725 9.25 11.238 9.762Q11.75 10.275 11.75 11Q11.75 11.1 11.65 11.55L14.45 14.35Q14.575 14.275 14.7 14.262Q14.825 14.25 15 14.25Q15.175 14.25 15.3 14.262Q15.425 14.275 15.55 14.35L19.35 10.55Q19.275 10.425 19.263 10.3Q19.25 10.175 19.25 10Q19.25 9.275 19.763 8.762Q20.275 8.25 21 8.25Q21.725 8.25 22.238 8.762Q22.75 9.275 22.75 10Q22.75 10.725 22.238 11.238Q21.725 11.75 21 11.75Q20.825 11.75 20.7 11.738Q20.575 11.725 20.45 11.65L16.65 15.45Q16.725 15.575 16.738 15.7Q16.75 15.825 16.75 16Q16.75 16.725 16.238 17.238Q15.725 17.75 15 17.75Q14.275 17.75 13.762 17.238Q13.25 16.725 13.25 16Q13.25 15.825 13.262 15.688Q13.275 15.55 13.35 15.425L10.575 12.65Q10.45 12.725 10.312 12.738Q10.175 12.75 10 12.75Q9.9 12.75 9.45 12.65L4.65 17.45Q4.725 17.575 4.738 17.7Q4.75 17.825 4.75 18Q4.75 18.725 4.237 19.238Q3.725 19.75 3 19.75ZM15 8.4 14.25 6.75 12.6 6 14.25 5.25 15 3.6 15.75 5.25 17.4 6 15.75 6.75ZM4 9.575 3.5 8.5 2.425 8 3.5 7.5 4 6.425 4.5 7.5 5.575 8 4.5 8.5Z"/></svg>Interactive Analysis</button></li>
+						{state.currentList.table == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
 								{state.alertActions.map((alertAction) => {
 									if (alertAction.type == "link") {
-										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>{alertAction.display_value}</button></li>
+										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>{alertAction.display_value}</button></li>
 									} else {
-										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("START_FLOW", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>{alertAction.display_value}</button></li>
+										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("START_FLOW", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>{alertAction.display_value}</button></li>
 									}
 								}
 								)}
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M11 15h2v-3h3v-2h-3V7h-2v3H8v2h3zM21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg>CI Details</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24" attr-x="0"/></g><g><path attr-d="M11,18h6v-5h-2.25V9.25h-4V7H13V2H7v5h2.25v2.25h-4V13H3v5h6v-5H6.75v-2.25h6.5V13H11V18z M15.5,14.5v2h-3v-2H15.5z M8.5,5.5v-2h3v2H8.5z M7.5,14.5v2h-3v-2H7.5z"/></g></svg>CI Dependency View</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M11.25 14.75H12.75V11.75H15.75V10.25H12.75V7.25H11.25V10.25H8.25V11.75H11.25ZM8.5 20.5V18.5H4.3Q3.55 18.5 3.025 17.975Q2.5 17.45 2.5 16.7V5.3Q2.5 4.55 3.025 4.025Q3.55 3.5 4.3 3.5H19.7Q20.45 3.5 20.975 4.025Q21.5 4.55 21.5 5.3V16.7Q21.5 17.45 20.975 17.975Q20.45 18.5 19.7 18.5H15.5V20.5ZM4.3 17H19.7Q19.8 17 19.9 16.9Q20 16.8 20 16.7V5.3Q20 5.2 19.9 5.1Q19.8 5 19.7 5H4.3Q4.2 5 4.1 5.1Q4 5.2 4 5.3V16.7Q4 16.8 4.1 16.9Q4.2 17 4.3 17ZM4 17Q4 17 4 16.913Q4 16.825 4 16.7V5.3Q4 5.175 4 5.088Q4 5 4 5Q4 5 4 5.088Q4 5.175 4 5.3V16.7Q4 16.825 4 16.913Q4 17 4 17Z"/></svg>CI Details</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3.25 21.75V15.25H6.25V11.25H11.25V8.75H8.25V2.25H15.75V8.75H12.75V11.25H17.75V15.25H20.75V21.75H13.25V15.25H16.25V12.75H7.75V15.25H10.75V21.75ZM9.75 7.25H14.25V3.75H9.75ZM4.75 20.25H9.25V16.75H4.75ZM14.75 20.25H19.25V16.75H14.75ZM12 7.25ZM9.25 16.75ZM14.75 16.75Z"/></svg>CI Dependency View</button></li>
 							</ul>
 						</li>}
 					</ul>
-					{state.properties.tableName == "em_alert" && <ul className="context-menu-list">
-						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Quick Search<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
+					{state.currentList.table == "em_alert" && <ul className="context-menu-list">
+						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Quick Search<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ci')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same CI</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_node')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same Node</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same AG</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_group')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" atttr-height="24" attr-width="24"/></g><g><path attr-d="M11,21h-1l1-7H7.5c-0.88,0-0.33-0.75-0.31-0.78C8.48,10.94,10.42,7.54,13.01,3h1l-1,7h3.51c0.4,0,0.62,0.19,0.4,0.66 C12.97,17.55,11,21,11,21z"/></g></svg>Same Group</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_tag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>Same Tag</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ci')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same CI</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_node')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same Node</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same AG</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_group')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same Group</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_tag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12.85 21.5Q12.55 21.5 12.263 21.375Q11.975 21.25 11.775 21.05L2.975 12.25Q2.75 12.025 2.625 11.75Q2.5 11.475 2.5 11.15V4Q2.5 3.375 2.938 2.938Q3.375 2.5 4 2.5H11.15Q11.45 2.5 11.738 2.625Q12.025 2.75 12.225 2.95L21.025 11.75Q21.475 12.2 21.475 12.837Q21.475 13.475 21.05 13.9L13.9 21.05Q13.7 21.25 13.425 21.375Q13.15 21.5 12.85 21.5ZM12.825 20 19.975 12.85 11.15 4H4V11.15ZM6.5 7.75Q7.025 7.75 7.388 7.387Q7.75 7.025 7.75 6.5Q7.75 5.975 7.388 5.612Q7.025 5.25 6.5 5.25Q5.975 5.25 5.613 5.612Q5.25 5.975 5.25 6.5Q5.25 7.025 5.613 7.387Q5.975 7.75 6.5 7.75ZM4 4Z"/></svg>Same Tag</button></li>
 							</ul>
 						</li>
 					</ul>}
@@ -879,29 +917,30 @@ const view = (state, {updateState, dispatch}) => {
 	);
 };
 
-const removeLastComma = (string) => {
-	if (string.charAt(string.length - 1) == ",") {
-		string = string.substring(0, string.length - 1);
-	}
-	return string;
-};
+const transformTableOrder = (tableOrder, tableData, currentList) => {
+	console.log("transformTableOrder");
+	console.log("tableOrder: ", tableOrder);
+	console.log("tableData: ", tableData);
+	console.log("currentList: ", currentList);
 
-const transformTableOrder = (tableOrder, tableData, tableColumns) => {
 	if (!tableOrder.includes("Select")) {
 		tableOrder.push("Select");
 	}
-	tableColumns.forEach((column) => {
-		if (column == "_row_data" || column == "sys_id" || column == "cmdb_ci.sys_class_name" || column == "additional_info" || column == "u_itom_tags") {
-			return;
-		}
-		if (!tableOrder.includes(column)) {
-			tableOrder.push(column);
-		}
-	});
+	if (currentList.columns) {
+		currentList.columns.split(",").forEach((column) => {
+			if (column == "sys_id" || column == "cmdb_ci.sys_class_name" || column == "additional_info" || column == "u_itom_tags") {
+				return;
+			}
+			if (!tableOrder.includes(column)) {
+				tableOrder.push(column);
+			}
+		});
+	}
+
 	tableData.forEach((tableRow) => {
 		let fields = Object.keys(tableRow);
 		for (let i = 0; i < fields.length; i++) {
-			if (fields[i] == "_row_data" || fields[i] == "sys_id" || fields[i] == "cmdb_ci.sys_class_name" || fields[i] == "selected" || fields[i] == "additional_info" || fields[i] == "u_itom_tags") {
+			if (fields[i] == "selected" || fields[i] == "sys_id" || fields[i] == "cmdb_ci.sys_class_name" || fields[i] == "additional_info" || fields[i] == "u_itom_tags") {
 				continue;
 			}
 			if (!tableOrder.includes(fields[i])) {
@@ -909,6 +948,7 @@ const transformTableOrder = (tableOrder, tableData, tableColumns) => {
 			}
 		}
 	});
+	console.log("returning tableOrder: ", tableOrder);
 	return tableOrder;
 };
 
@@ -916,11 +956,13 @@ const sortingArrayToString = (sortingArray) => {
 	let sortString = "";
 	for (let i = 0; i < sortingArray.length; i++) {
 		let orderObj = sortingArray[i];
-		let orderStr = "^ORDERBY";
-		if (orderObj.asc == false) {
-				orderStr += "DESC";
+		if (orderObj.do_not_include_in_string == false) {
+			let orderStr = "^ORDERBY";
+			if (orderObj.asc == false) {
+					orderStr += "DESC";
+			}
+			sortString += orderStr + orderObj.field;
 		}
-		sortString += orderStr + orderObj.field;
 	}
 	return sortString;
 }
@@ -963,15 +1005,8 @@ createCustomElement('snc-alert-email-message-list', {
 		showInfo: {
 			default: false
 		},
-		tableName: {
+		paramSysparmValue: {
 			default: ''
-		},
-		externalSysparam: {
-			default: ''
-		},
-		tableColumns: {
-			default: [],
-			deepCompare: true
 		},
 		tableLimit: {
 			default: 0
@@ -988,25 +1023,19 @@ createCustomElement('snc-alert-email-message-list', {
 		paramListValue: {
 			default: ''
 		},
-		menuOptions: {
-			default: []
+		workspaceId: {
+			default: '9ffb1ca697cf8190ada0b9cfe153af18'
 		},
+		defaultListId: {
+			default: '7443faee47574550d0bc5c62e36d4319'
+		}
 	},
 	setInitialState() {
 		return {
 			draggingColumnIndex: 0,
 			showingNumber: "0",
 			dummyStateChange: false,
-			sortingArray: [
-				{
-					field: "number",
-					asc: false
-				},
-				{
-					field: "order",
-					asc: true
-				}
-			], //format = [{field: "severity", asc: true}],
+			sortingArray: [], //format = [{field: "severity", asc: true, do_not_include_in_string: false}],
 			showContextMenu: false,
 			contextMenuLeft: "0px",
 			contextMenuTop: "0px",
@@ -1053,35 +1082,48 @@ createCustomElement('snc-alert-email-message-list', {
 			filters: [],
 			isMainQueryRunning: false,
 			allSelectChecked: false,
-			checkExternalSysparm: true,
+			checkSysparmParamValue: true,
 			lastTableData: [],
 			contextMenuTag: {},
-			alertActions: []
+			alertActions: [],
+			currentList: {condition: '', columns: '', table: ''}
 		}
 	},
 	transformState(state) {
 		return {
 			...state,
-			tableOrder: transformTableOrder(state.tableOrder, state.tableData, state.properties.tableColumns)
+			tableOrder: transformTableOrder(state.tableOrder, state.tableData, state.currentList)
 		};
 	},
 	actionHandlers: {
 		[COMPONENT_PROPERTY_CHANGED]: (coeffects) => {
 			const { dispatch, action, state, updateState } = coeffects;
 			console.log('COMPONENT_PROPERTY_CHANGED payload: ', action.payload);
-			if (action.payload.name != "showInfo" && action.payload.name != "currentUser") {
-				if (action.payload.name == "menuOptions" || action.payload.name == "paramListValue") {
-					console.log("list properties: ", state.properties);
+			// if (action.payload.name != "showInfo" && action.payload.name != "currentUser") {
+			// 	if (action.payload.name == "menuOptions" || action.payload.name == "paramListValue") {
+			// 		console.log("list properties: ", state.properties);
+			// 	}
+			// 	dispatch('REFRESH_MAIN_QUERY', {force: action.payload.name == "paramListValue" || action.payload.name == "menuOptions"});
+			// } else if (action.payload.name == "tableName") {
+			// 	let labelSysparm = `name=${state.properties.tableName}^elementISNOTEMPTY`;
+			// 	console.log("labelSysparm: ", labelSysparm);
+			// 	dispatch('FETCH_ALL_TABLE_COLUMNS', {
+			// 		table: 'sys_dictionary',
+			// 		sysparm_query: labelSysparm,
+			// 		sysparm_fields: 'element,column_label,name',
+			// 		sysparm_display_value: 'true'
+			// 	});
+			// }
+			if (action.payload.name == 'paramListValue') {
+				let listId = state.properties.defaultListId;
+				if (action.payload.value) {
+					listId = action.payload.value;
 				}
-				dispatch('REFRESH_MAIN_QUERY', {force: action.payload.name == "paramListValue" || action.payload.name == "menuOptions"});
-			} else if (action.payload.name == "tableName") {
-				let labelSysparm = `name=${state.properties.tableName}^elementISNOTEMPTY`;
-				console.log("labelSysparm: ", labelSysparm);
-				dispatch('FETCH_ALL_TABLE_COLUMNS', {
-					table: 'sys_dictionary',
-					sysparm_query: labelSysparm,
-					sysparm_fields: 'element,column_label,name',
-					sysparm_display_value: 'true'
+				dispatch('FETCH_CURRENT_LIST', {
+					table: 'sys_aw_list',
+					sysparm_query: `sys_id=${listId}^workspace=${state.properties.workspaceId}`,
+					sysparm_fields: 'columns,condition,table,title',
+					sysparm_display_value: 'false'
 				});
 			}
 		},
@@ -1089,55 +1131,123 @@ createCustomElement('snc-alert-email-message-list', {
 			const { state, dispatch, updateState } = coeffects;
 			console.log("COMPONENT_BOOTSTRAPPED");
 
-			let labelSysparm = `name=${state.properties.tableName}^elementISNOTEMPTY`;
-			console.log("labelSysparm: ", labelSysparm);
-			dispatch('FETCH_ALL_TABLE_COLUMNS', {
-				table: 'sys_dictionary',
-				sysparm_query: labelSysparm,
-				sysparm_fields: 'element,column_label,internal_type',
-				sysparm_display_value: 'true'
+			let listId = state.properties.defaultListId;
+			if (state.properties.paramListValue) {
+				listId = state.properties.paramListValue;
+			}
+			dispatch('FETCH_CURRENT_LIST', {
+				table: 'sys_aw_list',
+				sysparm_query: `sys_id=${listId}^workspace=${state.properties.workspaceId}`,
+				sysparm_fields: 'columns,condition,table,title',
+				sysparm_display_value: 'false'
 			});
-			dispatch('REFRESH_MAIN_QUERY', {force: false});
 		},
 		'QUERY_ERROR': (coeffects) => {
 			const { updateState, action } = coeffects;
 			console.log('%cQUERY_ERROR: %o', 'color:green;font-size:12px;', action.payload);
 			updateState({isMainQueryRunning: false});
 		},
+		'FETCH_CURRENT_LIST': createHttpEffect('/api/now/table/:table', {
+			batch: false,
+			cacheable: true,
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_CURRENT_LIST_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
+		}),
+		'FETCH_CURRENT_LIST_SUCCESS': (coeffects) => {
+			const { dispatch, updateState, action, state } = coeffects;
+			console.log("FETCH_CURRENT_LIST_SUCCESS payload: ", action.payload);
+			console.log("FETCH_CURRENT_LIST_SUCCESS action: ", action);
+			if (action.payload && action.payload.result && action.payload.result[0]) {
+				let newCurrentList = {
+					condition: action.payload.result[0].condition,
+					columns: action.payload.result[0].columns,
+					table: action.payload.result[0].table
+				};
+				updateState({currentList: newCurrentList, tableOrder: [], tableData: [], sortingArray: [], dummyStateChange: !state.dummyStateChange, showInfo: state.showInfo});
+
+				dispatch('REFRESH_MAIN_QUERY', {force: true});
+
+				let labelSysparm = `name=${newCurrentList.table}^elementISNOTEMPTY`;
+				console.log("labelSysparm: ", labelSysparm);
+				dispatch('FETCH_ALL_TABLE_COLUMNS', {
+					table: 'sys_dictionary',
+					sysparm_query: labelSysparm,
+					sysparm_fields: 'element,column_label,internal_type',
+					sysparm_display_value: 'true'
+				});
+			} else if (action.meta.request.updatedUrl == "/api/now/table/sys_aw_list") {
+				dispatch('FETCH_CURRENT_MY_LIST', {
+					table: 'sys_aw_my_list',
+					sysparm_query: `sys_id=${state.properties.paramListValue}`,
+					sysparm_fields: 'columns,condition,table,title',
+					sysparm_display_value: 'false'
+				});
+			}
+		},
+		'FETCH_CURRENT_MY_LIST': createHttpEffect('/api/now/table/:table', {
+			batch: false,
+			cacheable: true,
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_CURRENT_LIST_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
+		}),
 		'REFRESH_MAIN_QUERY': (coeffects) => {
 			const { state, dispatch, updateState, action } = coeffects;
 			let isForced = false;
 			if (action.payload) {
 				isForced = action.payload.force;
 			}
-			console.log("%cparamListValue: %o", "color: green;font-size:1.2em;", state.properties.paramListValue);
+			console.log("%ctableOrder: %o", "color: green;font-size:1.2em;", state.tableOrder);
+			console.log("%ccurrentList: %o", "color: green;font-size:1.2em;", state.currentList);
 			console.log("isForced: ", isForced);
-			if (state.isMainQueryRunning == false || isForced == true) {
+			if (state.currentList && (state.isMainQueryRunning == false || isForced == true)) {
 				updateState({isMainQueryRunning: true});
 				console.log('%cREFRESH_MAIN_QUERY', 'color:green;font-size:12px;');
 				console.log('%cState: %o', 'color:green;font-size:12px;', state);
 
 				let encodedSysparm = '';
-				if (state.checkExternalSysparm == true && state.properties.externalSysparam) {
-					updateState({checkExternalSysparm: false});
 
-					if (state.properties.paramListValue) {
-						let matchingMenuOption = state.properties.menuOptions.find((menuOption) => menuOption.name.toLowerCase() == state.properties.paramListValue.toLowerCase());
-						if (matchingMenuOption) {
-							encodedSysparm = matchingMenuOption.listValue;
+				let currentListCondition = state.currentList.condition
+				if (currentListCondition.includes("^ORDERBY")) {
+					let orderBySysparm = currentListCondition.substring(currentListCondition.indexOf("^ORDERBY")); // Grab only the order portion of the current list condition
+					orderBySysparm = orderBySysparm.substring(1); //Remove the first ^ in the string
+					let orderSysparmArray = orderBySysparm.split("^");
+
+					let updatedSortingArray = state.sortingArray;
+					orderSysparmArray.forEach((orderBy) => {
+						orderBy = orderBy.substring(7); //Removes the ORDERBY part of the string
+						let asc = true;
+						if (orderBy.includes("DESC")) {
+							asc = false;
+							orderBy = orderBy.substring(4); //Removes the DESC part of the string
 						}
-					} else {
-						encodedSysparm = state.properties.menuOptions[0].listValue;
-					}
-					encodedSysparm += state.properties.externalSysparam;
+						if (updatedSortingArray.findIndex(sortObj => sortObj.field == orderBy) == -1) { //Check if there is already a sortingObj with that field
+							updatedSortingArray.push({field: orderBy, asc: asc, do_not_include_in_string: true});
+						}
+					});
+					console.log("%cSorting Array: %o", "color:lightgreen;font-size:12px;", updatedSortingArray);
+					updateState({sortingArray: updatedSortingArray});
+				}
 
-					let tempSysparm = state.properties.externalSysparam;
+				if (state.checkSysparmParamValue == true && state.properties.paramSysparmValue) {
+					updateState({checkSysparmParamValue: false});
+
+					//Create sysparm using url param
+
+					encodedSysparm += state.properties.paramSysparmValue;
+
+					let tempSysparm = state.properties.paramSysparmValue;
 					if (tempSysparm.includes("^ORDERBY")) {
 						let orderBySysparm = tempSysparm.substring(tempSysparm.indexOf("^ORDERBY"));
 						let orderSysparmArray = orderBySysparm.split("^");
 						orderSysparmArray.splice(0, 1);
 
-						let updatedSortingArray = [];
+						let updatedSortingArray = state.sortingArray;
 						orderSysparmArray.forEach((orderBy) => {
 							orderBy = orderBy.substring(7);
 							let asc = true;
@@ -1145,8 +1255,11 @@ createCustomElement('snc-alert-email-message-list', {
 								asc = false;
 								orderBy = orderBy.substring(4);
 							}
-							updatedSortingArray.push({field: orderBy, asc: asc});
+							if (updatedSortingArray.findIndex(sortObj => sortObj.field == orderBy) == -1) { //Check if there is already a sortingObj with that field
+								updatedSortingArray.push({field: orderBy, asc: asc, do_not_include_in_string: false});
+							}
 						});
+						console.log("%cSorting Array: %o", "color:green;font-size:12px;", updatedSortingArray);
 						updateState({sortingArray: updatedSortingArray});
 						tempSysparm = tempSysparm.substring(0, tempSysparm.indexOf("^ORDERBY"));
 					}
@@ -1155,27 +1268,52 @@ createCustomElement('snc-alert-email-message-list', {
 					if (tempSysparm.length > 0) {
 						let urlFilters = tempSysparm.split(/(?=\^)/g);
 						console.log("urlFilters: ", urlFilters);
-						urlFilters.forEach((urlFilter) => {
+						urlFilters.forEach((urlFilter, i) => {
 							let and_or = {label: 'AND', value: '^'}
-							if (urlFilter.substring(0, 3) == "^OR") {
-								and_or = {label: 'OR', value: '^OR'}
-								urlFilter = urlFilter.substring(3);
-							} else {
-								urlFilter = urlFilter.substring(1);
+							if (i != 0) {
+								if (urlFilter.substring(0, 3) == "^OR") {
+									and_or = {label: 'OR', value: '^OR'}
+									urlFilter = urlFilter.substring(3);
+								} else {
+									urlFilter = urlFilter.substring(1);
+								}
 							}
-							let operatorOption = state.operatorOptions.find((option) => urlFilter.includes(option.value));
-							let operatorIndex = urlFilter.indexOf(operatorOption.value);
-							let columnSection = urlFilter.substring(0, operatorIndex);
-							urlFilter = urlFilter.substring(operatorIndex);
-							let valueSection = urlFilter.replace(operatorOption.value, "");
+
+							let operatorValueRegexString = "";
+							state.operatorOptions.forEach((operatorOption, index) => {
+								operatorValueRegexString += operatorOption.value;
+								if (index != state.operatorOptions.length - 1) {
+									operatorValueRegexString += "|";
+								}
+							});
+							let foundOperator = urlFilter.match(new RegExp(operatorValueRegexString));
+							console.log("foundOperator: ", foundOperator);
+
+							let columnAndValueSections = urlFilter.split(foundOperator);
+							console.log("columnAndValueSections: ", columnAndValueSections);
+
+							console.log("adding filter: ", {
+								showInputs: false,
+								showResults: {operator: false, value: false},
+								inputs: {
+									and_or: and_or,
+									column: {label: columnAndValueSections[0], value: columnAndValueSections[0]},
+									operator: {label: foundOperator, value: foundOperator},
+									value: {label: columnAndValueSections[1], value: columnAndValueSections[1]}
+								},
+								results: {
+									operator: [],
+									value: []
+								}
+							});
 							updatedFilters.push({
 								showInputs: false,
 								showResults: {operator: false, value: false},
 								inputs: {
 									and_or: and_or,
-									column: {label: columnSection, value: columnSection},
-									operator: operatorOption,
-									value: {label: valueSection, value: valueSection}
+									column: {label: columnAndValueSections[0], value: columnAndValueSections[0]},
+									operator: {label: foundOperator, value: foundOperator},
+									value: {label: columnAndValueSections[1], value: columnAndValueSections[1]}
 								},
 								results: {
 									operator: [],
@@ -1187,26 +1325,25 @@ createCustomElement('snc-alert-email-message-list', {
 
 					updateState({filters: updatedFilters});
 				} else {
-					if (state.properties.paramListValue) {
-						let matchingMenuOption = state.properties.menuOptions.find((menuOption) => menuOption.name.toLowerCase() == state.properties.paramListValue.toLowerCase());
-						if (matchingMenuOption) {
-							encodedSysparm += matchingMenuOption.listValue;
-						}
-					} else {
-						encodedSysparm += state.properties.menuOptions[0].listValue;
-					}
-					state.filters.map((filter) => {
-						encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
+					//Create sysparm without using URL param
+					state.filters.map((filter, i) => {
+						encodedSysparm += `${i != 0 ? filter.inputs.and_or.value : ''}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 					});
 					encodedSysparm += sortingArrayToString(state.sortingArray);
 				}
 
-				console.log("refresh sysparam: ", encodedSysparm);
-				console.log("%cparamListValue: %o", "color: green;font-size:1.2em;", state.properties.paramListValue);
+				if (encodedSysparm.length > 0 && state.currentList.condition.length > 0) {
+					if (state.currentList.condition.indexOf("^") != 0) {
+						encodedSysparm += "^";
+					}
+				}
+				encodedSysparm += state.currentList.condition;
+
+				console.log("main query sysparam: ", encodedSysparm);
 				dispatch('FETCH_MAIN_TABLE', {
-					table: state.properties.tableName,
+					table: state.currentList.table,
 					sysparm_query: encodedSysparm,
-					sysparm_fields: state.properties.tableColumns.toString(),
+					sysparm_fields: state.currentList.columns + ",sys_id",
 					sysparm_display_value: 'all',
 					sysparm_limit: parseInt(state.properties.tableLimit),
 					sysparm_offset: parseInt(state.properties.tableLimit) * parseInt(state.properties.page)
@@ -1233,8 +1370,9 @@ createCustomElement('snc-alert-email-message-list', {
 			const { result } = action.payload;
 			console.log('%cFETCH_MAIN_TABLE_SUCCESS', 'color:green');
 			console.log("%cpayload: %o", 'color:green', result);
-			console.log("action: ", action);
+			console.log("%caction: %o", 'color:green', action);
 			let updatedTableOrder = state.tableOrder;
+
 			result.forEach((resultRow) => {
 				if (state.selectedRecords.includes(resultRow.sys_id.value)) {
 					resultRow.selected = true;
@@ -1264,6 +1402,15 @@ createCustomElement('snc-alert-email-message-list', {
 					resultRow.source_icon = {
 						label: 'Source Icon',
 						value: findMatchingSourceIcon(resultRow.source.display_value)
+					};
+					if (!updatedTableOrder.includes("source_icon")) {
+						updatedTableOrder.splice(4, 0, "source_icon");
+					}
+				}
+				if (resultRow.u_applies_to_source) {
+					resultRow.source_icon = {
+						label: 'Source Icon',
+						value: findMatchingSourceIcon(resultRow.u_applies_to_source.display_value)
 					};
 					if (!updatedTableOrder.includes("source_icon")) {
 						updatedTableOrder.splice(4, 0, "source_icon");
@@ -1398,12 +1545,12 @@ createCustomElement('snc-alert-email-message-list', {
 					updatedSorting[sortingObjIndex].asc = false;
 				}
 			} else {
-				updatedSorting.push({field: action.payload.value, asc: true});
+				updatedSorting.push({field: action.payload.value, asc: true, do_not_include_in_string: false});
 			}
 			updateState({sortingArray: updatedSorting, dummyStateChange: !state.dummyStateChange});
 			let encodedSysparm = "";
-			state.filters.map((filter) => {
-				encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
+			state.filters.map((filter, i) => {
+				encodedSysparm += `${i != 0 ? filter.inputs.and_or.value : ''}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 			});
 			encodedSysparm += sortingArrayToString(updatedSorting);
 			dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: encodedSysparm}});
@@ -1413,7 +1560,8 @@ createCustomElement('snc-alert-email-message-list', {
 			const { state, dispatch } = coeffects;
 			if (state.tableData.length > 0) {
 				let columns = Object.keys(state.tableData[0]);
-				let labelSysparm = `name=${state.properties.tableName}^elementIN${columns.toString()}`;
+				let labelSysparm = `name=${state.currentList.table}^elementIN${columns.toString()}`;
+				console.log("fetch column labels sysparm: ", labelSysparm);
 				dispatch('FETCH_COLUMN_LABELS', {
 					table: 'sys_dictionary',
 					sysparm_query: labelSysparm,
@@ -1428,11 +1576,13 @@ createCustomElement('snc-alert-email-message-list', {
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_COLUMN_LABELS_SUCCESS',
 			errorActionType: 'QUERY_ERROR',
-			cacheable: true
+			cacheable: true,
+			batch: false
 		}),
 		'FETCH_COLUMN_LABELS_SUCCESS': (coeffects) => {
 			const { action, updateState, state, dispatch } = coeffects;
 			console.log("FETCH_COLUMN_LABELS_SUCCESS payload: ", action.payload);
+			console.log("FETCH_COLUMN_LABELS_SUCCESS action: ", action);
 			let updatedTableData = state.tableData;
 			updatedTableData.forEach((tableRow) => {
 				action.payload.result.forEach((result) => {
@@ -1761,7 +1911,7 @@ createCustomElement('snc-alert-email-message-list', {
 			updateState({typeaheadColumnOptions: newtypeaheadColumnOptions});
 			dispatch('FETCH_CHOICES', {
 				table: 'sys_choice',
-				sysparm_query: `name=${state.properties.tableName}^language=en^ORDERBYelement^ORDERBYsequence`,
+				sysparm_query: `name=${state.currentList.table}^language=en^ORDERBYelement^ORDERBYsequence`,
 				sysparm_fields: 'element,label,value',
 				sysparm_display_value: 'true'
 			});
@@ -1895,8 +2045,8 @@ createCustomElement('snc-alert-email-message-list', {
 			updateState({filters: updatedFilters, dummyStateChange: !state.dummyStateChange});
 
 			let encodedSysparm = '';
-			updatedFilters.map((filter) => {
-				encodedSysparm += `${filter.inputs.and_or.value}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
+			updatedFilters.map((filter, i) => {
+				encodedSysparm += `${i != 0 ? filter.inputs.and_or.value : ''}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
 			});
 			encodedSysparm += sortingArrayToString(state.sortingArray);
 			dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: encodedSysparm}});
@@ -1965,6 +2115,33 @@ createCustomElement('snc-alert-email-message-list', {
 			if (action.payload && action.payload.result) {
 				dispatch("SHOW_MESSAGE#MODAL", {header: 'Flow Action Outputs', content: JSON.stringify(action.payload.result)});
 			}
+		},
+		'SAVE_MY_LIST': (coeffects) => {
+			const { state, dispatch } = coeffects;
+
+			let conditions = '';
+			state.filters.map((filter, i) => {
+				conditions += `${i != 0 ? filter.inputs.and_or.value : ''}${filter.inputs.column.value}${filter.inputs.operator.value}${filter.inputs.value.value}`;
+			});
+			if ( conditions.length > 0 && state.currentList.condition.length > 0) {
+				if (state.currentList.condition.indexOf("^") != 0) {
+					conditions += "^";
+				}
+			}
+			conditions += state.currentList.condition;
+			if (conditions.length > 0 && !conditions.includes("^EQ")) {
+				conditions += "^EQ";
+			}
+			conditions += sortingArrayToString(state.sortingArray);
+
+			dispatch("CREATE_MY_WORKSPACE_LIST#MODAL", {
+				data: {
+					active: true,
+					columns: state.currentList.columns, //state.tableOrder.toString(),
+					condition: conditions,
+					table: state.currentList.table,
+				}
+			});
 		}
 	},
 	eventHandlers: [
@@ -1983,7 +2160,7 @@ createCustomElement('snc-alert-email-message-list', {
 					console.log("clickedRecordElement: ", clickedRecordElement);
 					if (clickedRecordElement) {
 						clickedRecordSysID = clickedRecordElement.id.substring(clickedRecordElement.id.indexOf("-") + 1);
-						if (state.properties.tableName == "em_alert") {
+						if (state.currentList.table == "em_alert") {
 							dispatch("START_FETCH_ALERT_ACTIONS", {value: clickedRecordSysID});
 						}
 						let clickedRecordIndex = state.tableData.findIndex((tableRow) => tableRow.sys_id.value == clickedRecordSysID);

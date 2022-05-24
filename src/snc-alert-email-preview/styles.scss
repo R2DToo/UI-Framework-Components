@@ -173,14 +173,21 @@
   margin-top: 1em;
 
   .card-header {
-    display: grid;
-    grid-template-columns: auto auto;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-content: space-between;
-    height: 50px;
 
-    .right {
-      margin-right: 30px;
+    .card-header-column {
+      display: flex;
+      flex-direction: column;
+      > div:first-child {
+        margin-bottom: 4px;
+      }
+    }
+    .card-header-image {
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
     }
   }
 
@@ -213,6 +220,11 @@
       flex: 50%;
       p {
         word-break: break-word;
+        &.align-items-center {
+          display: flex;
+          align-items: center;
+          column-gap: 6px;
+        }
       }
     }
     .card-center {
@@ -480,9 +492,14 @@
 	text-align: center;
 	line-height: 35px;
   display: inline-block;
+  font-size: 12px;
 
   &.secondary {
     background-color: RGB($now-color_alert--moderate-1);
+  }
+
+  &.big {
+    font-size: initial;
   }
 }
 
