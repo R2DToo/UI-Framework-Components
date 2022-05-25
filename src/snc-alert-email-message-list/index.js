@@ -315,7 +315,7 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className="view-message record-link">{row[key].display_value}</td>
 							} else if (key == "u_number") {
 								let url = '/now/nav/ui/classic/params/target/' + state.currentList.table + '.do%3Fsys_id%3D' + row.sys_id.value;
-								return <td className="name-message break-message"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
+								return <td className="name-message break-message force-center"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
 							} else if (key == "assigned_to") {
 								return <td className="view-message">
 									<now-avatar

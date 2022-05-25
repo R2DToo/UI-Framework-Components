@@ -441,7 +441,7 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
 												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
-												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg></p>
+												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
 												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
@@ -572,7 +572,7 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
 												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
-												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg></p>
+												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
 												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
@@ -741,15 +741,30 @@ createCustomElement('snc-alert-email-preview', {
 						newParentRecord[0].tags.push({key: tag_key, value: itom_tags[tag_key], type: "itom_tags"});
 					});
 					newParentRecord[0].tags.sort(sortTags);
-				} catch (e) {
-
-				}
+				} catch (e) {}
 			}
 			if (newParentRecord[0] && newParentRecord[0].source) {
 				newParentRecord[0].source_icon = {
 					label: 'Source Icon',
 					value: findMatchingSourceIcon(newParentRecord[0].source.display_value)
 				};
+			}
+			//Temp Uniqueness column
+			if (newParentRecord[0] && newParentRecord[0].u_repeated_alerts) {
+				let uniquenessString = "Causal";
+				if (newParentRecord[0].u_repeated_alerts.value != "") {
+					let numOfRepeatedAlerts = parseInt(newParentRecord[0].u_repeated_alerts.value);
+					if (numOfRepeatedAlerts <= 5) {
+						uniquenessString = "Causal";
+					} else if (numOfRepeatedAlerts <= 15) {
+						uniquenessString = "Impacting";
+					} else if (numOfRepeatedAlerts <= 30) {
+						uniquenessString = "Related";
+					} else {
+						uniquenessString = "Noise";
+					}
+				}
+				newParentRecord[0].temp_uniqueness = {display_value: uniquenessString, value: uniquenessString, label: "Uniqueness"};
 			}
 			updateState({parentRecord: newParentRecord});
 			dispatch('START_FETCH_EXTRA_DATA');
@@ -790,6 +805,23 @@ createCustomElement('snc-alert-email-preview', {
 							label: 'Source Icon',
 							value: findMatchingSourceIcon(secondaryRecord.source.display_value)
 						};
+					}
+					//Temp Uniqueness column
+					if (secondaryRecord.u_repeated_alerts) {
+						let uniquenessString = "Causal";
+						if (secondaryRecord.u_repeated_alerts.value != "") {
+							let numOfRepeatedAlerts = parseInt(secondaryRecord.u_repeated_alerts.value);
+							if (numOfRepeatedAlerts <= 5) {
+								uniquenessString = "Causal";
+							} else if (numOfRepeatedAlerts <= 15) {
+								uniquenessString = "Impacting";
+							} else if (numOfRepeatedAlerts <= 30) {
+								uniquenessString = "Related";
+							} else {
+								uniquenessString = "Noise";
+							}
+						}
+						secondaryRecord.temp_uniqueness = {display_value: uniquenessString, value: uniquenessString, label: "Uniqueness"};
 					}
 				});
 			}
@@ -838,7 +870,7 @@ createCustomElement('snc-alert-email-preview', {
 				if (record.cmdb_ci.value != "") {
 					ciArray.push(record.cmdb_ci.value);
 				}
-				if (record.additional_info.value.includes("snapshot") && (record.source.value == "Datadog" || record.source.value == "Demo")) {
+				if (record.additional_info.value.includes("snapshot")) {
 					dispatch('FETCH_DATADOG_SNAPSHOT', {
 						retrieveLaunchApplications: true,
 						retrieveRemediations: false,
@@ -853,7 +885,7 @@ createCustomElement('snc-alert-email-preview', {
 				if (record.cmdb_ci.value != "") {
 					ciArray.push(record.cmdb_ci.value);
 				}
-				if (record.additional_info.value.includes("snapshot") && (record.source.value == "Datadog" || record.source.value == "Demo")) {
+				if (record.additional_info.value.includes("snapshot")) {
 					dispatch('FETCH_DATADOG_SNAPSHOT', {
 						retrieveLaunchApplications: true,
 						retrieveRemediations: false,

@@ -11,8 +11,14 @@ const view = (state, {updateState, dispatch}) => {
 	console.log('snc-alert-email-sidebar state: ', state);
 
 	const renderOptions = () => {
-		return state.optionsArray.map((category, index) =>
-			<li class={{showMenu: index == state.expandedCategory, 'active': category.listOptions.findIndex((listOption) => state.properties.paramListValue == listOption.sys_id) > -1}}>
+		return state.optionsArray.map((category, index) => {
+			let categoryActive = false;
+			if (state.properties.paramListValue == "") {
+				categoryActive = category.listOptions.findIndex((listOption) => state.properties.defaultListId == listOption.sys_id) > -1;
+			} else {
+				categoryActive = category.listOptions.findIndex((listOption) => state.properties.paramListValue == listOption.sys_id) > -1;
+			}
+			return <li class={{showMenu: index == state.expandedCategory, 'active': categoryActive}}>
 				<div className="icon-link" onclick={() => {dispatch("UPDATE_EXPANDED_CATEGORY", {index: index})}}>
 					<div className="link_text">
 						<now-rich-text html={category.icon}></now-rich-text>
@@ -23,17 +29,23 @@ const view = (state, {updateState, dispatch}) => {
 				</div>
 				<ul className="sub-menu">
 					<li><div className="link_name">{category.categoryTitle}</div></li>
-					{category.listOptions.map((list, listIndex) =>
-						<li class={{'active': state.properties.paramListValue == list.sys_id}}>
+					{category.listOptions.map((list, listIndex) => {
+						let listActive = false;
+						if (state.properties.paramListValue == "") {
+							listActive = state.properties.defaultListId == list.sys_id;
+						} else {
+							listActive = state.properties.paramListValue == list.sys_id;
+						}
+						return <li class={{'active': listActive}}>
 							<div className="link_text" onclick={() => {dispatch("LIST_OPTION_CLICKED", {categoryIndex: index, listIndex: listIndex})}}>
 								<div>{list.title}</div>
 								{category.categoryId == "0" && <svg onclick={(e) => {e.stopPropagation(); dispatch("DELETE_MY_LIST", {sys_id: list.sys_id});}} attrs={{class: "delete-list-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg>}
 							</div>
 						</li>
-					)}
+					})}
 				</ul>
 			</li>
-		)
+		})
 	};
 
 	return (
@@ -194,10 +206,18 @@ createCustomElement('snc-alert-email-sidebar', {
 			console.log('FETCH_LIST_OPTIONS_SUCCESS payload: ', action.payload);
 			if (action.payload && action.payload.result) {
 				let updatedOptionsArray = state.optionsArray;
-				updatedOptionsArray.forEach(category => {
+				updatedOptionsArray.forEach((category, categoryIndex) => {
 					let matchingResults = action.payload.result.filter(result => result.category.value == category.categoryId);
 					matchingResults.forEach(result => {
 						category.listOptions.push(result);
+
+						if (state.properties.paramListValue == "") {
+							if (result.sys_id == state.properties.defaultListId) {
+								updateState({expandedCategory: categoryIndex});
+							}
+						} else if (result.sys_id == state.properties.paramListValue) {
+							updateState({expandedCategory: categoryIndex});
+						}
 					});
 				});
 				updateState({optionsArray: updatedOptionsArray});
@@ -219,6 +239,14 @@ createCustomElement('snc-alert-email-sidebar', {
 				let myListCategory = {categoryTitle: "My Lists", categoryId: "0", listOptions: [], icon: findTempIcon("My Lists")};
 				action.payload.result.forEach((result) => {
 					myListCategory.listOptions.push(result);
+
+					if (state.properties.paramListValue == "") {
+						if (result.sys_id == state.properties.defaultListId) {
+							updateState({expandedCategory: updatedOptionsArray.length});
+						}
+					} else if (result.sys_id == state.properties.paramListValue) {
+						updateState({expandedCategory: updatedOptionsArray.length});
+					}
 				});
 				updatedOptionsArray.push(myListCategory);
 				updateState({optionsArray: updatedOptionsArray, dummyStateChange: !state.dummyStateChange});
