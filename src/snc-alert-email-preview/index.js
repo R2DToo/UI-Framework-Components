@@ -423,7 +423,7 @@ const view = (state, {updateState, dispatch}) => {
 										<div className="card-row">
 											<div className="card-column">
 												<p><span className="key">Source: </span> <span className="">{record.source.display_value}</span></p>
-												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}><span className="key">CI:</span> <span className="underline-record-link">{record.cmdb_ci.display_value}</span></p>
+												<p className="align-items-center"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg></p>
 												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
 												<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
 												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
@@ -436,7 +436,7 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
 												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
 												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+												<p><span className="key">Metric Name:</span> <span className="">{record.metric_name.display_value}</span></p>
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
@@ -554,7 +554,7 @@ const view = (state, {updateState, dispatch}) => {
 										<div className="card-row">
 											<div className="card-column">
 												<p><span className="key">Source: </span> <span className="">{record.source.display_value}</span></p>
-												<p onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}><span className="key">CI:</span> <span className="underline-record-link">{record.cmdb_ci.display_value}</span></p>
+												<p className="align-items-center"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg></p>
 												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
 												<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
 												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
@@ -567,7 +567,7 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
 												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
 												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+												<p><span className="key">Metric Name:</span> <span className="">{record.metric_name.display_value}</span></p>
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
@@ -709,13 +709,13 @@ createCustomElement('snc-alert-email-preview', {
 			dispatch('FETCH_PARENT_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
 				sysparm_display_value: 'all'
 			});
 			dispatch('FETCH_CHILD_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,resource,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
 				sysparm_display_value: 'all'
 			});
 		},
