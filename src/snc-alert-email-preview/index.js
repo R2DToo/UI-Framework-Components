@@ -436,7 +436,7 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
 												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
 												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p><span className="key">Metric Name:</span> <span className="">{record.metric_name.display_value}</span></p>
+												<p><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
@@ -567,7 +567,7 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
 												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
 												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p><span className="key">Metric Name:</span> <span className="">{record.metric_name.display_value}</span></p>
+												<p><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
