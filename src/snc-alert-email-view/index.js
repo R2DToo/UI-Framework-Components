@@ -15,6 +15,7 @@ const view = (state, {updateState}) => {
 				paramListValue={state.properties.paramListValue}
 				defaultListId={state.properties.defaultListId}
 				excludedMenuCategories={state.properties.excludedMenuCategories}
+				uibRefresh={state.properties.uibRefresh}
 			/>
 			<snc-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
@@ -31,6 +32,7 @@ const view = (state, {updateState}) => {
 			{state.showInfo && (
 				<snc-alert-email-preview
 					focusedRecordNumber={state.focusedRecordNumber}
+					actionArray={state.properties.actionArray}
 					className={state.isInfoMounted ? "mounted" : "unmounted"}
 					onanimationend={() => {
 						if (!state.isInfoMounted) updateState({showInfo: false});
@@ -81,6 +83,9 @@ createCustomElement('snc-alert-email-view', {
 		excludedMenuCategories: {
 			default: []
 		},
+		uibRefresh: {
+			default: false
+		}
 	},
 	actionHandlers: {
 		'TABLE_ROW#CLICKED': ({action, dispatch, updateState, state}) => {
@@ -148,13 +153,13 @@ createCustomElement('snc-alert-email-view', {
 		'CREATE_MY_WORKSPACE_LIST#MODAL': ({action,dispatch}) => {
 			logEvent("CREATE_MY_WORKSPACE_LIST#MODAL", action.payload);
 			dispatch("CREATE_MY_WORKSPACE_LIST_MODAL", action.payload);
-		},
+		}
 	},
 	setInitialState() {
 		return {
 			showInfo: false,
 			isInfoMounted: false,
-			focusedRecordNumber: "Alert0000000"
+			focusedRecordNumber: "Alert0000000",
 		}
 	}
 });

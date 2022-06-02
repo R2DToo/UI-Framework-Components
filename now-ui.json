@@ -123,6 +123,21 @@
 					"selectable": false,
 					"valueType": "string",
 					"mandatory": false
+				},
+				{
+					"name": "uibRefresh",
+					"label": "Refresh Toggle",
+					"readOnly": false,
+					"required": false,
+					"selectable": false,
+					"fieldType": "boolean",
+					"typeMetadata": {
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					"description": "Toggle this value to request the component to refresh its data",
+					"valueType": "string"
 				}
 			],
 			"actions": [

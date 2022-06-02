@@ -108,6 +108,9 @@ createCustomElement('snc-alert-email-sidebar', {
 		excludedMenuCategories: {
 			default: []
 		},
+		uibRefresh: {
+			default: false
+		}
 	},
 	setInitialState() {
 		return {
@@ -132,6 +135,14 @@ createCustomElement('snc-alert-email-sidebar', {
 			const {state, dispatch, action} = coeffects;
 			console.log("snc-alert-email-sidebar COMPONENT_PROPERTY_CHANGED: ", action.payload.name);
 			console.log("sidebar payload: ", action.payload);
+			if (action.payload.name == "uibRefresh") {
+				dispatch('FETCH_LIST_CATEGORIES', {
+					table: 'sys_aw_list_category',
+					sysparm_query: `workspace=${state.properties.workspaceId}^sys_idNOT IN${state.properties.excludedMenuCategories.toString()}^active=true^ORDERBYorder`,
+					sysparm_fields: 'title,sys_id',
+					sysparm_display_value: 'true'
+				});
+			}
 		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);

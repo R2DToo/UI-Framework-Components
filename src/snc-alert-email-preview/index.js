@@ -292,12 +292,105 @@ const view = (state, {updateState, dispatch}) => {
 		} else if (num <= 999) {
 			returnValue = num; // if value < 1000, nothing to do
 		}
-		console.log("shortNumFormat: ", returnValue);
+		//console.log("shortNumFormat: ", returnValue);
 		return returnValue;
 	};
 
+	const handleContextMenu = (e) => {
+		e.preventDefault();
+		dispatch("ON_CONTEXT_MENU", {e: e});
+	};
+
+	const closeContextMenu = () => {
+		updateState({showContextMenu: false, contextMenuRecordIndex: -1, contextMenuStyle: {}, contextMenuPositionData: {}, contextAlertActions: []});
+	};
+
+	const updateContextMenuPosition = (contextMenuElement) => {
+		if (state.showContextMenu == true && !state.contextMenuStyle.top) {
+			const positionTop = state.contextMenuPositionData.clientY + contextMenuElement.scrollHeight >= state.contextMenuPositionData.parentDivHeight ? state.contextMenuPositionData.parentDivHeight - contextMenuElement.scrollHeight - 20 : state.contextMenuPositionData.clientY;
+			const positionLeft = state.contextMenuPositionData.clientX + contextMenuElement.scrollWidth >= state.contextMenuPositionData.parentDivWidth ? state.contextMenuPositionData.parentDivWidth - contextMenuElement.scrollWidth - 20 : state.contextMenuPositionData.clientX;
+
+			let contextMenuStyle = {
+				top: `${positionTop}px`,
+				left: `${positionLeft}px`
+				// left: `0px`
+			};
+			updateState({contextMenuStyle: contextMenuStyle});
+		}
+	};
+
+	const contextMenuOptionClicked = (event, option, isAction = false) => {
+		console.log("contextMenuOptionClicked: ", option);
+		if (state.contextMenuRecordIndex > -1) {
+			let contextRecord = null;
+			if (state.contextMenuRecordIsParent == true) {
+				contextRecord = state.parentRecord[state.contextMenuRecordIndex];
+			} else {
+				contextRecord = state.secondaryRecords[state.contextMenuRecordIndex];
+			}
+			console.log("contextRecord: ", contextRecord);
+
+			if (state.properties.actionArray && isAction == true) {
+				let matchingAction = state.properties.actionArray.find((action) => action.label == option);
+				if (matchingAction) {
+					if (matchingAction.label == "Tag Normalization") {
+						dispatch("DEFINE_TAG#NORMALIZATION", {value: replaceActionQueryVariables(matchingAction.updateQuery, contextRecord)});
+					} else if (matchingAction.isUpdate) {
+						fireEvent('TABLE_ACTION_BAR_BUTTON#CLICKED', {selectedRecords: [contextRecord.sys_id.value], table: "em_alert", updateQuery: matchingAction.updateQuery, isUpdate: matchingAction.isUpdate});
+						dispatch("REFRESH_MAIN_QUERY");
+					} else if (matchingAction.isLink) {
+						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: replaceActionQueryVariables(matchingAction.updateQuery, contextRecord)});
+					}
+				}
+			} else {
+				switch (option) {
+					case 'ci_details':
+						if (contextRecord) {
+							dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+						}
+						break;
+					case 'ci_dependency_view':
+						if (contextRecord) {
+							dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/nav/ui/classic/params/target/%24ngbsm.do%3Fid%3D${contextRecord.cmdb_ci.value}`});
+						}
+						break;
+					case 'show_in_list':
+						if (contextRecord) {
+							dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: `number=${contextRecord.number.value}`}});
+						}
+						break;
+					default: break;
+				}
+			}
+		}
+	};
+
+	const replaceActionQueryVariables = (updateQuery, currentRecord) => {
+		console.log("replaceActionQueryVariables");
+		if (currentRecord) {
+			console.log("starting query: ", updateQuery);
+			while (updateQuery.includes("<") && updateQuery.includes(">")) {
+				let variableStartIndex = updateQuery.indexOf("<");
+				let variableEndIndex = updateQuery.indexOf(">");
+				let rawVariable = updateQuery.substring(variableStartIndex, variableEndIndex + 1);
+				console.log("Raw Variable: ", rawVariable);
+				let variable = rawVariable.slice(1, rawVariable.length - 1);
+				console.log("Variable: ", variable);
+				updateQuery = updateQuery.replace(rawVariable, currentRecord[variable].value);
+				console.log("replaced query: ", updateQuery);
+			}
+		}
+		return updateQuery;
+	};
+
+	const copyTextToClipboard = async (event, text) => {
+		if (navigator.clipboard) {
+			await navigator.clipboard.writeText(text);
+		}
+	};
+
 	return (
-		<div id="info-container">
+		<div id="info-container" oncontextmenu={(e) => {handleContextMenu(e)}} onclick={() => {closeContextMenu()}}>
 			<div id="info-header">
 				<div>
 					<h1><now-rich-text title="Close Preview" className="g-icon primary-color" onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} html='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0zm0 0h24v24H0V0zm0 0h24v24H0V0zm0 0h24v24H0V0z" fill="none"/><path d="M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6zm-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.05-1.07.14zM2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45 2.01 3.87zm7.5 7.5l2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13zm-3.4-3.4l1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53z"/></svg>'/> 360&#176; View</h1>
@@ -403,10 +496,13 @@ const view = (state, {updateState, dispatch}) => {
 							break;
 						}
 						return (
-							<li className="info-card">
+							<li className="info-card" id={`sys_id-${record.sys_id.value}`}>
 								<div className="card-header">
 									<div className="card-header-column">
-										<div className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</div>
+										<div className="align-items-center">
+											<span className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</span>
+											<svg onclick={(e) => {copyTextToClipboard(e, record.number.display_value)}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
+										</div>
 										<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
 									</div>
 									<img className="card-header-image" src={record.source_icon.value}/>
@@ -422,21 +518,21 @@ const view = (state, {updateState, dispatch}) => {
 										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
 										<div className="card-row">
 											<div className="card-column">
-												<p><span className="key">Source: </span> <span className="">{record.source.display_value}</span></p>
-												<p className="align-items-center"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg></p>
-												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
-												<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
+												<p className="align-items-center"><span className="key">Source: </span> <span className="">{record.source.display_value}</span> {record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}</p>
+												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
+												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
 												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
-												<p><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
 												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
 												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
-												<p><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
 											</div>
 											<div className="card-column">
 												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
 												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
+												<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
@@ -534,10 +630,13 @@ const view = (state, {updateState, dispatch}) => {
 							break;
 						}
 						return (
-							<li className="info-card">
+							<li className="info-card" id={`sys_id-${record.sys_id.value}`}>
 								<div className="card-header">
 									<div className="card-header-column">
-										<div className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</div>
+										<div className="align-items-center">
+											<span className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</span>
+											<svg onclick={(e) => {copyTextToClipboard(e, record.number.display_value)}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
+										</div>
 										<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
 									</div>
 									<img className="card-header-image" src={record.source_icon.value}/>
@@ -553,21 +652,21 @@ const view = (state, {updateState, dispatch}) => {
 										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
 										<div className="card-row">
 											<div className="card-column">
-												<p><span className="key">Source: </span> <span className="">{record.source.display_value}</span></p>
-												<p className="align-items-center"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg></p>
-												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span></p>
-												<p><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
+												<p className="align-items-center"><span className="key">Source: </span> <span className="">{record.source.display_value}</span> {record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}</p>
+												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
+												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
 												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
-												<p><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
 												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
 												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
-												<p><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
 											</div>
 											<div className="card-column">
 												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
 												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">State:</span> <span class={{green: record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
+												<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
@@ -653,6 +752,35 @@ const view = (state, {updateState, dispatch}) => {
 					})}
 				</ul>
 			</div>
+			<div class={{'context-menu-container': true, visible: state.showContextMenu}} hook-update={(oldNode, newNode) => updateContextMenuPosition(newNode.elm)} style={{top: state.contextMenuStyle.top, left: state.contextMenuStyle.left}}>
+				<div className="context-menu">
+					<ul className="context-menu-list">
+						{state.contextMenuRecordIndex > -1 && state.properties.actionArray.map((action) =>
+							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
+						)}
+						{/* <li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.currentList.table}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12 15.625 7.725 11.35 8.775 10.25 11.25 12.725V4.325H12.75V12.725L15.225 10.25L16.275 11.35ZM6.3 19.5Q5.55 19.5 5.025 18.975Q4.5 18.45 4.5 17.7V15H6V17.7Q6 17.8 6.1 17.9Q6.2 18 6.3 18H17.7Q17.8 18 17.9 17.9Q18 17.8 18 17.7V15H19.5V17.7Q19.5 18.45 18.975 18.975Q18.45 19.5 17.7 19.5Z"/></svg>Export CSV</button></a></li> */}
+						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
+							<ul className="context-menu-sub-list">
+								{state.contextAlertActions.map((alertAction) => {
+									if (alertAction.type == "link") {
+										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>{alertAction.display_value}</button></li>
+									} else {
+										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("START_FLOW", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>{alertAction.display_value}</button></li>
+									}
+								})}
+								{state.contextMenuRecordIndex > -1 && state.contextMenuRecordIsParent == true && state.parentRecord[state.contextMenuRecordIndex].cmdb_ci.value != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M11.25 14.75H12.75V11.75H15.75V10.25H12.75V7.25H11.25V10.25H8.25V11.75H11.25ZM8.5 20.5V18.5H4.3Q3.55 18.5 3.025 17.975Q2.5 17.45 2.5 16.7V5.3Q2.5 4.55 3.025 4.025Q3.55 3.5 4.3 3.5H19.7Q20.45 3.5 20.975 4.025Q21.5 4.55 21.5 5.3V16.7Q21.5 17.45 20.975 17.975Q20.45 18.5 19.7 18.5H15.5V20.5ZM4.3 17H19.7Q19.8 17 19.9 16.9Q20 16.8 20 16.7V5.3Q20 5.2 19.9 5.1Q19.8 5 19.7 5H4.3Q4.2 5 4.1 5.1Q4 5.2 4 5.3V16.7Q4 16.8 4.1 16.9Q4.2 17 4.3 17ZM4 17Q4 17 4 16.913Q4 16.825 4 16.7V5.3Q4 5.175 4 5.088Q4 5 4 5Q4 5 4 5.088Q4 5.175 4 5.3V16.7Q4 16.825 4 16.913Q4 17 4 17Z"/></svg>CI Details</button></li>}
+								{state.contextMenuRecordIndex > -1 && state.contextMenuRecordIsParent == true && state.parentRecord[state.contextMenuRecordIndex].cmdb_ci.value != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3.25 21.75V15.25H6.25V11.25H11.25V8.75H8.25V2.25H15.75V8.75H12.75V11.25H17.75V15.25H20.75V21.75H13.25V15.25H16.25V12.75H7.75V15.25H10.75V21.75ZM9.75 7.25H14.25V3.75H9.75ZM4.75 20.25H9.25V16.75H4.75ZM14.75 20.25H19.25V16.75H14.75ZM12 7.25ZM9.25 16.75ZM14.75 16.75Z"/></svg>CI Dependency View</button></li>}
+
+								{state.contextMenuRecordIndex > -1 && state.contextMenuRecordIsParent == false && state.secondaryRecords[state.contextMenuRecordIndex].cmdb_ci.value != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M11.25 14.75H12.75V11.75H15.75V10.25H12.75V7.25H11.25V10.25H8.25V11.75H11.25ZM8.5 20.5V18.5H4.3Q3.55 18.5 3.025 17.975Q2.5 17.45 2.5 16.7V5.3Q2.5 4.55 3.025 4.025Q3.55 3.5 4.3 3.5H19.7Q20.45 3.5 20.975 4.025Q21.5 4.55 21.5 5.3V16.7Q21.5 17.45 20.975 17.975Q20.45 18.5 19.7 18.5H15.5V20.5ZM4.3 17H19.7Q19.8 17 19.9 16.9Q20 16.8 20 16.7V5.3Q20 5.2 19.9 5.1Q19.8 5 19.7 5H4.3Q4.2 5 4.1 5.1Q4 5.2 4 5.3V16.7Q4 16.8 4.1 16.9Q4.2 17 4.3 17ZM4 17Q4 17 4 16.913Q4 16.825 4 16.7V5.3Q4 5.175 4 5.088Q4 5 4 5Q4 5 4 5.088Q4 5.175 4 5.3V16.7Q4 16.825 4 16.913Q4 17 4 17Z"/></svg>CI Details</button></li>}
+								{state.contextMenuRecordIndex > -1 && state.contextMenuRecordIsParent == false && state.secondaryRecords[state.contextMenuRecordIndex].cmdb_ci.value != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3.25 21.75V15.25H6.25V11.25H11.25V8.75H8.25V2.25H15.75V8.75H12.75V11.25H17.75V15.25H20.75V21.75H13.25V15.25H16.25V12.75H7.75V15.25H10.75V21.75ZM9.75 7.25H14.25V3.75H9.75ZM4.75 20.25H9.25V16.75H4.75ZM14.75 20.25H19.25V16.75H14.75ZM12 7.25ZM9.25 16.75ZM14.75 16.75Z"/></svg>CI Dependency View</button></li>}
+							</ul>
+						</li>
+					</ul>
+					{state.contextMenuRecordIndex > -1 && <ul className="context-menu-list">
+						<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'show_in_list')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Show in List</button></li>
+					</ul>}
+				</div>
+			</div>
 		</div>
 	);
 };
@@ -709,13 +837,13 @@ createCustomElement('snc-alert-email-preview', {
 			dispatch('FETCH_PARENT_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent',
 				sysparm_display_value: 'all'
 			});
 			dispatch('FETCH_CHILD_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent',
 				sysparm_display_value: 'all'
 			});
 		},
@@ -1114,14 +1242,92 @@ createCustomElement('snc-alert-email-preview', {
 				}
 			}
 		},
+		'ON_CONTEXT_MENU': (coeffects) => {
+			const {action, state, updateState, dispatch} = coeffects;
+			console.log("preview ON_CONTEXT_MENU payload: ", action.payload);
+			console.log("preview ON_CONTEXT_MENU path: ", action.payload.e.path);
+
+			let clickedRecordSysID = 0;
+			let contextMenuRecordIndex = -1;
+			let contextMenuRecordIsParent = true;
+
+			let clientX = action.payload.e.clientX - 1171;
+			let clientY = action.payload.e.clientY - 142;
+			let parentDiv = action.payload.e.path.find((element) => element.id && element.id == "info-container");
+			let parentDivHeight = parentDiv.offsetHeight;
+			let parentDivWidth = parentDiv.offsetWidth;
+			let contextMenuPositionData = {clientX: clientX, clientY: clientY, parentDivHeight: parentDivHeight, parentDivWidth: parentDivWidth};
+
+			if (state.showContextMenu == false && action.payload.e.path) {
+				let clickedRecordElement = action.payload.e.path.find((element) => element.id && element.id.includes("sys_id-"));
+				console.log("clickedRecordElement: ", clickedRecordElement);
+				if (clickedRecordElement) {
+					clickedRecordSysID = clickedRecordElement.id.substring(clickedRecordElement.id.indexOf("-") + 1);
+					console.log("clickedRecordSysID: ", clickedRecordSysID);
+					dispatch("START_FETCH_ALERT_ACTIONS", {value: clickedRecordSysID});
+					let matchingParentRecordIndex = state.parentRecord.findIndex((parentRecord) => parentRecord.sys_id.value == clickedRecordSysID);
+					if (matchingParentRecordIndex > -1) {
+						contextMenuRecordIsParent = true;
+						contextMenuRecordIndex = matchingParentRecordIndex;
+					} else {
+						let matchingSecondaryRecordIndex = state.secondaryRecords.findIndex((secondaryRecord) => secondaryRecord.sys_id.value == clickedRecordSysID);
+						contextMenuRecordIsParent = false;
+						contextMenuRecordIndex = matchingSecondaryRecordIndex;
+					}
+				}
+			}
+
+			updateState({
+				showContextMenu: !state.showContextMenu,
+				contextMenuRecordIndex: contextMenuRecordIndex,
+				contextMenuRecordIsParent: contextMenuRecordIsParent,
+				contextMenuPositionData: contextMenuPositionData,
+				contextMenuStyle: {}
+			});
+		},
+		'START_FETCH_ALERT_ACTIONS': (coeffects) => {
+			const {action, dispatch} = coeffects;
+			if (action.payload.value) {
+				dispatch('FETCH_ALERT_ACTIONS', {
+					retrieveLaunchApplications: true,
+					retrieveRemediations: true,
+					retrieveSubflows: true,
+					alertId: action.payload.value
+				});
+			}
+		},
+		'FETCH_ALERT_ACTIONS': createHttpEffect('/api/now/em_actions/getManualActionsForAlert', {
+			batch: false,
+			method: 'GET',
+			queryParams: ['retrieveLaunchApplications', 'retrieveRemediations', 'retrieveSubflows', 'alertId'],
+			successActionType: 'FETCH_ALERT_ACTIONS_SUCCESS',
+			cacheable: true
+		}),
+		'FETCH_ALERT_ACTIONS_SUCCESS': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			console.log("FETCH_ALERT_ACTIONS_SUCCESS payload: ", action.payload);
+			if (action.payload && action.payload.result) {
+				let newAlertActions = [];
+				if (action.payload.result.toolsForAlert) {
+					action.payload.result.toolsForAlert.forEach((alertActionEntry) => newAlertActions.push({display_value: alertActionEntry.displayName, value: alertActionEntry.url, type: "link"}));
+				}
+				if (action.payload.result.manualRemediationData) {
+					action.payload.result.manualRemediationData.forEach((flowAction) => newAlertActions.push({display_value: flowAction.workflowName, value: flowAction, type: "flow"}));
+				}
+				updateState({contextAlertActions: newAlertActions, dummyStateChange: !state.dummyStateChange});
+			}
+		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
 		},
 	},
 	properties: {
 		focusedRecordNumber: {
-			default: 'Alert0000000'
-		}
+			default: 'Alert0000000',
+		},
+		actionArray: {
+			default: []
+		},
 	},
 	setInitialState() {
 		return {
@@ -1129,8 +1335,12 @@ createCustomElement('snc-alert-email-preview', {
 			dummyStateChange: false,
 			parentRecord: [],
 			secondaryRecords: [],
-			//tagClusteringMethod: '',
-			//repeatedAlertsURL: '',
+			showContextMenu: false,
+			contextMenuRecordIndex: -1,
+			contextMenuRecordIsParent: true,
+			contextMenuStyle: {},
+			contextMenuPositionData: {},
+			contextAlertActions: []
 		}
 	}
 });

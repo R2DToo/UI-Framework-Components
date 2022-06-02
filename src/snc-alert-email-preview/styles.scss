@@ -1,6 +1,5 @@
 @import '@servicenow/sass-kit/host';
-
-@import url('https://fonts.googleapis.com/css?family=Roboto:300&display=swap');
+@import '@servicenow/sass-utility/index';
 
 * {
   box-sizing: border-box;
@@ -10,6 +9,9 @@
   fill: RGB($now-color--primary-1);
   &.green {
     fill: rgba(119, 178, 123, 1);
+  }
+  &.clickable:hover {
+    fill: RGB($now-color--primary-0);
   }
 }
 
@@ -172,6 +174,12 @@
   margin-bottom: 1em;
   margin-top: 1em;
 
+  .align-items-center {
+    display: flex;
+    align-items: center;
+    column-gap: 6px;
+  }
+
   .card-header {
     display: flex;
     align-items: center;
@@ -212,19 +220,28 @@
     .key {
       //font-weight: bold;
       color: RGB($now-color--primary-1);
+      white-space:nowrap;
+    }
+    .elipse-value {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      &:hover{
+        overflow: initial;
+        white-space: normal;
+        word-break: break-all;
+        height: auto;  /* just added this line */
+      }
     }
     .card-row {
       display: flex;
     }
     .card-column {
-      flex: 50%;
+      width: 50%;
+      padding-right: 4px;
       p {
-        word-break: break-word;
-        &.align-items-center {
-          display: flex;
-          align-items: center;
-          column-gap: 6px;
-        }
+        width: 100%;
+        white-space: nowrap;
       }
     }
     .card-center {
@@ -264,7 +281,7 @@
     .bottom {
       margin-bottom: 8px;
     }
-    .green {
+    .green-text {
       color: rgba(119, 178, 123, 1);
     }
     .tags, .tags-title {
@@ -394,11 +411,11 @@
       margin-top: -($bdiam/2);
       background: $barColor;
       position: absolute;
-      z-index: 999;
+      z-index: 11;
       box-shadow: 10px 0 10px rgba(0,0,0,.2);
     }
     &:after {
-      z-index: 998;
+      z-index: 10;
       box-shadow: none;
       transform: translate(0,-($size/2)+($bdiam/2));
     }
@@ -473,14 +490,21 @@
 }
 
 .record-link {
+  color: RGB($now-color_text--primary);
   border-radius:25px;
 	padding:2px 5px;
   background-color:RGB($now-color--primary-1);
   cursor: pointer;
+  &.green {
+    background-color: rgba(119, 178, 123, 1);
+  }
 }
 
 .record-link:hover {
   background-color: RGB($now-color--primary-0);
+  &.green {
+    background-color: rgba(74, 182, 77, 1);
+  }
 }
 
 .circle-tag {
@@ -507,5 +531,95 @@
 	border-bottom: 2px solid RGB($now-color--primary-1);
 	&:hover {
 		border-color: RGB($now-color--primary-2);
+	}
+}
+
+.context-menu-container {
+	display: none;
+	z-index: 100;
+	position: absolute;
+	&.visible {
+		display: block;
+	}
+
+	.context-menu {
+		display: flex;
+		flex-direction: column;
+		background-color: RGB($now-color_background--tertiary);
+		border: 1px solid RGB($now-color--primary-1);
+		border-radius: 10px;
+		color: RGB($now-color_text--primary);
+		font-family: $now-font-family;
+
+		.context-menu-list {
+			margin: 0;
+			display: block;
+			width: 100%;
+			padding: 8px;
+      list-style-type: none;
+			& + .context-menu-list {
+				border-top: 1px solid RGB($now-color_border--primary);
+			}
+		}
+		.context-menu-item {
+			position: relative;
+		}
+		.context-menu-link {
+			text-decoration: none;
+			color: inherit;
+		}
+		.context-menu-button {
+			font: inherit;
+			border: 0;
+			padding: 8px 8px;
+			padding-right: 36px;
+			width: 100%;
+			border-radius: 8px;
+			text-align: left;
+			display: flex;
+			align-items: center;
+			position: relative;
+			color: RGB($now-color_text--primary);
+			background-color: RGB($now-color_background--tertiary);
+			&:hover {
+				background-color: RGB($now-color--primary-1);
+				& + .context-menu-sub-list {
+					display: flex;
+				}
+				.context-menu-icon {
+					fill: RGB($now-color_text--primary);
+				}
+			}
+		}
+		.context-menu-icon {
+			flex-shrink: 0;
+			width: 24px;
+			height: 24px;
+			margin-right: 10px;
+			fill: RGB($now-color_text--secondary);
+			&:nth-of-type(2) {
+				margin-right: 0;
+				position: absolute;
+				right: 8px;
+			}
+		}
+		.context-menu-sub-list {
+			display: none;
+			padding: 8px;
+			background-color: RGB($now-color_background--tertiary);
+			border: 1px solid RGB($now-color--primary-1);
+			border-radius: 10px;
+			position: absolute;
+			left: 100%;
+			right: 0;
+			z-index: 100;
+			width: 100%;
+			top: 0;
+			flex-direction: column;
+      list-style-type: none;
+			&:hover {
+				display: flex;
+			}
+		}
 	}
 }

@@ -302,22 +302,22 @@ const view = (state, {updateState, dispatch}) => {
 					{state.tableOrder.map((key) => {
 						if (row[key]) {
 							if (key == "severity" || key == "sn_priority_group") {
-								return <td>{row[key].display_value && <now-highlighted-value label={row[key].display_value} color={getSeverityColor(row[key].value)} variant="secondary"/>}</td>
+								return <td className={`data-field-${key}`}>{row[key].display_value && <now-highlighted-value label={row[key].display_value} color={getSeverityColor(row[key].value)} variant="secondary"/>}</td>
 							} else if (key == "incident.priority") {
-								return <td className="">
-									<div className="broker-tags">
+								return <td className={`data-field-${key}`}>
+									<div className="broker-tags centered">
 										<div className={"broker-tag " + getTaskPriorityColor(row[key].value)}><span className="tag-key">{row[key].display_value}</span></div>
 									</div>
 								</td>
 							} else if (key == "sys_updated_on" || key == "sys_created_on") {
-								return <td className="view-message">{makeRelativeTime(row[key].display_value)}</td>
+								return <td className={`view-message data-field-${key}`}>{makeRelativeTime(row[key].display_value)}</td>
 							} else if (key == "number") {
-								return <td className="view-message record-link">{row[key].display_value}</td>
+								return <td className={`view-message record-link data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "u_number") {
 								let url = '/now/nav/ui/classic/params/target/' + state.currentList.table + '.do%3Fsys_id%3D' + row.sys_id.value;
-								return <td className="name-message break-message force-center"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
+								return <td className={`name-message break-message force-center view-message data-field-${key}`}><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
 							} else if (key == "assigned_to") {
-								return <td className="view-message">
+								return <td className={`view-message data-field-${key}`}>
 									<now-avatar
 										size="md"
 										user-name={row[key].display_value}
@@ -326,7 +326,7 @@ const view = (state, {updateState, dispatch}) => {
 									/>
 								</td>
 							} else if (key == "description") {
-								return <td className="description break-message">{row[key].display_value}</td>
+								return <td className={`description break-message data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "application_service") {
 								let services = [];
 								row[key].forEach(service => {
@@ -338,30 +338,30 @@ const view = (state, {updateState, dispatch}) => {
 									let url = "/$ngbsm.do?id=" + service.value;
 									return <div className={"tag " + getSeverityColor(service.impact)} onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{service.display_value}</div>
 								});
-								return <td className="tags">{serviceTags}</td>
+								return <td className={`tags data-field-${key}`}>{serviceTags}</td>
 							} else if (key == "secondary_alerts") {
-								return <td className="tags">
+								return <td className={`tags data-field-${key}`}>
 									{row[key].display_value != "0" && <div className="circle-tags">
 										<div className={"circle-tag"}>{row[key].display_value}</div>
 									</div>}
 								</td>
 							} else if (key == "cmdb_ci") {
 								let url = `/now/cmdb/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}`;
-								return <td className="view-message">
+								return <td className={`view-message data-field-${key}`}>
 									{row[key].value ?
 										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span>
 										: row[key].display_value
 									}
 								</td>
 							} else if (key == "incident") {
-								return <td className="view-message">
+								return <td className={`view-message data-field-${key}`}>
 									{row[key].value ?
 										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK#CLICKED", {table: 'task', sys_id: row[key].value});}}>{row[key].display_value}</span>
 										: row[key].display_value
 									}
 								</td>
 							} else if (key == "itom_tags") {
-								return <td className="broker-tags-container">
+								return <td className={`broker-tags-container data-field-${key}`}>
 									<div className="broker-tags">
 										{row[key].map((tag, index) =>
 											<div className="broker-tag" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
@@ -369,38 +369,38 @@ const view = (state, {updateState, dispatch}) => {
 									</div>
 								</td>
 							} else if (key == "alert_filter") {
-								return <td className="description break-message">{row[key].display_value}</td>
+								return <td className={`description break-message data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "name") {
 								let url = '/now/nav/ui/classic/params/target/' + state.currentList.table + '.do%3Fsys_id%3D' + row.sys_id.value;
-								return <td className="name-message break-message"><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
+								return <td className={`name-message break-message data-field-${key}`}><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
 							} else if (key == "alert_correlation_rule") {
-								return <td className="name-message">{row[key].display_value}</td>
+								return <td className={`name-message data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "node") {
-								return <td className="name-message break-message force-center">{row[key].display_value}</td>
+								return <td className={`name-message break-message force-center data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "source_icon") {
-								return <td className="view-message"><img className="table-image" src={row[key].value}/></td>
+								return <td className={`view-message data-field-${key}`}><img className="table-image" src={row[key].value}/></td>
 							// } else if (key == "incident.priority") {
 							// 	return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
 							} else if (key == "u_tbac_reasoning") {
-								return <td className="name-message primary-color force-center">{row[key].display_value}</td>
+								return <td className={`name-message primary-color force-center data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "prc") {
-								return <td className="name-message force-center">{row[key].display_value}</td>
+								return <td className={`name-message force-center data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "u_repeated_alerts") {
-								return <td className="tags">
+								return <td className={`tags data-field-${key}`}>
 									<div className="circle-tags">
 										<div className={"circle-tag secondary"}>{shortNumFormat(row[key].value)}</div>
 									</div>
 								</td>
 							} else if (key == "u_normalized_key") {
-								return <td className="view-message">
+								return <td className={`view-message data-field-${key}`}>
 									<div className="broker-tags centered">
 										<div className="broker-tag"><span className="tag-key">{row[key].display_value}</span></div>
 									</div>
 								</td>
 							} else if (key == "u_flattened_data") {
-								return <td className="broker-tags-container break-message">{row[key].display_value}</td>
+								return <td className={`broker-tags-container break-message data-field-${key}`}>{row[key].display_value}</td>
 							} else {
-								return <td className="view-message">{row[key].display_value}</td>
+								return <td className={`view-message data-field-${key}`}>{row[key].display_value}</td>
 							}
 						} else {
 							if (key == 'Select') {
@@ -460,6 +460,50 @@ const view = (state, {updateState, dispatch}) => {
 					}
 					sysparm += state.currentList.condition;
 					dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/$interactive_analysis.do?sysparm_field=source&sysparm_table=${state.currentList.table}&sysparm_from_list=true&sysparm_query=${sysparm}&sysparm_list_view=`});
+					break;
+				case 'show_matching':
+					if (contextRecord) {
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: contextRecord[state.contextMenuRecordField].label || state.contextMenuRecordField, value: state.contextMenuRecordField},
+								operator: {label: "is", value: "="},
+								value: {label: contextRecord[state.contextMenuRecordField].display_value, value: contextRecord[state.contextMenuRecordField].value}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				case 'filter_out':
+					if (contextRecord) {
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: contextRecord[state.contextMenuRecordField].label || state.contextMenuRecordField, value: state.contextMenuRecordField},
+								operator: {label: "is not", value: "!="},
+								value: {label: contextRecord[state.contextMenuRecordField].display_value, value: contextRecord[state.contextMenuRecordField].value}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
+					}
 					break;
 				case 'same_ci':
 					if (contextRecord) {
@@ -564,6 +608,29 @@ const view = (state, {updateState, dispatch}) => {
 								and_or: {label: 'AND', value: '^'},
 								column: {label: 'ITOM Tags', value: 'u_itom_tags'},
 								operator: {label: "contains", value: "LIKE"},
+								value: {label: `"${state.contextMenuTag.key}": "${state.contextMenuTag.value}"`, value: `"${state.contextMenuTag.key}": "${state.contextMenuTag.value}"`}
+							},
+							results: {
+								operator: [],
+								value: []
+							}
+						});
+						updateState({filters: updatedFilters});
+						dispatch('UPDATE_PAGE#PARAMETER', {params: {sysparm: parseFiltersToSysparm(updatedFilters)}});
+						dispatch('REFRESH_MAIN_QUERY', {force: true});
+					}
+					break;
+				case 'exclude_tag':
+					if (state.contextMenuTag.key && state.contextMenuTag.value) {
+						//Add new filter, cmdb_ci=contextRecord
+						let updatedFilters = state.filters;
+						updatedFilters.push({
+							showInputs: false,
+							showResults: {operator: false, value: false},
+							inputs: {
+								and_or: {label: 'AND', value: '^'},
+								column: {label: 'ITOM Tags', value: 'u_itom_tags'},
+								operator: {label: "does not contains", value: "NOT LIKE"},
 								value: {label: `"${state.contextMenuTag.key}": "${state.contextMenuTag.value}"`, value: `"${state.contextMenuTag.key}": "${state.contextMenuTag.value}"`}
 							},
 							results: {
@@ -877,7 +944,7 @@ const view = (state, {updateState, dispatch}) => {
 					No records to display
 				</div>}
 			</main>
-			<div class={{'context-menu-container': true, visible: state.showContextMenu}} style={{top: state.contextMenuTop, left: state.contextMenuLeft}} hook-insert={(vnode) => console.log('inserted', vnode.elm.offsetWidth)}>
+			<div ref={(contextMenuElement) => updateState({contextMenuRef: contextMenuElement})} class={{'context-menu-container': true, visible: state.showContextMenu}} /*style={{top: state.contextMenuTop, left: state.contextMenuLeft}}*/ style={{/*width: state.contextMenuStyle.width, height: state.contextMenuStyle.height,*/ top: state.contextMenuStyle.top, left: state.contextMenuStyle.left}}>
 				<div className="context-menu">
 					<ul className="context-menu-list">
 						{state.properties.actionArray.map((action) =>
@@ -893,21 +960,23 @@ const view = (state, {updateState, dispatch}) => {
 									} else {
 										return <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {dispatch("START_FLOW", {value: alertAction.value})}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>{alertAction.display_value}</button></li>
 									}
-								}
-								)}
+								})}
 								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_details')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M11.25 14.75H12.75V11.75H15.75V10.25H12.75V7.25H11.25V10.25H8.25V11.75H11.25ZM8.5 20.5V18.5H4.3Q3.55 18.5 3.025 17.975Q2.5 17.45 2.5 16.7V5.3Q2.5 4.55 3.025 4.025Q3.55 3.5 4.3 3.5H19.7Q20.45 3.5 20.975 4.025Q21.5 4.55 21.5 5.3V16.7Q21.5 17.45 20.975 17.975Q20.45 18.5 19.7 18.5H15.5V20.5ZM4.3 17H19.7Q19.8 17 19.9 16.9Q20 16.8 20 16.7V5.3Q20 5.2 19.9 5.1Q19.8 5 19.7 5H4.3Q4.2 5 4.1 5.1Q4 5.2 4 5.3V16.7Q4 16.8 4.1 16.9Q4.2 17 4.3 17ZM4 17Q4 17 4 16.913Q4 16.825 4 16.7V5.3Q4 5.175 4 5.088Q4 5 4 5Q4 5 4 5.088Q4 5.175 4 5.3V16.7Q4 16.825 4 16.913Q4 17 4 17Z"/></svg>CI Details</button></li>
 								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'ci_dependency_view')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3.25 21.75V15.25H6.25V11.25H11.25V8.75H8.25V2.25H15.75V8.75H12.75V11.25H17.75V15.25H20.75V21.75H13.25V15.25H16.25V12.75H7.75V15.25H10.75V21.75ZM9.75 7.25H14.25V3.75H9.75ZM4.75 20.25H9.25V16.75H4.75ZM14.75 20.25H19.25V16.75H14.75ZM12 7.25ZM9.25 16.75ZM14.75 16.75Z"/></svg>CI Dependency View</button></li>
 							</ul>
 						</li>}
 					</ul>
-					{state.currentList.table == "em_alert" && <ul className="context-menu-list">
+					{state.currentList.table == "em_alert" && state.contextMenuRecordIndex != -1 && <ul className="context-menu-list">
 						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Quick Search<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ci')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same CI</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_node')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same Node</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same AG</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_group')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Same Group</button></li>
-								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_tag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12.85 21.5Q12.55 21.5 12.263 21.375Q11.975 21.25 11.775 21.05L2.975 12.25Q2.75 12.025 2.625 11.75Q2.5 11.475 2.5 11.15V4Q2.5 3.375 2.938 2.938Q3.375 2.5 4 2.5H11.15Q11.45 2.5 11.738 2.625Q12.025 2.75 12.225 2.95L21.025 11.75Q21.475 12.2 21.475 12.837Q21.475 13.475 21.05 13.9L13.9 21.05Q13.7 21.25 13.425 21.375Q13.15 21.5 12.85 21.5ZM12.825 20 19.975 12.85 11.15 4H4V11.15ZM6.5 7.75Q7.025 7.75 7.388 7.387Q7.75 7.025 7.75 6.5Q7.75 5.975 7.388 5.612Q7.025 5.25 6.5 5.25Q5.975 5.25 5.613 5.612Q5.25 5.975 5.25 6.5Q5.25 7.025 5.613 7.387Q5.975 7.75 6.5 7.75ZM4 4Z"/></svg>Same Tag</button></li>
+								{state.contextMenuRecordField != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'show_matching')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Show Matching</button></li>}
+								{state.contextMenuRecordField != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'filter_out')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Filter Out</button></li>}
+								{/* <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ci')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>CI</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_node')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Node</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_ag')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>AG</button></li>
+								<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_group')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Group</button></li> */}
+								{state.contextMenuTag.key && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'same_tag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12.85 21.5Q12.55 21.5 12.263 21.375Q11.975 21.25 11.775 21.05L2.975 12.25Q2.75 12.025 2.625 11.75Q2.5 11.475 2.5 11.15V4Q2.5 3.375 2.938 2.938Q3.375 2.5 4 2.5H11.15Q11.45 2.5 11.738 2.625Q12.025 2.75 12.225 2.95L21.025 11.75Q21.475 12.2 21.475 12.837Q21.475 13.475 21.05 13.9L13.9 21.05Q13.7 21.25 13.425 21.375Q13.15 21.5 12.85 21.5ZM12.825 20 19.975 12.85 11.15 4H4V11.15ZM6.5 7.75Q7.025 7.75 7.388 7.387Q7.75 7.025 7.75 6.5Q7.75 5.975 7.388 5.612Q7.025 5.25 6.5 5.25Q5.975 5.25 5.613 5.612Q5.25 5.975 5.25 6.5Q5.25 7.025 5.613 7.387Q5.975 7.75 6.5 7.75ZM4 4Z"/></svg>Same Tag</button></li>}
+								{state.contextMenuTag.key && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'exclude_tag')}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M17.8 15.65 16.7 14.55 18.55 12 15.175 7.25Q15.075 7.125 14.95 7.062Q14.825 7 14.675 7H9.15L7.65 5.5H14.7Q15.2 5.5 15.663 5.737Q16.125 5.975 16.425 6.4L20.375 12ZM19.225 22.025 15.5 18.3Q15.35 18.4 15.138 18.45Q14.925 18.5 14.7 18.5H5.3Q4.55 18.5 4.025 17.975Q3.5 17.45 3.5 16.7V7.3Q3.5 7.1 3.55 6.9Q3.6 6.7 3.7 6.5L1.775 4.575L2.85 3.525L20.275 20.975ZM9.575 12.4Q9.575 12.4 9.575 12.4Q9.575 12.4 9.575 12.4ZM12.925 10.775Q12.925 10.775 12.925 10.775Q12.925 10.775 12.925 10.775ZM14.2 17 5 7.8V16.7Q5 16.8 5.1 16.9Q5.2 17 5.3 17Z"/></svg>Exclude Tag</button></li>}
 							</ul>
 						</li>
 					</ul>}
@@ -1028,6 +1097,9 @@ createCustomElement('snc-alert-email-message-list', {
 		},
 		defaultListId: {
 			default: '7443faee47574550d0bc5c62e36d4319'
+		},
+		listRefresh: {
+			default: false
 		}
 	},
 	setInitialState() {
@@ -1039,7 +1111,10 @@ createCustomElement('snc-alert-email-message-list', {
 			showContextMenu: false,
 			contextMenuLeft: "0px",
 			contextMenuTop: "0px",
-			contextMenuRecordIndex: 0,
+			contextMenuRecordIndex: -1,
+			contextMenuRecordField: "",
+			contextMenuRef: null,
+			contextMenuStyle: {},
 			tableOrder: [],
 			tableData: [],
 			totalCount: 0,
@@ -1051,7 +1126,7 @@ createCustomElement('snc-alert-email-message-list', {
 				{label: 'starts with', value: 'STARTSWITH', types: ["String", "Reference", "Choice"]},
 				{label: 'ends with', value: 'ENDSWITH', types: ["String", "Reference", "Choice"]},
 				{label: 'contains', value: 'LIKE', types: ["String", "Reference", "Choice"]},
-				{label: 'does not contain', value: 'NOTLIKE', types: ["String", "Reference", "Choice"]},
+				{label: 'does not contain', value: 'NOT LIKE', types: ["String", "Reference", "Choice"]},
 				{label: 'is', value: '=', types: ["String", "Reference", "Choice", "Integer", "True/False"]},
 				{label: 'is not', value: '!=', types: ["String", "Reference", "Choice", "Integer", "True/False"]},
 				{label: 'is empty', value: 'ISEMPTY', types: ["String", "Reference", "Choice", "Date/Time", "Integer", "True/False"]},
@@ -1099,32 +1174,30 @@ createCustomElement('snc-alert-email-message-list', {
 		[COMPONENT_PROPERTY_CHANGED]: (coeffects) => {
 			const { dispatch, action, state, updateState } = coeffects;
 			console.log('COMPONENT_PROPERTY_CHANGED payload: ', action.payload);
-			// if (action.payload.name != "showInfo" && action.payload.name != "currentUser") {
-			// 	if (action.payload.name == "menuOptions" || action.payload.name == "paramListValue") {
-			// 		console.log("list properties: ", state.properties);
-			// 	}
-			// 	dispatch('REFRESH_MAIN_QUERY', {force: action.payload.name == "paramListValue" || action.payload.name == "menuOptions"});
-			// } else if (action.payload.name == "tableName") {
-			// 	let labelSysparm = `name=${state.properties.tableName}^elementISNOTEMPTY`;
-			// 	console.log("labelSysparm: ", labelSysparm);
-			// 	dispatch('FETCH_ALL_TABLE_COLUMNS', {
-			// 		table: 'sys_dictionary',
-			// 		sysparm_query: labelSysparm,
-			// 		sysparm_fields: 'element,column_label,name',
-			// 		sysparm_display_value: 'true'
-			// 	});
-			// }
-			if (action.payload.name == 'paramListValue') {
-				let listId = state.properties.defaultListId;
-				if (action.payload.value) {
-					listId = action.payload.value;
-				}
-				dispatch('FETCH_CURRENT_LIST', {
-					table: 'sys_aw_list',
-					sysparm_query: `sys_id=${listId}^workspace=${state.properties.workspaceId}`,
-					sysparm_fields: 'columns,condition,table,title',
-					sysparm_display_value: 'false'
-				});
+			switch (action.payload.name) {
+				case 'paramListValue':
+					let listId = state.properties.defaultListId;
+					if (action.payload.value) {
+						listId = action.payload.value;
+					}
+					dispatch('FETCH_CURRENT_LIST', {
+						table: 'sys_aw_list',
+						sysparm_query: `sys_id=${listId}^workspace=${state.properties.workspaceId}`,
+						sysparm_fields: 'columns,condition,table,title',
+						sysparm_display_value: 'false'
+					});
+					break;
+				case 'paramSysparmValue':
+					updateState({checkSysparmParamValue: true});
+					dispatch("REFRESH_MAIN_QUERY", {force: true});
+					break;
+				case 'page':
+					dispatch("REFRESH_MAIN_QUERY", {force: true});
+					break;
+				case 'tableLimit':
+					dispatch("REFRESH_MAIN_QUERY", {force: true});
+					break;
+				default: break;
 			}
 		},
 		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
@@ -1773,9 +1846,13 @@ createCustomElement('snc-alert-email-message-list', {
 						}
 					});
 				});
+				let updatedTableOrder = state.tableOrder;
+				if (!updatedTableOrder.includes("prc")) {
+					updatedTableOrder.splice(updatedTableOrder.length - 1, 0, "prc");
+				}
 				// console.log("%cCheck TableData isEqual: %o", "color:blue;font-size:12px;", isEqual(state.lastTableData, state.tableData));
 				// console.log(state.lastTableData, "vs", state.tableData);
-				updateState({lastTableData: state.tableData, isMainQueryRunning: false, tableData: updatedTableData});
+				updateState({lastTableData: state.tableData, isMainQueryRunning: false, tableData: updatedTableData, tableOrder: updatedTableOrder});
 			}
 		},
 		'START_FETCH_AVATARS': (coeffects) => {
@@ -2147,16 +2224,18 @@ createCustomElement('snc-alert-email-message-list', {
 	eventHandlers: [
 		{
 			events: ['contextmenu'],
-			effect({state, updateState, dispatch, action: {payload: {event}}}) {
-				event.preventDefault();
-				console.log(event.path);
+			effect({state, updateState, dispatch, action}) {
+				action.payload.event.preventDefault();
 				console.log("contextmenu");
-				console.log(event);
+				console.log(action.payload.event);
+				console.log(action.payload.event.path);
 				let clickedRecordSysID = "0"
 				let contextMenuTag = {};
-				let contextMenuRecordIndex = 0;
-				if (state.showContextMenu == false) {
-					let clickedRecordElement = event.path.find((element) => element.id && element.id.includes("sys_id-"));
+				let contextMenuRecordIndex = -1;
+				let clickedField = "";
+				let contextMenuStyle = {};
+				if (state.showContextMenu == false && action.payload.event.path) {
+					let clickedRecordElement = action.payload.event.path.find((element) => element.id && element.id.includes("sys_id-"));
 					console.log("clickedRecordElement: ", clickedRecordElement);
 					if (clickedRecordElement) {
 						clickedRecordSysID = clickedRecordElement.id.substring(clickedRecordElement.id.indexOf("-") + 1);
@@ -2167,37 +2246,83 @@ createCustomElement('snc-alert-email-message-list', {
 						if (clickedRecordIndex > -1) {
 							contextMenuRecordIndex = clickedRecordIndex;
 
-							let clickedTag = event.path.find((element) => element.id && element.id.includes("tagindex-"));
+							let clickedTag = action.payload.event.path.find((element) => element.id && element.id.includes("tagindex-"));
 							if (clickedTag) {
 								let clickedTagIndex = clickedTag.id.substring(clickedTag.id.indexOf("-") + 1);
 								contextMenuTag = state.tableData[contextMenuRecordIndex].itom_tags[clickedTagIndex];
 							}
 						}
 					}
+					for (let i = 0; i < 10; i++) { //Only loops over the first 10 elements in the path
+						console.log("event path [" + i + "] classList : ", action.payload.event.path[i].classList);
+						if (action.payload.event.path[i].classList) {
+							action.payload.event.path[i].classList.forEach((classString) => {
+								if (classString.includes("data-field")) {
+									clickedField = classString.substring(11);
+								}
+							})
+						}
+					}
+					if (clickedField == "source_icon") {
+						clickedField = "source";
+					}
+					if (//These fields can't be parsed into a filter so they are ignored
+						clickedField == "secondary_alerts" || clickedField == "temp_uniqueness" ||
+						clickedField == "application_service" || clickedField == "itom_tags" ||
+						clickedField == "prc" || clickedField == "tag_based_definition"
+					) {
+						clickedField = "";
+					}
+					console.log('%cClicked Field: %o', 'color:green;font-size:12px;', clickedField);
 					console.log('%cclickedRecordSysID: %o', 'color:green;font-size:12px;', clickedRecordSysID);
 					console.log('%ccontextMenuRecordIndex: %o', 'color:green;font-size:12px;', contextMenuRecordIndex);
 
-					// console.log("view innerWidth: ", event.view.innerWidth);
-					// if ((event.view.innerWidth - event.clientX) > )
+					let parentDiv = action.payload.event.path.find((element) => element.id && element.id == "snc-alert-email-message-list");
+					console.log('%cParent Div: %o', 'color:green;font-size:12px;', parentDiv);
 
-					updateState({showContextMenu: true, contextMenuLeft: event.x + "px", contextMenuTop: event.y - 140 + "px", contextMenuRecordIndex: contextMenuRecordIndex, contextMenuTag: contextMenuTag});
+					//New Positioning Code
+					let clientX = action.payload.event.clientX;
+					let clientY = action.payload.event.clientY - 142;
+					//I think anything refrencing the window should instead reference the parent div of this component.
+					// let windowInnerHeight = action.payload.event.view.innerHeight;
+					// let windowInnerWidth = action.payload.event.view.innerWidth;
+					let windowInnerHeight = parentDiv.offsetHeight;
+					let windowInnerWidth = parentDiv.offsetWidth;
+					console.log("clientX: ", clientX);
+					console.log("clientY: ", clientY);
+					console.log("windowInnerHeight: ", windowInnerHeight);
+					console.log("windowInnerWidth: ", windowInnerWidth);
+					console.log("contextMenuRef.scrollHeight: ", state.contextMenuRef.scrollHeight);
+					console.log("contextMenuRef.scrollWidth: ", state.contextMenuRef.scrollWidth);
+
+					const positionY = clientY + state.contextMenuRef.scrollHeight >= windowInnerHeight ? windowInnerHeight - state.contextMenuRef.scrollHeight - 20 : clientY;
+					const positionX = clientX + state.contextMenuRef.scrollWidth >= windowInnerWidth ? windowInnerWidth - state.contextMenuRef.scrollWidth - 20 : clientX;
+
+					contextMenuStyle = {
+						width: `${state.contextMenuRef.scrollWidth}px`,
+						height: `${state.contextMenuRef.scrollHeight}px`,
+						top: `${positionY}px`,
+						left: `${positionX}px`
+					};
+
+					updateState({showContextMenu: true, contextMenuLeft: action.payload.event.x + "px", contextMenuTop: action.payload.event.y - 140 + "px", contextMenuRecordIndex: contextMenuRecordIndex, contextMenuTag: contextMenuTag, contextMenuRecordField: clickedField, contextMenuStyle: contextMenuStyle});
 				} else {
-					updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px", contextMenuRecordIndex: contextMenuRecordIndex, contextMenuTag: contextMenuTag});
+					updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px", contextMenuRecordIndex: contextMenuRecordIndex, contextMenuTag: contextMenuTag, contextMenuRecordField: clickedField, contextMenuStyle: contextMenuStyle});
 				}
 			}
 		},
 		{
 			events: ['click'],
-			effect({dispatch, state, updateState, action: {payload: {event}}}) {
+			effect({dispatch, state, updateState, action}) {
 				updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px"});
-				console.log(event.path);
-				if (event.path.some((clickPath) => clickPath.className && clickPath.className.includes("add-filter")) == false) {
+				console.log(action.payload.event.path);
+				if (action.payload.event.path.some((clickPath) => clickPath.className && clickPath.className.includes("add-filter")) == false) {
 
 					console.log("hide add filter results");
 					updateState({showAddFilterResults: false});
 				}
 
-				let clickedFilter = event.path.find((clickPath) => clickPath.className && clickPath.className.includes("filter index-"));
+				let clickedFilter = action.payload.event.path.find((clickPath) => clickPath.className && clickPath.className.includes("filter index-"));
 				if (!clickedFilter) {
 					let updatedFilters = state.filters;
 					updatedFilters.forEach((filter) => {
