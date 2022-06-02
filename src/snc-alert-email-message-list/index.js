@@ -65,6 +65,7 @@ export const INTEGRATION_ICONS = [
 	{key: 'icinga', value: icingaSVG},
 	{key: 'itom', value: servicenowSVG},
 	{key: 'lightstep', value: lightstepSVG},
+	{key: 'log analytics', value: servicenowSVG},
 	{key: 'logic monitor', value: logicmonitorSVG},
 	{key: 'logicmonitor', value: logicmonitorSVG},
 	{key: 'nagios', value: nagiosSVG},
