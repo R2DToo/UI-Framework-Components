@@ -245,6 +245,10 @@ ul {
 		min-width: 600px;
 		max-width: 600px;
 	}
+	&.log-message {
+		text-align: left;
+		max-width: none;
+	}
 }
 .table-inbox tr td now-icon {
   color: #f78a09;

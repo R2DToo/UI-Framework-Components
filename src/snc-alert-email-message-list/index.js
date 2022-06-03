@@ -197,7 +197,28 @@ const view = (state, {updateState, dispatch}) => {
 			break;
 		}
 		return color;
-	}
+	};
+
+	const getLogLevelColor = (logLevel) => {
+		let color = 'low';
+		switch (logLevel) {
+			case 'ERROR': color = 'critical';
+			break;
+			// case 2: color = 'high';
+			// break;
+			case 'WARNING': color = 'moderate';
+			break;
+			case 'INFO': color = 'planning';
+			break;
+			case 'INFORMATIONAL': color = 'planning';
+			break;
+			case 'UNKNOWN': color = 'low';
+			break;
+			default: color = 'low';
+			break;
+		}
+		return color;
+	};
 
 	const recordSelectionChanged = (sys_id, tableDataIndex) => {
 		let updatedSelectedRecords = state.selectedRecords;
@@ -400,6 +421,18 @@ const view = (state, {updateState, dispatch}) => {
 								</td>
 							} else if (key == "u_flattened_data") {
 								return <td className={`broker-tags-container break-message data-field-${key}`}>{row[key].display_value}</td>
+							} else if (key == "raw_message") {
+								return <td className={`log-message data-field-${key}`}>
+									<svg onclick={() => {dispatch('UPDATE_SHOW_PRETTY_LOG', {index: index})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><title>Switch Format</title><path attr-d="M5.3 20.5Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H18.7Q19.45 3.5 19.975 4.025Q20.5 4.55 20.5 5.3V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5ZM5.3 19H18.7Q18.825 19 18.913 18.913Q19 18.825 19 18.7V7H5V18.7Q5 18.825 5.088 18.913Q5.175 19 5.3 19ZM7 11.75V10.25H17V11.75ZM7 15.75V14.25H13V15.75Z"/></svg>
+									<svg onclick={() => {row[key].show_pretty_value == false ? copyTextToClipboard(row[key].display_value) : copyTextToClipboard(row[key].pretty_value)}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><title>Copy to Clipboard</title><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
+									{row[key].show_pretty_value == false ? row[key].display_value : (<pre>{row[key].pretty_value}</pre>)}
+								</td>
+							} else if (key == "level") {
+								return <td className={`data-field-${key}`}>
+									<div className="broker-tags centered">
+										<div className={"broker-tag " + getLogLevelColor(row[key].value)}><span className="">{row[key].display_value}</span></div>
+									</div>
+								</td>
 							} else {
 								return <td className={`view-message data-field-${key}`}>{row[key].display_value}</td>
 							}
@@ -813,7 +846,13 @@ const view = (state, {updateState, dispatch}) => {
 		}
 		// console.log("CSV Content: ", csvContent);
 		return csvContent;
-	}
+	};
+
+	const copyTextToClipboard = async (text) => {
+		if (navigator.clipboard) {
+			await navigator.clipboard.writeText(text);
+		}
+	};
 
 	return (
 		<div id="snc-alert-email-message-list">
@@ -952,7 +991,7 @@ const view = (state, {updateState, dispatch}) => {
 							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
 						)}
 						<li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.currentList.table}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12 15.625 7.725 11.35 8.775 10.25 11.25 12.725V4.325H12.75V12.725L15.225 10.25L16.275 11.35ZM6.3 19.5Q5.55 19.5 5.025 18.975Q4.5 18.45 4.5 17.7V15H6V17.7Q6 17.8 6.1 17.9Q6.2 18 6.3 18H17.7Q17.8 18 17.9 17.9Q18 17.8 18 17.7V15H19.5V17.7Q19.5 18.45 18.975 18.975Q18.45 19.5 17.7 19.5Z"/></svg>Export CSV</button></a></li>
-						<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "interactive_analysis")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3 19.75Q2.275 19.75 1.762 19.238Q1.25 18.725 1.25 18Q1.25 17.275 1.762 16.762Q2.275 16.25 3 16.25Q3.175 16.25 3.312 16.262Q3.45 16.275 3.575 16.35L8.35 11.575Q8.275 11.45 8.262 11.312Q8.25 11.175 8.25 11Q8.25 10.275 8.762 9.762Q9.275 9.25 10 9.25Q10.725 9.25 11.238 9.762Q11.75 10.275 11.75 11Q11.75 11.1 11.65 11.55L14.45 14.35Q14.575 14.275 14.7 14.262Q14.825 14.25 15 14.25Q15.175 14.25 15.3 14.262Q15.425 14.275 15.55 14.35L19.35 10.55Q19.275 10.425 19.263 10.3Q19.25 10.175 19.25 10Q19.25 9.275 19.763 8.762Q20.275 8.25 21 8.25Q21.725 8.25 22.238 8.762Q22.75 9.275 22.75 10Q22.75 10.725 22.238 11.238Q21.725 11.75 21 11.75Q20.825 11.75 20.7 11.738Q20.575 11.725 20.45 11.65L16.65 15.45Q16.725 15.575 16.738 15.7Q16.75 15.825 16.75 16Q16.75 16.725 16.238 17.238Q15.725 17.75 15 17.75Q14.275 17.75 13.762 17.238Q13.25 16.725 13.25 16Q13.25 15.825 13.262 15.688Q13.275 15.55 13.35 15.425L10.575 12.65Q10.45 12.725 10.312 12.738Q10.175 12.75 10 12.75Q9.9 12.75 9.45 12.65L4.65 17.45Q4.725 17.575 4.738 17.7Q4.75 17.825 4.75 18Q4.75 18.725 4.237 19.238Q3.725 19.75 3 19.75ZM15 8.4 14.25 6.75 12.6 6 14.25 5.25 15 3.6 15.75 5.25 17.4 6 15.75 6.75ZM4 9.575 3.5 8.5 2.425 8 3.5 7.5 4 6.425 4.5 7.5 5.575 8 4.5 8.5Z"/></svg>Interactive Analysis</button></li>
+						{state.currentList.table == "em_alert" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "interactive_analysis")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3 19.75Q2.275 19.75 1.762 19.238Q1.25 18.725 1.25 18Q1.25 17.275 1.762 16.762Q2.275 16.25 3 16.25Q3.175 16.25 3.312 16.262Q3.45 16.275 3.575 16.35L8.35 11.575Q8.275 11.45 8.262 11.312Q8.25 11.175 8.25 11Q8.25 10.275 8.762 9.762Q9.275 9.25 10 9.25Q10.725 9.25 11.238 9.762Q11.75 10.275 11.75 11Q11.75 11.1 11.65 11.55L14.45 14.35Q14.575 14.275 14.7 14.262Q14.825 14.25 15 14.25Q15.175 14.25 15.3 14.262Q15.425 14.275 15.55 14.35L19.35 10.55Q19.275 10.425 19.263 10.3Q19.25 10.175 19.25 10Q19.25 9.275 19.763 8.762Q20.275 8.25 21 8.25Q21.725 8.25 22.238 8.762Q22.75 9.275 22.75 10Q22.75 10.725 22.238 11.238Q21.725 11.75 21 11.75Q20.825 11.75 20.7 11.738Q20.575 11.725 20.45 11.65L16.65 15.45Q16.725 15.575 16.738 15.7Q16.75 15.825 16.75 16Q16.75 16.725 16.238 17.238Q15.725 17.75 15 17.75Q14.275 17.75 13.762 17.238Q13.25 16.725 13.25 16Q13.25 15.825 13.262 15.688Q13.275 15.55 13.35 15.425L10.575 12.65Q10.45 12.725 10.312 12.738Q10.175 12.75 10 12.75Q9.9 12.75 9.45 12.65L4.65 17.45Q4.725 17.575 4.738 17.7Q4.75 17.825 4.75 18Q4.75 18.725 4.237 19.238Q3.725 19.75 3 19.75ZM15 8.4 14.25 6.75 12.6 6 14.25 5.25 15 3.6 15.75 5.25 17.4 6 15.75 6.75ZM4 9.575 3.5 8.5 2.425 8 3.5 7.5 4 6.425 4.5 7.5 5.575 8 4.5 8.5Z"/></svg>Interactive Analysis</button></li>}
 						{state.currentList.table == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
 								{state.alertActions.map((alertAction) => {
@@ -967,7 +1006,7 @@ const view = (state, {updateState, dispatch}) => {
 							</ul>
 						</li>}
 					</ul>
-					{state.currentList.table == "em_alert" && state.contextMenuRecordIndex != -1 && <ul className="context-menu-list">
+					{(state.currentList.table == "em_alert" || state.currentList.table == "sn_occ_log_viewer_parent") && state.contextMenuRecordIndex != -1 && <ul className="context-menu-list">
 						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Quick Search<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
 								{state.contextMenuRecordField != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'show_matching')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Show Matching</button></li>}
@@ -1514,6 +1553,19 @@ createCustomElement('snc-alert-email-message-list', {
 					if (!updatedTableOrder.includes("temp_uniqueness")) {
 						updatedTableOrder.splice(10, 0, "temp_uniqueness");
 					}
+				}
+
+				if (resultRow.raw_message) {
+					let pretty_value = "";
+					if (resultRow.raw_message.value != "") {
+						try {
+							pretty_value = JSON.stringify(JSON.parse(resultRow.raw_message.value), null, 2);
+						} catch (e) {
+							console.log('%cRAW_MESSAGE_PARSE_ERROR: %o', 'color:green;font-size:12px;', e);
+						}
+					}
+					resultRow.raw_message.pretty_value = pretty_value;
+					resultRow.raw_message.show_pretty_value = false;
 				}
 			});
 
@@ -2220,7 +2272,13 @@ createCustomElement('snc-alert-email-message-list', {
 					table: state.currentList.table,
 				}
 			});
-		}
+		},
+		'UPDATE_SHOW_PRETTY_LOG': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			let updatedTableData = state.tableData;
+			updatedTableData[action.payload.index].raw_message.show_pretty_value = !updatedTableData[action.payload.index].raw_message.show_pretty_value;
+			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
+		},
 	},
 	eventHandlers: [
 		{

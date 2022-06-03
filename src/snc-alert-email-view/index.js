@@ -153,6 +153,10 @@ createCustomElement('snc-alert-email-view', {
 		'CREATE_MY_WORKSPACE_LIST#MODAL': ({action,dispatch}) => {
 			logEvent("CREATE_MY_WORKSPACE_LIST#MODAL", action.payload);
 			dispatch("CREATE_MY_WORKSPACE_LIST_MODAL", action.payload);
+		},
+		'OPEN_CONTEXTUAL#LOG_VIEWER': ({action,dispatch}) => {
+			logEvent("OPEN_CONTEXTUAL#LOG_VIEWER", action.payload);
+			dispatch("OPEN_CONTEXTUAL_LOG_VIEWER", action.payload);
 		}
 	},
 	setInitialState() {

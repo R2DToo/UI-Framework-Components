@@ -188,6 +188,12 @@
 					"label": "CREATE_MY_WORKSPACE_LIST_MODAL",
 					"description": "Open modal which allows the user to save custom lists",
 					"payload": []
+				},
+				{
+					"name": "OPEN_CONTEXTUAL_LOG_VIEWER",
+					"label": "OPEN_CONTEXTUAL_LOG_VIEWER",
+					"description": "Open the log viewer page with a contextual sysparm",
+					"payload": []
 				}
 			]
 		},
