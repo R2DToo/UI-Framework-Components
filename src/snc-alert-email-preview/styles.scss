@@ -35,16 +35,12 @@
       font-weight: 100;
       font-size: 1.625rem;
       margin-top: 0;
+      display: flex;
+      align-items: center;
+      column-gap: 10px;
     }
     #right-side {
       text-align: end;
-    }
-    .g-icon {
-      margin-right: 10px;
-      fill: RGB($now-color_text--primary);
-      &:hover {
-        fill: RGB($now-color_text--tertiary);
-      }
     }
     .inline-header {
       //display: inline-block;

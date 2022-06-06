@@ -423,9 +423,9 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className={`broker-tags-container break-message data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "raw_message") {
 								return <td className={`log-message data-field-${key}`}>
-									<svg onclick={() => {dispatch('UPDATE_SHOW_PRETTY_LOG', {index: index})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><title>Switch Format</title><path attr-d="M5.3 20.5Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H18.7Q19.45 3.5 19.975 4.025Q20.5 4.55 20.5 5.3V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5ZM5.3 19H18.7Q18.825 19 18.913 18.913Q19 18.825 19 18.7V7H5V18.7Q5 18.825 5.088 18.913Q5.175 19 5.3 19ZM7 11.75V10.25H17V11.75ZM7 15.75V14.25H13V15.75Z"/></svg>
-									<svg onclick={() => {row[key].show_pretty_value == false ? copyTextToClipboard(row[key].display_value) : copyTextToClipboard(row[key].pretty_value)}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><title>Copy to Clipboard</title><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
-									{row[key].show_pretty_value == false ? row[key].display_value : (<pre>{row[key].pretty_value}</pre>)}
+									<svg onclick={() => {dispatch('UPDATE_SHOW_PRETTY_LOG', {sys_id: row.sys_id.value})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><title>Switch Format</title><path attr-d="M5.3 20.5Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H18.7Q19.45 3.5 19.975 4.025Q20.5 4.55 20.5 5.3V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5ZM5.3 19H18.7Q18.825 19 18.913 18.913Q19 18.825 19 18.7V7H5V18.7Q5 18.825 5.088 18.913Q5.175 19 5.3 19ZM7 11.75V10.25H17V11.75ZM7 15.75V14.25H13V15.75Z"/></svg>
+									<svg onclick={() => {!state.showPrettyLogList.includes(row.sys_id.value) ? copyTextToClipboard(row[key].display_value) : copyTextToClipboard(row[key].pretty_value)}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><title>Copy to Clipboard</title><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
+									{!state.showPrettyLogList.includes(row.sys_id.value) ? row[key].display_value : (<pre>{row[key].pretty_value}</pre>)}
 								</td>
 							} else if (key == "level") {
 								return <td className={`data-field-${key}`}>
@@ -1201,7 +1201,8 @@ createCustomElement('snc-alert-email-message-list', {
 			lastTableData: [],
 			contextMenuTag: {},
 			alertActions: [],
-			currentList: {condition: '', columns: '', table: ''}
+			currentList: {condition: '', columns: '', table: ''},
+			showPrettyLogList: []
 		}
 	},
 	transformState(state) {
@@ -1565,7 +1566,6 @@ createCustomElement('snc-alert-email-message-list', {
 						}
 					}
 					resultRow.raw_message.pretty_value = pretty_value;
-					resultRow.raw_message.show_pretty_value = false;
 				}
 			});
 
@@ -2275,9 +2275,14 @@ createCustomElement('snc-alert-email-message-list', {
 		},
 		'UPDATE_SHOW_PRETTY_LOG': (coeffects) => {
 			const {action, state, updateState} = coeffects;
-			let updatedTableData = state.tableData;
-			updatedTableData[action.payload.index].raw_message.show_pretty_value = !updatedTableData[action.payload.index].raw_message.show_pretty_value;
-			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
+			let updatedShowPrettyLogList = state.showPrettyLogList;
+			let existingIndex = updatedShowPrettyLogList.indexOf(action.payload.sys_id);
+			if (existingIndex > -1) {
+				updatedShowPrettyLogList.splice(existingIndex, 1);
+			} else {
+				updatedShowPrettyLogList.push(action.payload.sys_id);
+			}
+			updateState({showPrettyLogList: updatedShowPrettyLogList, dummyStateChange: !state.dummyStateChange});
 		},
 	},
 	eventHandlers: [
