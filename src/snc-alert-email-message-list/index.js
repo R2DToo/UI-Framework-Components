@@ -44,6 +44,9 @@ import opsviewSVG from '../images/Opsview.svg';
 import webhookSVG from '../images/webhook.svg';
 import catchpointSVG from '../images/catchpoint_new.svg';
 import servicenowSVG from '../images/servicenow_new.svg';
+
+import linuxSVG from '../images/linux-tux.svg';
+
 export const INTEGRATION_ICONS = [
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
@@ -91,6 +94,11 @@ export const INTEGRATION_ICONS = [
 	{key: 'vrealize', value: vmwareSVG},
 	{key: 'zabbix', value: zabbixSVG},
 	{key: 'generic events', value: webhookSVG},
+];
+
+const OPERATING_SYSTEM_ICONS = [
+	{key: 'cmdb_ci_win_server', value: microsoftSVG},
+	{key: 'cmdb_ci_linux_server', value: linuxSVG},
 ];
 
 const view = (state, {updateState, dispatch}) => {
@@ -331,7 +339,7 @@ const view = (state, {updateState, dispatch}) => {
 										<div className={"broker-tag " + getTaskPriorityColor(row[key].value)}><span className="tag-key">{row[key].display_value}</span></div>
 									</div>
 								</td>
-							} else if (key == "sys_updated_on" || key == "sys_created_on") {
+							} else if (key == "sys_updated_on" || key == "sys_created_on" || key == "last_refreshed") {
 								return <td className={`view-message data-field-${key}`}>{makeRelativeTime(row[key].display_value)}</td>
 							} else if (key == "number") {
 								return <td className={`view-message record-link data-field-${key}`}>{row[key].display_value}</td>
@@ -368,7 +376,7 @@ const view = (state, {updateState, dispatch}) => {
 									</div>}
 								</td>
 							} else if (key == "cmdb_ci") {
-								let url = `/now/cmdb/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}`;
+								let url = state.currentList.table == "sn_agent_ci_extended_info" ? `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}/params/selected-tab-index/2` : `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}`;
 								return <td className={`view-message data-field-${key}`}>
 									{row[key].value ?
 										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span>
@@ -399,7 +407,7 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className={`name-message data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "node") {
 								return <td className={`name-message break-message force-center data-field-${key}`}>{row[key].display_value}</td>
-							} else if (key == "source_icon") {
+							} else if (key == "source_icon" || key == "os_icon") {
 								return <td className={`view-message data-field-${key}`}><img className="table-image" src={row[key].value}/></td>
 							// } else if (key == "incident.priority") {
 							// 	return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
@@ -433,6 +441,15 @@ const view = (state, {updateState, dispatch}) => {
 										<div className={"broker-tag " + getLogLevelColor(row[key].value)}><span className="">{row[key].display_value}</span></div>
 									</div>
 								</td>
+							} else if (key == "status") {
+								let data_fields = `data-field-${key}`;
+								return <td class={{[data_fields]: true, 'text-green': row[key].display_value == "Up", 'text-red': row[key].display_value == "Down"}}>{row[key].display_value}</td>
+							} else if (key == "data_collection") {
+								let data_fields = `data-field-${key}`;
+								return <td class={{[data_fields]: true, 'text-green': row[key].display_value == "On", 'text-red': row[key].display_value == "Off"}}>{row[key].display_value}</td>
+							} else if (key == "running_checks_num") {
+								let data_fields = `data-field-${key}`;
+								return <td class={{[data_fields]: true, 'text-red': row[key].display_value == "0"}}>{row[key].display_value}</td>
 							} else {
 								return <td className={`view-message data-field-${key}`}>{row[key].display_value}</td>
 							}
@@ -471,7 +488,7 @@ const view = (state, {updateState, dispatch}) => {
 			switch (option) {
 				case 'ci_details':
 					if (contextRecord) {
-						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
 					}
 					break;
 				case 'ci_dependency_view':
@@ -481,7 +498,7 @@ const view = (state, {updateState, dispatch}) => {
 					break;
 				case 'alert_tbac':
 					// if (contextRecord) {
-					// 	dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+					// 	dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
 					// }
 					break;
 				case 'interactive_analysis':
@@ -1106,6 +1123,15 @@ const findMatchingSourceIcon = (sourceValue) => {
 	return icon;
 }
 
+const findMatchingOsIcon = (class_value) => {
+	let icon = webhookSVG;
+	let match = OPERATING_SYSTEM_ICONS.find((operating_system_icon) => class_value.toLowerCase().includes(operating_system_icon.key));
+	if (match) {
+		icon = match.value;
+	}
+	return icon;
+};
+
 createCustomElement('snc-alert-email-message-list', {
 	renderer: {type: snabbdom},
 	view,
@@ -1566,6 +1592,20 @@ createCustomElement('snc-alert-email-message-list', {
 						}
 					}
 					resultRow.raw_message.pretty_value = pretty_value;
+				}
+
+				if (resultRow['cmdb_ci.os']) {
+					resultRow['cmdb_ci.os'].label = "Operating System";
+				}
+
+				if (state.currentList.table == "sn_agent_ci_extended_info" && resultRow['cmdb_ci.sys_class_name']) {
+					resultRow.os_icon = {
+						label: 'OS Icon',
+						value: findMatchingOsIcon(resultRow['cmdb_ci.sys_class_name'].value)
+					}
+					if (!updatedTableOrder.includes("os_icon")) {
+						updatedTableOrder.splice(3, 0, "os_icon");
+					}
 				}
 			});
 
@@ -2140,6 +2180,9 @@ createCustomElement('snc-alert-email-message-list', {
 				operatorOption.types.includes(state.filters[action.payload.index].inputs.column.type)
 				&& (operatorOption.label.toLowerCase().includes(searchInput.toLowerCase()) || operatorOption.value.toLowerCase().includes(searchInput.toLowerCase()))
 			);
+			if (results.length == 0) { //No Matching Type found
+				results = state.operatorOptions.filter((operatorOption) => operatorOption.types.includes("String"));
+			}
 			if (searchInput.trim().length == 0) {
 				results = state.operatorOptions.filter((operatorOption) =>
 					operatorOption.types.includes(state.filters[action.payload.index].inputs.column.type));

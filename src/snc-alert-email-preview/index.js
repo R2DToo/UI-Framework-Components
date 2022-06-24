@@ -347,7 +347,7 @@ const view = (state, {updateState, dispatch}) => {
 				switch (option) {
 					case 'ci_details':
 						if (contextRecord) {
-							dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
+							dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${contextRecord['cmdb_ci.sys_class_name'].value}/${contextRecord.cmdb_ci.value}`});
 						}
 						break;
 					case 'ci_dependency_view':
@@ -384,20 +384,90 @@ const view = (state, {updateState, dispatch}) => {
 		return updateQuery;
 	};
 
+	const getLogTimeSysparm = (initial_event_time) => {
+		var start_time = `'${initial_event_time.replace(" ", "','")}'`;
+		var start_time_hours = parseInt(start_time.substring(14, 16));
+		var start_time_minutes = parseInt(start_time.substring(17, 19)) - 15;
+		if (start_time_minutes < 0) {
+			start_time_minutes = 60 + start_time_minutes;
+			start_time_hours -= 1;
+		}
+		var end_time_hours = parseInt(start_time.substring(14, 16));
+		var end_time_minutes = parseInt(start_time.substring(17, 19)) + 15;
+		if (end_time_minutes >= 60) {
+			end_time_minutes -= 60;
+			end_time_hours += 1;
+		}
+		const end_time = start_time.substring(0, 14) + String(end_time_hours).padStart(2, '0') + start_time.substring(16, 17) + String(end_time_minutes).padStart(2, '0') + start_time.substring(19);
+		start_time = start_time.substring(0, 14) + String(start_time_hours).padStart(2, '0') + start_time.substring(16, 17) + String(start_time_minutes).padStart(2, '0') + start_time.substring(19);
+		return `timeBETWEENjavascript:gs.dateGenerate(${start_time})@javascript:gs.dateGenerate(${end_time})`;
+	};
+
 	const copyTextToClipboard = async (event, text) => {
 		if (navigator.clipboard) {
 			await navigator.clipboard.writeText(text);
 		}
 	};
 
+	const displayDateFromTimestamp = (timestamp) => {
+		let date = new Date(timestamp);
+		return date.toLocaleTimeString('en-US');
+	};
+
+	const setSelectedMetricOption = (event, recordIndex, isParent) => {
+		let records = isParent ? state.parentRecord : state.secondaryRecords;
+		records[recordIndex].metric_options.forEach((mo) => mo.selected = mo.value == event.target.value);
+		if (isParent == true) {
+			updateState({parentRecord: records});
+		} else {
+			updateState({secondaryRecords: records});
+		}
+		let created_time_array = records[recordIndex].sys_created_on.display_value.split(/[- :]+/).map(Number);
+		created_time_array[1] -= 1;
+		let current_time = new Date(...created_time_array);
+		current_time = addMinutes(current_time, 5);
+		//current_time.setHours(current_time.getHours() + 1);
+		let start_time = new Date(...created_time_array);
+		start_time.setHours(start_time.getHours() - 1);
+		dispatch('QUERY_METRIC', {
+			sys_id: records[recordIndex].cmdb_ci.value,
+			metric_id: event.target.value,
+			start_time: start_time.getTime(),
+			end_time: current_time.getTime(),
+			opt_is_parent: isParent.toString(),
+			opt_record_index: recordIndex,
+		})
+	};
+
 	return (
 		<div id="info-container" oncontextmenu={(e) => {handleContextMenu(e)}} onclick={() => {closeContextMenu()}}>
+			{/* <div id="preview-header">
+				<div id="preview-title-split">
+					<div id="preview-title-left">
+						<svg onclick={() => {fireEvent("OPEN_TIMELINE_BUTTON#CLICKED", {parentRecord: state.parentRecord, secondaryRecords: state.secondaryRecords})}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Open Timeline</title><path attr-d="M6.275 16.75H11.725V15.25H6.275ZM12.275 8.75H17.725V7.25H12.275ZM9.275 12.75H14.725V11.25H9.275ZM5.3 20.5Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H18.7Q19.45 3.5 19.975 4.025Q20.5 4.55 20.5 5.3V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5ZM5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V5.3Q19 5.2 18.9 5.1Q18.8 5 18.7 5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19ZM5 19Q5 19 5 18.9Q5 18.8 5 18.7V5.3Q5 5.2 5 5.1Q5 5 5 5Q5 5 5 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5 18.9Q5 19 5 19Z"/></svg>
+					</div>
+					<div id="preview-title-right">
+						<div className="preview-title">360&#176; View</div>
+						<svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg>
+					</div>
+				</div>
+				<div id="preview-header-split">
+					<div id="preview-header-left">
+
+					</div>
+					<div id="preview-header-right">
+						<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
+						{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
+						{state.parentRecord && state.parentRecord[0] && state.parentRecord[0].group_source && state.parentRecord[0].group_source.display_value && <div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>}
+					</div>
+				</div>
+			</div> */}
 			<div id="info-header">
 				<div>
 					<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
 					<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
 					{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
-					{state.parentRecord && state.parentRecord[0] && state.parentRecord[0].group_source && state.parentRecord[0].group_source.display_value && <div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>}
+					{state.parentRecord[0] && state.parentRecord[0].group_source && state.parentRecord[0].group_source.display_value && <div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>}
 				</div>
 				<div id="right-side">
 					<div className="dials-container">
@@ -429,6 +499,11 @@ const view = (state, {updateState, dispatch}) => {
 					<label for="tab2">Tags</label>
 					<input type="radio" name="tabset" id="tab3" aria-controls="additional" onchange={() => {updateState({activeTabIndex: 3})}}/>
 					<label for="tab3">Additional</label>
+					{((state.parentRecord.length > 0 && state.parentRecord[0].source && state.parentRecord[0].source.display_value == "ITOM Agent") ||
+					(state.secondaryRecords.length > 0 && state.secondaryRecords.findIndex((sr) => sr.source && sr.source.display_value == "ITOM Agent") > -1)) && <div>
+						<input type="radio" name="tabset" id="tab5" aria-controls="metrics" onchange={() => {updateState({activeTabIndex: 5})}}/>
+						<label for="tab5">Metrics</label>
+					</div>}
 				</div>
 			</div>
 			<div id="info-cards">
@@ -522,15 +597,16 @@ const view = (state, {updateState, dispatch}) => {
 												<p className="align-items-center">
 													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
 													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
-													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.cmdb_ci.display_value}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
+													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
 												</p>
-												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
 												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
 												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
 												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
 												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
 												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
 												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+												{/* <p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p> */}
 												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
 											</div>
 											<div className="card-column">
@@ -541,8 +617,8 @@ const view = (state, {updateState, dispatch}) => {
 												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
 												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
+												{/* <p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p> */}
 												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
@@ -556,13 +632,6 @@ const view = (state, {updateState, dispatch}) => {
 													onmousemove={(e) => {imageZoomMouseMove(e, index, true)}}
 												></div>
 											</div>}
-											{/* {record.snapshotImage && <img
-												className="card-image"
-												onmouseover={() => imageZoomMouseOver(index, true)}
-												onmouseout={() => imageZoomMouseOut(index, true)}
-												src={record.snapshotImage.display_value}
-												style={{transform: `scale(${record.snapshotImage.scale})`}}
-											></img>} */}
 										</div>
 									</div>
 								)}
@@ -615,6 +684,61 @@ const view = (state, {updateState, dispatch}) => {
 												<pre className="">{JSON.stringify(JSON.parse(record.additional_info.display_value), null, 2)}</pre>
 											</div>
 										)}
+									</div>
+								)}
+								{state.activeTabIndex == 5 && (
+									<div className="card-body">
+										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<div className="card-row">
+											<div className="card-column">
+												<p className="align-items-center">
+													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
+													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
+													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
+												</p>
+												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
+											</div>
+											<div className="card-column">
+												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+											</div>
+										</div>
+										<div className="card-center">
+											{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
+												{record.metric_options && <div className="metric-filters-container">
+													<select onchange={(e) => {setSelectedMetricOption(e, index, true)}}>
+														{record.metric_options.map((option) => <option class={{selected: option.selected}} value={option.value}>{option.display_value}</option>)}
+													</select>
+												</div>}
+												<div className="chart-wrapper">
+													{record.metrics && <table id="line-example-15" className="charts-css line show-heading show-data-on-hover multiple show-labels show-primary-axis show-4-secondary-axes show-data-axes">
+														<caption>{`${record.metrics.ci_name}-${record.metrics.metric_name}`}</caption>
+														<tbody>
+															{record.metrics.datapoints.map((dataPoint, i) => {
+																if (record.metrics.datapoints[i + 1]) {
+																	return <tr>
+																		<th class={{'hide-label': i % 2 == 1}} scope="row">{displayDateFromTimestamp(dataPoint.timestamp)}</th>
+																		{record.metrics.resource_names.map((resource_name) =>
+																			<td style={{'--start': `${dataPoint[resource_name] / record.metrics.max_value}`, '--size': `${record.metrics.datapoints[i + 1][resource_name] / record.metrics.max_value}`}}>
+																				<span className="data">{record.metrics.datapoints[i + 1][resource_name].toFixed(2)}</span>
+																				{/* <span className="tooltip">{record.metrics.datapoints[i + 1].value}</span> */}
+																			</td>
+																		)}
+																	</tr>
+																}
+															})}
+														</tbody>
+													</table>}
+													{record.metrics && <ul className="charts-css legend legend-inline legend-circle">
+															{record.metrics.resource_names.map((resource_name) =>
+																<li>{resource_name == "" ? "No Resource" : resource_name}</li>
+															)}
+													</ul>}
+												</div>
+											</div>}
+										</div>
 									</div>
 								)}
 							</li>
@@ -660,9 +784,9 @@ const view = (state, {updateState, dispatch}) => {
 												<p className="align-items-center">
 													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
 													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
-													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.cmdb_ci.display_value}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
+													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
 												</p>
-												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/cmdb/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
 												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
 												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
 												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
@@ -695,13 +819,6 @@ const view = (state, {updateState, dispatch}) => {
 													onmousemove={(e) => {imageZoomMouseMove(e, index, false)}}
 												></div>
 											</div>}
-											{/* {record.snapshotImage && <img
-												className="card-image"
-												onmouseover={() => imageZoomMouseOver(index, false)}
-												onmouseout={() => imageZoomMouseOut(index, false)}
-												src={record.snapshotImage.display_value}
-												style={{transform: `scale(${record.snapshotImage.scale})`}}
-											></img>} */}
 										</div>
 									</div>
 								)}
@@ -754,6 +871,61 @@ const view = (state, {updateState, dispatch}) => {
 												<pre className="">{JSON.stringify(JSON.parse(record.additional_info.display_value), null, 2)}</pre>
 											</div>
 										)}
+									</div>
+								)}
+								{state.activeTabIndex == 5 && (
+									<div className="card-body">
+										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<div className="card-row">
+											<div className="card-column">
+												<p className="align-items-center">
+													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
+													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
+													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
+												</p>
+												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
+											</div>
+											<div className="card-column">
+												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+											</div>
+										</div>
+										<div className="card-center">
+											{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
+												{record.metric_options && <div className="metric-filters-container">
+													<select onchange={(e) => {setSelectedMetricOption(e, index, false)}}>
+														{record.metric_options.map((option) => <option class={{selected: option.selected}} value={option.value}>{option.display_value}</option>)}
+													</select>
+												</div>}
+												<div className="chart-wrapper">
+													{record.metrics && <table id="line-example-15" className="charts-css line show-heading show-data-on-hover multiple show-labels show-primary-axis show-4-secondary-axes show-data-axes">
+														<caption>{`${record.metrics.ci_name}-${record.metrics.metric_name}`}</caption>
+														<tbody>
+															{record.metrics.datapoints.map((dataPoint, i) => {
+																if (record.metrics.datapoints[i + 1]) {
+																	return <tr>
+																		<th class={{'hide-label': i % 2 == 1}} scope="row">{displayDateFromTimestamp(dataPoint.timestamp)}</th>
+																		{record.metrics.resource_names.map((resource_name) =>
+																			<td style={{'--start': `${dataPoint[resource_name] / record.metrics.max_value}`, '--size': `${record.metrics.datapoints[i + 1][resource_name] / record.metrics.max_value}`}}>
+																				<span className="data">{record.metrics.datapoints[i + 1][resource_name].toFixed(2)}</span>
+																				{/* <span className="tooltip">{record.metrics.datapoints[i + 1].value}</span> */}
+																			</td>
+																		)}
+																	</tr>
+																}
+															})}
+														</tbody>
+													</table>}
+													{record.metrics && <ul className="charts-css legend legend-inline legend-circle">
+															{record.metrics.resource_names.map((resource_name) =>
+																<li>{resource_name == "" ? "No Resource" : resource_name}</li>
+															)}
+													</ul>}
+												</div>
+											</div>}
+										</div>
 									</div>
 								)}
 							</li>
@@ -815,6 +987,19 @@ const sortTags = (a, b) => {
   return 0;
 }
 
+const sortMetricOptions = (a, b) => {
+	let aKey = a.display_value.toLowerCase();
+	let bKey = b.display_value.toLowerCase();
+
+	if ( aKey < bKey ){
+    return -1;
+  }
+  if ( aKey > bKey ){
+    return 1;
+  }
+  return 0;
+}
+
 const findMatchingSourceIcon = (sourceValue) => {
 	let icon = webhookSVG;
 	let match = INTEGRATION_ICONS.find((integration_icon) => sourceValue.toLowerCase().includes(integration_icon.key));
@@ -822,6 +1007,10 @@ const findMatchingSourceIcon = (sourceValue) => {
 		icon = match.value;
 	}
 	return icon;
+}
+
+const addMinutes = (date, minutes) => {
+	return new Date(date.getTime() + minutes * 60000);
 }
 
 createCustomElement('snc-alert-email-preview', {
@@ -846,13 +1035,13 @@ createCustomElement('snc-alert-email-preview', {
 			dispatch('FETCH_PARENT_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent,initial_event_time,resource',
 				sysparm_display_value: 'all'
 			});
 			dispatch('FETCH_CHILD_RECORD', {
 				table: 'em_alert',
 				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent',
+				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent,initial_event_time,resource',
 				sysparm_display_value: 'all'
 			});
 		},
@@ -986,7 +1175,24 @@ createCustomElement('snc-alert-email-preview', {
 				}
 				updatedParentRecord[0].u_repeated_alerts.url = encodeURI(`/now/optimiz-workspace/home/params/list/49667e2647974550d0bc5c62e36d43a7/sysparm/${repeatedAlertsSysparm}`);
 			}
-			updatedSecondaryRecords.forEach((secondaryRecord) => {
+			if (updatedParentRecord[0].source && updatedParentRecord[0].source.display_value == "ITOM Agent" && updatedParentRecord[0].cmdb_ci && updatedParentRecord[0].cmdb_ci.value != "" && updatedParentRecord[0]["cmdb_ci.sys_class_name"] && updatedParentRecord[0]["cmdb_ci.sys_class_name"].value != "") {
+				//Query Metrics and Resources
+				dispatch('FETCH_METRIC_OPTIONS', {
+					cmdb_ci_type: updatedParentRecord[0]["cmdb_ci.sys_class_name"].value,
+					cmdb_ci_sys_id: updatedParentRecord[0].cmdb_ci.value,
+					opt_is_parent: 'true',
+					opt_record_index: 0
+				});
+				// dispatch('FETCH_METRIC_OPTIONS', {
+				// 	table: 'sa_metric_dashboard_metadata',
+				// 	sysparm_query: `cmdb_ci_type=${updatedParentRecord[0]["cmdb_ci.sys_class_name"].value}`,
+				// 	sysparm_fields: 'source_metrics_types',
+				// 	sysparm_display_value: 'all',
+				// 	opt_is_parent: 'true',
+				// 	opt_record_index: 0
+				// });
+			}
+			updatedSecondaryRecords.forEach((secondaryRecord, index) => {
 				if (secondaryRecord.is_group_alert && secondaryRecord.message_key && secondaryRecord.u_repeated_alerts) {
 					let repeatedAlertsSysparm = '';
 					if (secondaryRecord.is_group_alert && secondaryRecord.message_key && secondaryRecord.message_key.value) {
@@ -995,6 +1201,23 @@ createCustomElement('snc-alert-email-preview', {
 						}
 					}
 					secondaryRecord.u_repeated_alerts.url = encodeURI(`/now/optimiz-workspace/home/params/list/49667e2647974550d0bc5c62e36d43a7/sysparm/${repeatedAlertsSysparm}`);
+				}
+				if (secondaryRecord.source && secondaryRecord.source.display_value == "ITOM Agent" && secondaryRecord.cmdb_ci && secondaryRecord.cmdb_ci.value != "" && secondaryRecord["cmdb_ci.sys_class_name"] && secondaryRecord["cmdb_ci.sys_class_name"].value != "") {
+					//Query Metrics and Resources
+					dispatch('FETCH_METRIC_OPTIONS', {
+						cmdb_ci_type: secondaryRecord["cmdb_ci.sys_class_name"].value,
+						cmdb_ci_sys_id: secondaryRecord.cmdb_ci.value,
+						opt_is_parent: 'false',
+						opt_record_index: index
+					});
+					// dispatch('FETCH_METRIC_OPTIONS', {
+					// 	table: 'sa_metric_dashboard_metadata',
+					// 	sysparm_query: `cmdb_ci_type=${secondaryRecord["cmdb_ci.sys_class_name"].value}`,
+					// 	sysparm_fields: 'source_metrics_types',
+					// 	sysparm_display_value: 'all',
+					// 	opt_is_parent: 'false',
+					// 	opt_record_index: index
+					// });
 				}
 			});
 			updateState({parentRecord: updatedParentRecord, secondaryRecords: updatedSecondaryRecords});
@@ -1015,7 +1238,6 @@ createCustomElement('snc-alert-email-preview', {
 						alertId: record.sys_id.value
 					});
 				}
-
 			});
 			state.secondaryRecords.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
@@ -1218,6 +1440,68 @@ createCustomElement('snc-alert-email-preview', {
 				updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
 			}
 		},
+		'FETCH_METRIC_OPTIONS': createHttpEffect('/api/x_snc_optimiz_wo_0/optimiz_workspace_api/golden_metric_options', {
+			batch: true,
+			cacheable: true,
+			method: 'GET',
+			queryParams: ['cmdb_ci_type', 'cmdb_ci_sys_id', 'opt_is_parent', 'opt_record_index'],
+			successActionType: 'FETCH_METRIC_OPTIONS_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
+		}),
+		'FETCH_METRIC_OPTIONS_SUCCESS': (coeffects) => {
+			const { state, action, updateState, dispatch } = coeffects;
+			console.log("FETCH_METRIC_OPTIONS_SUCCESS payload: ", action.payload);
+			console.log("FETCH_METRIC_OPTIONS request params: ", action.meta.request.params);
+
+			if (action.meta.request.params.opt_is_parent == "true") {
+				let updatedParentRecord = state.parentRecord;
+				updatedParentRecord[action.meta.request.params.opt_record_index].metric_options = action.payload;
+
+				updatedParentRecord[action.meta.request.params.opt_record_index].metric_options.sort(sortMetricOptions);
+				updatedParentRecord[action.meta.request.params.opt_record_index].metric_options[0].selected = true;
+				console.log("metric_options: ", updatedParentRecord[action.meta.request.params.opt_record_index].metric_options);
+				//Split created time into an array of each segment then parsed to be integers
+				let created_time_array = updatedParentRecord[action.meta.request.params.opt_record_index].sys_created_on.display_value.split(/[- :]+/).map(Number);
+				created_time_array[1] -= 1;
+				let current_time = new Date(...created_time_array);
+				current_time = addMinutes(current_time, 5);
+				//current_time.setHours(current_time.getHours() + 1);
+				let start_time = new Date(...created_time_array);
+				start_time.setHours(start_time.getHours() - 1);
+				dispatch('QUERY_METRIC', {
+					sys_id: updatedParentRecord[action.meta.request.params.opt_record_index].cmdb_ci.value,
+					metric_id: updatedParentRecord[action.meta.request.params.opt_record_index].metric_options[0].value,
+					start_time: start_time.getTime(),
+					end_time: current_time.getTime(),
+					opt_is_parent: action.meta.request.params.opt_is_parent,
+					opt_record_index: action.meta.request.params.opt_record_index,
+				});
+				updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
+			} else {
+				let updatedSecondaryRecords = state.secondaryRecords;
+				updatedSecondaryRecords[action.meta.request.params.opt_record_index].metric_options = action.payload;
+
+				updatedSecondaryRecords[action.meta.request.params.opt_record_index].metric_options.sort(sortMetricOptions);
+				updatedSecondaryRecords[action.meta.request.params.opt_record_index].metric_options[0].selected = true;
+				console.log("metric_options: ", updatedSecondaryRecords[action.meta.request.params.opt_record_index].metric_options);
+				let created_time_array = updatedSecondaryRecords[action.meta.request.params.opt_record_index].sys_created_on.display_value.split(/[- :]+/).map(Number);
+				created_time_array[1] -= 1;
+				let current_time = new Date(...created_time_array);
+				current_time = addMinutes(current_time, 5);
+				//current_time.setHours(current_time.getHours() + 1);
+				let start_time = new Date(...created_time_array);
+				start_time.setHours(start_time.getHours() - 1);
+				dispatch('QUERY_METRIC', {
+					sys_id: updatedSecondaryRecords[action.meta.request.params.opt_record_index].cmdb_ci.value,
+					metric_id: updatedSecondaryRecords[action.meta.request.params.opt_record_index].metric_options[0].value,
+					start_time: start_time.getTime(),
+					end_time: current_time.getTime(),
+					opt_is_parent: action.meta.request.params.opt_is_parent,
+					opt_record_index: action.meta.request.params.opt_record_index,
+				});
+				updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
+			}
+		},
 		'FETCH_DATADOG_SNAPSHOT': createHttpEffect('/api/now/em_actions/getManualActionsForAlert', {
 			batch: true,
 			cacheable: true,
@@ -1326,8 +1610,50 @@ createCustomElement('snc-alert-email-preview', {
 				updateState({contextAlertActions: newAlertActions, dummyStateChange: !state.dummyStateChange});
 			}
 		},
+		'QUERY_METRIC': createHttpEffect('/api/x_snc_optimiz_wo_0/optimiz_workspace_api/metric', {
+			batch: true,
+			cacheable: true,
+			method: 'GET',
+			queryParams: ['sys_id', 'metric_id', 'start_time', 'end_time', 'opt_is_parent', 'opt_record_index'],
+			successActionType: 'QUERY_METRIC_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
+		}),
+		'QUERY_METRIC_SUCCESS': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			console.log("QUERY_METRIC_SUCCESS action: ", action);
+			if (!action.payload.resource_names) {
+				return;
+			}
+			if (action.meta.request.params.opt_is_parent == "true") {
+				let updatedParentRecord = state.parentRecord;
+				updatedParentRecord[action.meta.request.params.opt_record_index].metrics = action.payload;
+				var max_value = 0;
+				action.payload.resource_names.forEach((resource_name) => {
+					if ((Math.max(...action.payload.datapoints.map(dp => dp[resource_name])) * 1.2) > max_value) {
+						max_value = Math.max(...action.payload.datapoints.map(dp => dp[resource_name])) * 1.2;
+					}
+				});
+				updatedParentRecord[action.meta.request.params.opt_record_index].metrics.max_value = max_value;
+				updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
+			} else {
+				let updatedSecondaryRecords = state.secondaryRecords;
+				updatedSecondaryRecords[action.meta.request.params.opt_record_index].metrics = action.payload;
+				var max_value = 0;
+				action.payload.resource_names.forEach((resource_name) => {
+					if ((Math.max(...action.payload.datapoints.map(dp => dp[resource_name])) * 1.2) > max_value) {
+						max_value = Math.max(...action.payload.datapoints.map(dp => dp[resource_name])) * 1.2;
+					}
+				});
+				updatedSecondaryRecords[action.meta.request.params.opt_record_index].metrics.max_value = max_value;
+				updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
+			}
+		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
+		},
+		'QUERY_ERROR': (coeffects) => {
+			const { action } = coeffects;
+			console.log('%cQUERY_ERROR: %o', 'color:green;font-size:12px;', action.payload);
 		},
 	},
 	properties: {
