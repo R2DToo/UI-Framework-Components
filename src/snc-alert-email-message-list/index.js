@@ -145,7 +145,7 @@ const view = (state, {updateState, dispatch}) => {
 	}
 
 	const makeRelativeTime = (time) => {
-		let currentTime = new Date();
+		let currentTime = changeTimeZone(new Date(), state.properties.currentUser.timeZone);
 		let fieldTime = new Date(time);
 
 		let diff = fieldTime - currentTime;
@@ -169,6 +169,22 @@ const view = (state, {updateState, dispatch}) => {
 			hh = hh % 24;
 			return `${dd} d ${hh} hr ago`;
 		}
+	};
+
+	const changeTimeZone = (date, timezone) => {
+		if (typeof date === 'string') {
+			return new Date(
+				new Date(date).toLocaleString('en-US', {
+					timezone,
+				}),
+			);
+		}
+
+		return new Date(
+			date.toLocaleString('en-US', {
+				timezone,
+			}),
+		);
 	};
 
 	const getSeverityColor = (severityNumber) => {
@@ -450,6 +466,9 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "running_checks_num") {
 								let data_fields = `data-field-${key}`;
 								return <td class={{[data_fields]: true, 'text-red': row[key].display_value == "0"}}>{row[key].display_value}</td>
+							} else if (key == "host_data") {
+								let data_fields = `data-field-${key}`;
+								return <td class={{[data_fields]: true, 'text-red': row[key].display_value == "Collection failed"}}>{row[key].display_value}</td>
 							} else {
 								return <td className={`view-message data-field-${key}`}>{row[key].display_value}</td>
 							}
@@ -1023,7 +1042,7 @@ const view = (state, {updateState, dispatch}) => {
 							</ul>
 						</li>}
 					</ul>
-					{(state.currentList.table == "em_alert" || state.currentList.table == "sn_occ_log_viewer_parent") && state.contextMenuRecordIndex != -1 && <ul className="context-menu-list">
+					{state.contextMenuRecordIndex != -1 && <ul className="context-menu-list">
 						<li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Quick Search<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
 							<ul className="context-menu-sub-list">
 								{state.contextMenuRecordField != "" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, 'show_matching')}}><svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M19.55 20.575 13.25 14.3Q12.5 14.925 11.525 15.275Q10.55 15.625 9.525 15.625Q6.95 15.625 5.175 13.85Q3.4 12.075 3.4 9.5Q3.4 6.95 5.175 5.162Q6.95 3.375 9.525 3.375Q12.075 3.375 13.85 5.15Q15.625 6.925 15.625 9.5Q15.625 10.575 15.275 11.55Q14.925 12.525 14.325 13.25L20.6 19.525ZM9.525 14.125Q11.45 14.125 12.788 12.775Q14.125 11.425 14.125 9.5Q14.125 7.575 12.788 6.225Q11.45 4.875 9.525 4.875Q7.575 4.875 6.238 6.225Q4.9 7.575 4.9 9.5Q4.9 11.425 6.238 12.775Q7.575 14.125 9.525 14.125Z"/></svg>Show Matching</button></li>}

@@ -281,6 +281,19 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      .open_metric_explorer {
+        outline: none;
+        border: none;
+        color: RGB($now-color_text--primary);
+        background-color: RGB($now-color--primary-1);
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        transition: background-color 100ms linear;
+        &:hover {
+          background-color: rgba($now-color--primary-1, 0.3);
+        }
+      }
       .metric-container {
         width: 95%;
         .metric-filters-container {
@@ -381,6 +394,32 @@
     .work-note {
       margin-top: 1em;
       margin-bottom: 1em;
+
+      .work-note-compose {
+        position: relative;
+        border: 1px solid RGB($now-color--primary-1);
+        border-radius: 6px;
+        padding: 8px;
+
+        .work-note-compose-input {
+          border: none;
+          resize: none;
+          outline: none;
+          background-color: RGB($now-color_background--tertiary);
+          color: RGB($now-color_text--primary);
+        }
+        .work-note-compose-submit {
+          position: absolute;
+          background-color: RGB($now-color_background--tertiary);
+          color: RGB($now-color--primary-1);
+          font-size: 1rem;
+          bottom: 4px;
+          right: 4px;
+          border: none;
+          cursor: pointer;
+        }
+      }
+
       .work-note-content {
         display: flex;
         align-items: center;
@@ -396,11 +435,13 @@
           border-radius: 6px;
           padding: 8px;
           margin-left: 8px;
+          width: 100%;
           .work-note-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 2px;
+            column-gap: 12px;
             .work-note-relative-time {
               display: flex;
               align-items: center;

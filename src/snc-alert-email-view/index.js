@@ -33,6 +33,7 @@ const view = (state, {updateState}) => {
 				<snc-alert-email-preview
 					focusedRecordNumber={state.focusedRecordNumber}
 					actionArray={state.properties.actionArray}
+					currentUser={state.properties.currentUser}
 					className={state.isInfoMounted ? "mounted" : "unmounted"}
 					onanimationend={() => {
 						if (!state.isInfoMounted) updateState({showInfo: false});
@@ -157,6 +158,10 @@ createCustomElement('snc-alert-email-view', {
 		'OPEN_CONTEXTUAL#LOG_VIEWER': ({action,dispatch}) => {
 			logEvent("OPEN_CONTEXTUAL#LOG_VIEWER", action.payload);
 			dispatch("OPEN_CONTEXTUAL_LOG_VIEWER", action.payload);
+		},
+		'METRIC_EXPLORER_LINK#CLICKED': ({action,dispatch}) => {
+			logEvent("METRIC_EXPLORER_LINK#CLICKED", action.payload);
+			dispatch("METRIC_EXPLORER_LINK_CLICKED", action.payload);
 		}
 	},
 	setInitialState() {

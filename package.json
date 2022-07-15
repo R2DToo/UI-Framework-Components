@@ -26,11 +26,11 @@
 		"@servicenow/now-rich-text": "^19.8.2-ecd",
 		"@servicenow/now-template-message": "^19.8.2-ecd",
 		"@servicenow/now-typeahead": "^19.8.2-ecd",
-		"@servicenow/sass-kit": "quebec",
-		"@servicenow/sass-theme": "quebec",
-		"@servicenow/ui-core": "quebec",
+		"@servicenow/sass-kit": "^19.8.2-ecd",
+		"@servicenow/sass-theme": "^19.8.2-ecd",
+		"@servicenow/ui-core": "19.4.2",
 		"@servicenow/ui-effect-http": "19.4.2",
-		"@servicenow/ui-renderer-snabbdom": "quebec",
+		"@servicenow/ui-renderer-snabbdom": "19.4.2",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {

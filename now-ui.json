@@ -194,6 +194,18 @@
 					"label": "OPEN_CONTEXTUAL_LOG_VIEWER",
 					"description": "Open the log viewer page with a contextual sysparm",
 					"payload": []
+				},
+				{
+					"name": "METRIC_EXPLORER_LINK_CLICKED",
+					"label": "METRIC_EXPLORER_LINK_CLICKED",
+					"description": "Open Metric Explorer",
+					"payload": []
+				},
+				{
+					"name": "EXTERNAL_LINK_CLICKED",
+					"label": "EXTERNAL_LINK_CLICKED",
+					"description": "Open link that is not part of this workspace in another browser tab",
+					"payload": []
 				}
 			]
 		},

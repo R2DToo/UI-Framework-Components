@@ -104,7 +104,7 @@ const view = (state, {updateState, dispatch}) => {
 	};
 
 	const makeRelativeTime = (time) => {
-		let currentTime = new Date();
+		let currentTime = changeTimeZone(new Date(), state.properties.currentUser.timeZone);
 		let fieldTime = new Date(time);
 
 		let diff = fieldTime - currentTime;
@@ -128,6 +128,22 @@ const view = (state, {updateState, dispatch}) => {
 			hh = hh % 24;
 			return `${dd} d ${hh} hr ago`;
 		}
+	};
+
+	const changeTimeZone = (date, timezone) => {
+		if (typeof date === 'string') {
+			return new Date(
+				new Date(date).toLocaleString('en-US', {
+					timezone,
+				}),
+			);
+		}
+
+		return new Date(
+			date.toLocaleString('en-US', {
+				timezone,
+			}),
+		);
 	};
 
 	const calculateDial = (calculationIndex) => {
@@ -182,18 +198,24 @@ const view = (state, {updateState, dispatch}) => {
 		}
 	}
 
-	const workNoteComponent = (work_notes) => {
+	const workNoteComponent = (work_notes, is_parent, record_index) => {
+		let records = is_parent ? state.parentRecord : state.secondaryRecords;
+		let record = records[record_index];
 		let systemNotes = work_notes.filter((work_note) => {
 			return work_note.sys_created_by.value == "system" || work_note.sys_created_by.value == "admin";
 		});
 		let userNotes = work_notes.filter((work_note) => {
 			return work_note.sys_created_by.value != "system" && work_note.sys_created_by.value != "admin";
 		});
-		console.log("system notes: ", systemNotes);
-		console.log("user notes: ", userNotes);
 		return (
 			<div className="work-notes">
-				{userNotes.length > 0 && <div className="work-notes-header"><svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15 4v7H5.17l-.59.59-.58.58V4h11m1-2H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm5 4h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1z"/></svg>&nbsp;&nbsp;Collaboration</div>}
+				<div className="work-notes-header"><svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15 4v7H5.17l-.59.59-.58.58V4h11m1-2H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm5 4h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1z"/></svg>&nbsp;&nbsp;Collaboration</div>
+				<div className="work-note">
+					<div className="work-note-compose">
+						<textarea className="work-note-compose-input" rows="4" cols="66" placeholder="Type your work notes here" oninput={(e) => {dispatch("SET_WORK_NOTE_COMPOSE_VALUE", {input: e.target.value, opt_is_parent: is_parent, opt_record_index: record_index})}}>{record.work_note_compose_value || ''}</textarea>
+						<button className="work-note-compose-submit" onclick={() => {dispatch("START_POST_WORK_NOTE", {input: record.work_note_compose_value, opt_is_parent: is_parent, opt_record_index: record_index})}}>Post</button>
+					</div>
+				</div>
 				{userNotes.map((note) =>
 					<div className="work-note">
 						<div className="work-note-content">
@@ -203,7 +225,7 @@ const view = (state, {updateState, dispatch}) => {
 							<div className="work-note-text">
 								<div className="work-note-header">
 									<div className="work-note-relative-time">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M14.31 2l.41 2.48C13.87 4.17 12.96 4 12 4c-.95 0-1.87.17-2.71.47L9.7 2h4.61m.41 17.52L14.31 22H9.7l-.41-2.47c.84.3 1.76.47 2.71.47.96 0 1.87-.17 2.72-.48M16 0H8l-.95 5.73C5.19 7.19 4 9.45 4 12s1.19 4.81 3.05 6.27L8 24h8l.96-5.73C18.81 16.81 20 14.54 20 12s-1.19-4.81-3.04-6.27L16 0zm-4 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M8.35 13.55h7.3v-.35q0-.95-1.013-1.55-1.012-.6-2.637-.6t-2.637.6q-1.013.6-1.013 1.55ZM12 9.75q.725 0 1.238-.512.512-.513.512-1.238t-.512-1.238Q12.725 6.25 12 6.25t-1.238.512Q10.25 7.275 10.25 8t.512 1.238q.513.512 1.238.512Zm-9.5 11.3V4.3q0-.75.525-1.275Q3.55 2.5 4.3 2.5h15.4q.75 0 1.275.525.525.525.525 1.275v11.4q0 .75-.525 1.275-.525.525-1.275.525H6.05ZM4 17.425 5.425 16H19.7q.125 0 .213-.088.087-.087.087-.212V4.3q0-.125-.087-.213Q19.825 4 19.7 4H4.3q-.125 0-.212.087Q4 4.175 4 4.3ZM4 4.3V4v13.425Z"/></svg>
 										&nbsp;{makeRelativeTime(note.sys_created_on.display_value)}
 									</div>
 									<div>
@@ -225,7 +247,7 @@ const view = (state, {updateState, dispatch}) => {
 							<div className="work-note-text">
 								<div className="work-note-header">
 									<div className="work-note-relative-time">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M14.31 2l.41 2.48C13.87 4.17 12.96 4 12 4c-.95 0-1.87.17-2.71.47L9.7 2h4.61m.41 17.52L14.31 22H9.7l-.41-2.47c.84.3 1.76.47 2.71.47.96 0 1.87-.17 2.72-.48M16 0H8l-.95 5.73C5.19 7.19 4 9.45 4 12s1.19 4.81 3.05 6.27L8 24h8l.96-5.73C18.81 16.81 20 14.54 20 12s-1.19-4.81-3.04-6.27L16 0zm-4 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M14.975 16.025 11.25 12.3V7h1.5v4.7l3.275 3.275Zm-3 4.475q-3.25 0-5.663-2.137Q3.9 16.225 3.55 13h1.525q.375 2.6 2.325 4.3Q9.35 19 11.975 19q2.925 0 4.963-2.038 2.037-2.037 2.037-4.962t-2.037-4.963Q14.9 5 11.975 5q-1.625 0-3.062.725-1.438.725-2.463 2h2.6v1.5H3.975V4.15h1.5v2.375Q6.7 5.075 8.4 4.287q1.7-.787 3.575-.787 1.775 0 3.325.675Q16.85 4.85 18 6q1.15 1.15 1.812 2.688.663 1.537.663 3.312t-.663 3.312Q19.15 16.85 18 18q-1.15 1.15-2.7 1.825-1.55.675-3.325.675Z"/></svg>
 										&nbsp;{makeRelativeTime(note.sys_created_on.display_value)}
 									</div>
 									<div>
@@ -638,14 +660,7 @@ const view = (state, {updateState, dispatch}) => {
 								{state.activeTabIndex == 1 && (
 									<div className="card-body">
 										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										{workNoteComponent(record.work_notes || [])}
-										{/* {record.work_notes && record.work_notes.map((note) =>
-											<p>
-												<now-avatar className="" size="sm" user-name={note.sys_created_by.display_value} image-src={note.sys_created_by.avatar}/>
-												<now-rich-text html={note.value.display_value}/>
-												<br/><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 20 20" height="18px" viewBox="0 0 20 20" width="18px"><g><rect fill="none" height="20" width="20"/></g><g><g><path d="M8.5,8.53v3.24c0,0.18,0.09,0.34,0.24,0.43l2.52,1.51c0.23,0.14,0.52,0.06,0.66-0.16l0,0c0.14-0.23,0.06-0.53-0.16-0.66 L9.5,11.55V8.53c0-0.26-0.21-0.48-0.48-0.48H8.98C8.71,8.05,8.5,8.26,8.5,8.53z"/><path d="M13.9,10c0.07,0.32,0.1,0.66,0.1,1c0,2.76-2.24,5-5,5s-5-2.24-5-5s2.24-5,5-5c0.71,0,1.39,0.15,2,0.42V5.35 C10.37,5.13,9.7,5,9,5c-3.31,0-6,2.69-6,6s2.69,6,6,6s6-2.69,6-6c0-0.34-0.04-0.67-0.09-1H13.9z"/><path d="M15,6V4.5C15,4.22,14.78,4,14.5,4h0C14.22,4,14,4.22,14,4.5V6h0h-1.5C12.22,6,12,6.22,12,6.5v0C12,6.78,12.22,7,12.5,7H14 v1.5C14,8.78,14.22,9,14.5,9h0C14.78,9,15,8.78,15,8.5V7v0h1.5C16.78,7,17,6.78,17,6.5v0C17,6.22,16.78,6,16.5,6H15z"/></g></g></svg>'/> {note.sys_created_on.display_value}
-											</p>
-										)} */}
+										{workNoteComponent(record.work_notes || [], true, index)}
 									</div>
 								)}
 								{state.activeTabIndex == 2 && (
@@ -706,6 +721,7 @@ const view = (state, {updateState, dispatch}) => {
 											</div>
 										</div>
 										<div className="card-center">
+											{/* <button className="open_metric_explorer" onclick={() => {dispatch("METRIC_EXPLORER_LINK#CLICKED", {ciSysId: record.cmdb_ci ? record.cmdb_ci.value : ''})}}>Metric Explorer</button> */}
 											{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
 												{record.metric_options && <div className="metric-filters-container">
 													<select onchange={(e) => {setSelectedMetricOption(e, index, true)}}>
@@ -825,7 +841,7 @@ const view = (state, {updateState, dispatch}) => {
 								{state.activeTabIndex == 1 && (
 									<div className="card-body">
 										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										{workNoteComponent(record.work_notes || [])}
+										{workNoteComponent(record.work_notes || [], false, index)}
 										{/* {record.work_notes && record.work_notes.map((note) =>
 											<p>
 												<now-avatar className="" size="sm" user-name={note.sys_created_by.display_value} image-src={note.sys_created_by.avatar}/>
@@ -893,6 +909,7 @@ const view = (state, {updateState, dispatch}) => {
 											</div>
 										</div>
 										<div className="card-center">
+											{/* <button className="open_metric_explorer" onclick={() => {dispatch("METRIC_EXPLORER_LINK#CLICKED", {ciSysId: record.cmdb_ci ? record.cmdb_ci.value : ''})}}>Metric Explorer</button> */}
 											{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
 												{record.metric_options && <div className="metric-filters-container">
 													<select onchange={(e) => {setSelectedMetricOption(e, index, false)}}>
@@ -1648,6 +1665,50 @@ createCustomElement('snc-alert-email-preview', {
 				updateState({secondaryRecords: updatedSecondaryRecords, dummyStateChange: !state.dummyStateChange});
 			}
 		},
+		'SET_WORK_NOTE_COMPOSE_VALUE': (coeffects) => {
+			const { action, state, updateState } = coeffects;
+			console.log("SET_WORK_NOTE_COMPOSE_VALUE payload: ", action.payload);
+			let records = action.payload.opt_is_parent ? state.parentRecord : state.secondaryRecords;
+			records[action.payload.opt_record_index].work_note_compose_value = action.payload.input;
+			if (action.payload.opt_is_parent) {
+				updateState({parentRecord: records, dummyStateChange: !state.dummyStateChange});
+			} else {
+				updateState({secondaryRecords: records, dummyStateChange: !state.dummyStateChange});
+			}
+		},
+		'START_POST_WORK_NOTE': (coeffects) => {
+			const { action, state, updateState, dispatch } = coeffects;
+			console.log("START_POST_WORK_NOTE payload: ", action.payload);
+
+			let records = action.payload.opt_is_parent ? state.parentRecord : state.secondaryRecords;
+			records[action.payload.opt_record_index].work_note_compose_value = "";
+			if (action.payload.opt_is_parent) {
+				updateState({parentRecord: records, dummyStateChange: !state.dummyStateChange});
+			} else {
+				updateState({secondaryRecords: records, dummyStateChange: !state.dummyStateChange});
+			}
+			dispatch("POST_WORK_NOTE", {
+				table: 'em_alert',
+				sys_id: records[action.payload.opt_record_index].sys_id.value,
+				data: {
+					work_notes: action.payload.input
+				}
+			});
+		},
+		'POST_WORK_NOTE': createHttpEffect('/api/now/table/:table/:sys_id', {
+			batch: false,
+			method: 'PATCH',
+			pathParams: ['table', 'sys_id'],
+			dataParam: 'data',
+			successActionType: 'POST_WORK_NOTE_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: false
+		}),
+		'POST_WORK_NOTE_SUCCESS': (coeffects) => {
+			const { action, dispatch } = coeffects;
+			console.log("POST_WORK_NOTE_SUCCESS payload: ", action.payload);
+			dispatch("REFRESH_MAIN_QUERY");
+		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
 		},
@@ -1663,6 +1724,9 @@ createCustomElement('snc-alert-email-preview', {
 		actionArray: {
 			default: []
 		},
+		currentUser: {
+			default: {}
+		}
 	},
 	setInitialState() {
 		return {
