@@ -3,6 +3,7 @@ const { COMPONENT_PROPERTY_CHANGED, COMPONENT_BOOTSTRAPPED, COMPONENT_ERROR_THRO
 import {createHttpEffect} from '@servicenow/ui-effect-http';
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
+import '../snc-alert-lifecycle';
 import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
 import '@servicenow/now-avatar';
@@ -892,7 +893,7 @@ const view = (state, {updateState, dispatch}) => {
 
 	return (
 		<div id="snc-alert-email-message-list">
-			<main id="main">
+			{state.showLifecycle == false && <main id="main">
 				<div className="header">
 					<div className="table-title">
 						<h1>
@@ -1019,7 +1020,8 @@ const view = (state, {updateState, dispatch}) => {
 					<div className="list-flavin"></div>
 					No records to display
 				</div>}
-			</main>
+			</main>}
+			{state.showLifecycle == true && <snc-alert-lifecycle/>}
 			<div ref={(contextMenuElement) => updateState({contextMenuRef: contextMenuElement})} class={{'context-menu-container': true, visible: state.showContextMenu}} /*style={{top: state.contextMenuTop, left: state.contextMenuLeft}}*/ style={{/*width: state.contextMenuStyle.width, height: state.contextMenuStyle.height,*/ top: state.contextMenuStyle.top, left: state.contextMenuStyle.left}}>
 				<div className="context-menu">
 					<ul className="context-menu-list">
@@ -1247,7 +1249,8 @@ createCustomElement('snc-alert-email-message-list', {
 			contextMenuTag: {},
 			alertActions: [],
 			currentList: {condition: '', columns: '', table: ''},
-			showPrettyLogList: []
+			showPrettyLogList: [],
+			showLifecycle: false
 		}
 	},
 	transformState(state) {
@@ -1320,23 +1323,28 @@ createCustomElement('snc-alert-email-message-list', {
 			console.log("FETCH_CURRENT_LIST_SUCCESS payload: ", action.payload);
 			console.log("FETCH_CURRENT_LIST_SUCCESS action: ", action);
 			if (action.payload && action.payload.result && action.payload.result[0]) {
-				let newCurrentList = {
-					condition: action.payload.result[0].condition,
-					columns: action.payload.result[0].columns,
-					table: action.payload.result[0].table
-				};
-				updateState({currentList: newCurrentList, tableOrder: [], tableData: [], sortingArray: [], dummyStateChange: !state.dummyStateChange, showInfo: state.showInfo});
+				if (action.payload.result[0].title == "Lifecycle") {
+					updateState({showLifecycle: true});
+				} else {
+					updateState({showLifecycle: false});
+					let newCurrentList = {
+						condition: action.payload.result[0].condition,
+						columns: action.payload.result[0].columns,
+						table: action.payload.result[0].table
+					};
+					updateState({currentList: newCurrentList, tableOrder: [], tableData: [], sortingArray: [], dummyStateChange: !state.dummyStateChange, showInfo: state.showInfo});
 
-				dispatch('REFRESH_MAIN_QUERY', {force: true});
+					dispatch('REFRESH_MAIN_QUERY', {force: true});
 
-				let labelSysparm = `name=${newCurrentList.table}^elementISNOTEMPTY`;
-				console.log("labelSysparm: ", labelSysparm);
-				dispatch('FETCH_ALL_TABLE_COLUMNS', {
-					table: 'sys_dictionary',
-					sysparm_query: labelSysparm,
-					sysparm_fields: 'element,column_label,internal_type',
-					sysparm_display_value: 'true'
-				});
+					let labelSysparm = `name=${newCurrentList.table}^elementISNOTEMPTY`;
+					console.log("labelSysparm: ", labelSysparm);
+					dispatch('FETCH_ALL_TABLE_COLUMNS', {
+						table: 'sys_dictionary',
+						sysparm_query: labelSysparm,
+						sysparm_fields: 'element,column_label,internal_type',
+						sysparm_display_value: 'true'
+					});
+				}
 			} else if (action.meta.request.updatedUrl == "/api/now/table/sys_aw_list") {
 				dispatch('FETCH_CURRENT_MY_LIST', {
 					table: 'sys_aw_my_list',
