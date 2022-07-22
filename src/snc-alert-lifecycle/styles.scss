@@ -33,14 +33,35 @@
 }
 
 #progress-bar-container li:before {
-	content:" ";
+	// content:" ";
+	content: url(images/map.svg);
+	background-color: black;
 	display:block;
 	margin:auto;
 	width:30px;
 	height:30px;
 	border-radius:50%;
-	border:solid 2px RGB($now-color_text--primary);
+	border:solid 2px white;
 	transition:all ease 0.3s;
+}
+
+#progress-bar-container li.step0:before {
+	content: url(images/grain.svg);
+}
+#progress-bar-container li.step1:before {
+	content: url(images/map.svg);
+}
+#progress-bar-container li.step2:before {
+	content: url(images/transform.svg);
+}
+#progress-bar-container li.step3:before {
+	content: url(images/notifications_active.svg);
+}
+#progress-bar-container li.step4:before {
+	content: url(images/precision_manufacturing.svg);
+}
+#progress-bar-container li.step5:before {
+	content: url(images/crisis_alert.svg);
 }
 
 #progress-bar-container li.active:before, #progress-bar-container li:hover:before {

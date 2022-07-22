@@ -611,6 +611,7 @@
 }
 
 .circle-tag {
+  box-sizing: border-box;
 	color: RGB($now-color_text--primary);
 	background-color: rgba(119, 178, 123, 1);
 	border-radius: 50%;

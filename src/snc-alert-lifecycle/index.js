@@ -12,7 +12,7 @@ const view = (state, {updateState, dispatch}) => {
 				<div id="progress-bar-container">
 					<ul>
 						{state.steps.map((step, index) => {
-							return <li class={{active: step.active}} onclick={() => {dispatch("STEP_CLICKED", {index: index})}}><div className="step-inner">{step.label}</div></li>
+							return <li class={{active: step.active, ['step' + index]: true}} onclick={() => {dispatch("STEP_CLICKED", {index: index})}}><div className="step-inner">{step.label}</div></li>
 						})}
 					</ul>
 
@@ -63,7 +63,18 @@ createCustomElement('snc-alert-lifecycle', {
 					</ul>
 				</div>)},
 				{label: 'Alert Management Rules', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>Alert Management Rules provided with the base system help you respond to alerts. You can create filters to specify conditions for the rule so that the remedial action specified in the rule takes effect only when the conditions are met. For example, launch the required subflow or open an incident based on an alert. The alert's execution history is automatically updated to indicate the actions that were invoked.</p></div>)},
-				{label: 'Correlation', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>The Alert Correlation capability enhances Event Management with alert data analysis and alert aggregation. Alert Correlation helps organize incoming real-time alerts and reduce alert noise. Out of the box techniques used are Tag-based Alert Clustering, Automated Temporal Analysis, CMDB Topological Analysis, and Text Analysis.</p></div>)}
+				{label: 'Correlation', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>Alerts are grouped either automatically or manually into (R)Tag-based, (A)utomated, (M)anual, (C)MDB, or (T)ext alert groups. Grouping alerts enables you to narrow down problems by focusing on the primary alerts in the correlated group.</p>
+					<br/>
+					<p>When evaluating incoming alerts to form alert groups, the types of group that alerts might potentially belong to are considered in the following order. After an alert becomes part of a group, it is not available for any other group.</p>
+					<ul>
+						<li>Log Analytics</li>
+						<li>Tag-based</li>
+						<li>Manual</li>
+						<li>Automated</li>
+						<li>CMDB</li>
+						<li>Text</li>
+					</ul>
+				</div>)}
 			],
 			dummyStateChange: false,
 			progress: 0
