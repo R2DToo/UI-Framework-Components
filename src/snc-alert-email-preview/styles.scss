@@ -359,30 +359,7 @@
     .green-text {
       color: rgba(119, 178, 123, 1);
     }
-    .tags, .tags-title {
-      display: flex;
-      text-align: center;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .tags {
-      margin-bottom: 1em;
-    }
 
-    .broker-tag {
-      background-color: RGB($now-color--primary-1);
-      color: RGB($now-color_text--primary);
-      padding: 0px 2px;
-      margin: 2px;
-      border-radius: 6px;
-      .tag-key {
-        font-weight: bold;
-        font-size: 0.9em;
-      }
-      &.green {
-        background-color: rgba(119, 178, 123, 1);
-      }
-    }
     .work-notes {
       .work-notes-header {
         display: flex;
@@ -726,6 +703,34 @@
 			}
 		}
 	}
+}
+
+.tags, .tags-title, .correlated_tags {
+  display: flex;
+  text-align: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tags {
+  margin-bottom: 1em;
+}
+.correlated_tags {
+  max-width: 350px;
+}
+
+.broker-tag {
+  background-color: RGB($now-color--primary-1);
+  color: RGB($now-color_text--primary);
+  padding: 0px 2px;
+  margin: 2px;
+  border-radius: 6px;
+  .tag-key {
+    font-weight: bold;
+    font-size: 0.9em;
+  }
+  &.green {
+    background-color: rgba(119, 178, 123, 1);
+  }
 }
 
 .chart-wrapper {

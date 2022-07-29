@@ -324,6 +324,11 @@ ul {
 	max-width: 400px !important;
 }
 
+.reasoning-tags-container {
+	min-width: 200px !important;
+	max-width: 200px !important;
+}
+
 .broker-tags {
 	display: flex;
 	text-align: center;
@@ -359,6 +364,9 @@ ul {
 	}
 	&.planning {
 		background-color: RGB($now-color_alert--info-1);
+	}
+	&.green {
+		background-color: rgba(119, 178, 123, 1);
 	}
 }
 

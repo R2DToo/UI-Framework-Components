@@ -489,7 +489,12 @@ const view = (state, {updateState, dispatch}) => {
 					<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
 					<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
 					{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
-					{state.parentRecord[0] && state.parentRecord[0].group_source && state.parentRecord[0].group_source.display_value && <div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>}
+					{state.parentRecord[0] && state.parentRecord[0].tbac_cluster_tags ?
+						(<div className="correlated_tags">{state.parentRecord[0].tbac_cluster_tags.map((tbac_cluster_tag) =>
+							<div className="broker-tag green"><span className="tag-key">{tbac_cluster_tag.key}:</span> {tbac_cluster_tag.value}</div>
+						)}</div>) :
+						(<div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>)
+					}
 				</div>
 				<div id="right-side">
 					<div className="dials-container">
@@ -1255,6 +1260,14 @@ createCustomElement('snc-alert-email-preview', {
 						alertId: record.sys_id.value
 					});
 				}
+				if (record.u_tbac_reasoning.value != "") {
+					dispatch('FETCH_TBAC_TAGS_USED', {
+						table: 'sn_em_tbac_alert_clustering_definitions',
+						sysparm_query: "name=" + record.u_tbac_reasoning.value,
+						sysparm_fields: 'name,sys_id',
+						sysparm_display_value: 'all'
+					});
+				}
 			});
 			state.secondaryRecords.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
@@ -1297,6 +1310,100 @@ createCustomElement('snc-alert-email-preview', {
 					sysparm_display_value: 'all'
 				});
 			}
+		},
+		'FETCH_TBAC_TAGS_USED': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_TBAC_TAGS_USED_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true,
+			batch: false
+		}),
+		'FETCH_TBAC_TAGS_USED_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_TBAC_TAGS_USED_SUCCESS payload: ", action.payload);
+			let updatedParentRecord = state.parentRecord;
+			let alert_clustering_defs = [];
+			action.payload.result.forEach((result) => {
+				if (updatedParentRecord[0].u_tbac_reasoning.display_value == result.name.display_value) {
+					updatedParentRecord[0].u_tbac_reasoning.value = result.sys_id.value;
+					if (!alert_clustering_defs.includes(result.sys_id.value)) {
+						alert_clustering_defs.push(result.sys_id.value);
+					}
+				}
+			})
+			updateState({parentRecord: updatedParentRecord});
+			if (alert_clustering_defs.length > 0) {
+				console.log("FETCH_TBAC_CLUSTER_DEF_M2M sysparm: ", "alert_clustering_definitionIN" + alert_clustering_defs.toString());
+				dispatch('FETCH_TBAC_CLUSTER_DEF_M2M', {
+					table: 'sn_em_tbac_alert_clustering_definitions_tags_m2m',
+					sysparm_query: "alert_clustering_definitionIN" + alert_clustering_defs.toString(),
+					sysparm_fields: 'alert_clustering_definition,alert_clustering_tag',
+					sysparm_display_value: 'all'
+				});
+			}
+		},
+		'FETCH_TBAC_CLUSTER_DEF_M2M': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_TBAC_CLUSTER_DEF_M2M_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true,
+			batch: false
+		}),
+		'FETCH_TBAC_CLUSTER_DEF_M2M_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_TBAC_CLUSTER_DEF_M2M_SUCCESS payload: ", action.payload);
+			let updatedParentRecord = state.parentRecord;
+			let alert_cluster_tags = [];
+			updatedParentRecord[0].u_tbac_reasoning.alert_clustering_tags = [];
+			action.payload.result.forEach((result) => {
+				if (updatedParentRecord[0].u_tbac_reasoning.value == result.alert_clustering_definition.value) {
+					updatedParentRecord[0].u_tbac_reasoning.alert_clustering_tags.push(result.alert_clustering_tag);
+					if (!alert_cluster_tags.includes(result.alert_clustering_tag.value)) {
+						alert_cluster_tags.push(result.alert_clustering_tag.value);
+					}
+				}
+			});
+			updateState({parentRecord: updatedParentRecord});
+			if (alert_cluster_tags.length > 0) {
+				console.log("FETCH_TBAC_CLUSTER_TAGS sysparm: ", "sys_idIN" + alert_cluster_tags.toString());
+				dispatch('FETCH_TBAC_CLUSTER_TAGS', {
+					table: 'sn_em_tbac_alert_clustering_tags',
+					sysparm_query: "sys_idIN" + alert_cluster_tags.toString() + "^source=additional_info",
+					sysparm_fields: 'sys_id,additional_info_key',
+					sysparm_display_value: 'all'
+				});
+			}
+		},
+		'FETCH_TBAC_CLUSTER_TAGS': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_TBAC_CLUSTER_TAGS_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true,
+			batch: false
+		}),
+		'FETCH_TBAC_CLUSTER_TAGS_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_TBAC_CLUSTER_TAGS_SUCCESS payload: ", action.payload);
+			let updatedParentRecord = state.parentRecord;
+			updatedParentRecord[0].tbac_cluster_tags = [];
+			if (updatedParentRecord[0].u_tbac_reasoning.alert_clustering_tags) {
+				action.payload.result.forEach((result) => {
+					if (updatedParentRecord[0].u_tbac_reasoning.alert_clustering_tags.find((act) => act.value == result.sys_id.value)) {
+						let desired_tag = result.additional_info_key.value;
+						let found_tag = updatedParentRecord[0].tags.find((tag) => tag.key == desired_tag && tag.type == "itom_tags");
+						if (found_tag) {
+							updatedParentRecord[0].tbac_cluster_tags.push(found_tag);
+						}
+					}
+				});
+			}
+			updateState({parentRecord: updatedParentRecord, dummyStateChange: !state.dummyStateChange});
 		},
 		'FETCH_WORK_NOTES': createHttpEffect('/api/now/table/:table', {
 			batch: true,

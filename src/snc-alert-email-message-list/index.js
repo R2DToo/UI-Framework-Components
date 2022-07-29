@@ -292,6 +292,8 @@ const view = (state, {updateState, dispatch}) => {
 					break;
 					case "itom_tags": label = "ITOM Tags";
 					break;
+					case "tbac_cluster_tags": label = "Correlation Tags";
+					break;
 				}
 				return (
 					<th
@@ -412,6 +414,14 @@ const view = (state, {updateState, dispatch}) => {
 									<div className="broker-tags">
 										{row[key].map((tag, index) =>
 											<div className="broker-tag" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
+										)}
+									</div>
+								</td>
+							} else if (key == "tbac_cluster_tags") {
+								return <td className={`reasoning-tags-container data-field-${key}`}>
+									<div className="broker-tags centered">
+										{row[key].map((tag, index) =>
+											<div className="broker-tag green" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
 										)}
 									</div>
 								</td>
@@ -1639,9 +1649,130 @@ createCustomElement('snc-alert-email-message-list', {
 			dispatch('TABLE_RECORD_COUNT#UPDATED', {value: parseInt(action.meta.responseHeaders['x-total-count'])});
 			updateState({tableData: result, tableOrder: updatedTableOrder, totalCount: parseInt(action.meta.responseHeaders['x-total-count']), isMainQueryRunning: result.length == 0 ? false : true});
 			dispatch('START_FETCH_COLUMN_LABELS');
+			dispatch('START_FETCH_TBAC_TAGS_USED');
 		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
+		},
+		'START_FETCH_TBAC_TAGS_USED': (coeffects) => {
+			const { state, dispatch } = coeffects;
+			console.log("START_FETCH_TBAC_TAGS_USED");
+			let reasoning_names = [];
+			state.tableData.forEach((td) => {
+				if (td.u_tbac_reasoning.value != "" && !reasoning_names.includes(td.u_tbac_reasoning.value)) {
+					reasoning_names.push(td.u_tbac_reasoning.value);
+				}
+			});
+			if (reasoning_names.length > 0) {
+				console.log("FETCH_TBAC_TAGS_USED sysparm: ", "nameIN" + reasoning_names.toString());
+				dispatch('FETCH_TBAC_TAGS_USED', {
+					table: 'sn_em_tbac_alert_clustering_definitions',
+					sysparm_query: "nameIN" + reasoning_names.toString(),
+					sysparm_fields: 'name,sys_id',
+					sysparm_display_value: 'all'
+				});
+			}
+		},
+		'FETCH_TBAC_TAGS_USED': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_TBAC_TAGS_USED_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'FETCH_TBAC_TAGS_USED_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_TBAC_TAGS_USED_SUCCESS payload: ", action.payload);
+			let updatedTableData = state.tableData;
+			let alert_clustering_defs = [];
+			updatedTableData.filter((td) => td.u_tbac_reasoning.value != "").forEach((td) => {
+				action.payload.result.forEach((result) => {
+					if (td.u_tbac_reasoning.display_value == result.name.display_value) {
+						td.u_tbac_reasoning.value = result.sys_id.value;
+						if (!alert_clustering_defs.includes(result.sys_id.value)) {
+							alert_clustering_defs.push(result.sys_id.value);
+						}
+					}
+				})
+			});
+			updateState({tableData: updatedTableData});
+			if (alert_clustering_defs.length > 0) {
+				console.log("FETCH_TBAC_CLUSTER_DEF_M2M sysparm: ", "alert_clustering_definitionIN" + alert_clustering_defs.toString());
+				dispatch('FETCH_TBAC_CLUSTER_DEF_M2M', {
+					table: 'sn_em_tbac_alert_clustering_definitions_tags_m2m',
+					sysparm_query: "alert_clustering_definitionIN" + alert_clustering_defs.toString(),
+					sysparm_fields: 'alert_clustering_definition,alert_clustering_tag',
+					sysparm_display_value: 'all'
+				});
+			}
+		},
+		'FETCH_TBAC_CLUSTER_DEF_M2M': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_TBAC_CLUSTER_DEF_M2M_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'FETCH_TBAC_CLUSTER_DEF_M2M_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_TBAC_CLUSTER_DEF_M2M_SUCCESS payload: ", action.payload);
+			let updatedTableData = state.tableData;
+			let alert_cluster_tags = [];
+			updatedTableData.filter((td) => td.u_tbac_reasoning.value != "").forEach((td) => {
+				td.u_tbac_reasoning.alert_clustering_tags = [];
+				action.payload.result.forEach((result) => {
+					if (td.u_tbac_reasoning.value == result.alert_clustering_definition.value) {
+						td.u_tbac_reasoning.alert_clustering_tags.push(result.alert_clustering_tag);
+						if (!alert_cluster_tags.includes(result.alert_clustering_tag.value)) {
+							alert_cluster_tags.push(result.alert_clustering_tag.value);
+						}
+					}
+				});
+			});
+			updateState({tableData: updatedTableData});
+			if (alert_cluster_tags.length > 0) {
+				console.log("FETCH_TBAC_CLUSTER_TAGS sysparm: ", "sys_idIN" + alert_cluster_tags.toString());
+				dispatch('FETCH_TBAC_CLUSTER_TAGS', {
+					table: 'sn_em_tbac_alert_clustering_tags',
+					sysparm_query: "sys_idIN" + alert_cluster_tags.toString() + "^source=additional_info",
+					sysparm_fields: 'sys_id,additional_info_key',
+					sysparm_display_value: 'all'
+				});
+			}
+		},
+		'FETCH_TBAC_CLUSTER_TAGS': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_TBAC_CLUSTER_TAGS_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'FETCH_TBAC_CLUSTER_TAGS_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_TBAC_CLUSTER_TAGS_SUCCESS payload: ", action.payload);
+			let updatedTableData = state.tableData;
+			updatedTableData.forEach((td) => {
+				td.tbac_cluster_tags = [];
+				if (td.u_tbac_reasoning.alert_clustering_tags) {
+					action.payload.result.forEach((result) => {
+						if (td.u_tbac_reasoning.alert_clustering_tags.find((act) => act.value == result.sys_id.value)) {
+							let desired_tag = result.additional_info_key.value;
+							let found_tag = td.itom_tags.find((itom_tag) => itom_tag.key == desired_tag);
+							if (found_tag) {
+								td.tbac_cluster_tags.push(found_tag);
+							}
+						}
+					});
+				}
+			});
+			let updatedTableOrder = state.tableOrder;
+			if (!updatedTableOrder.includes("tbac_cluster_tags")) {
+				updatedTableOrder.splice(12, 0, "tbac_cluster_tags");
+			}
+			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange, tableOrder: updatedTableOrder});
 		},
 		'START_FETCH_APP_SERVICES': (coeffects) => {
 			const { state, dispatch } = coeffects;
