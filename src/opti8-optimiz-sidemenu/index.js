@@ -6,7 +6,7 @@ import '@servicenow/now-avatar';
 import '@servicenow/now-rich-text';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-optimiz-sidemenu state: ', state);
+	console.log('opti8-optimiz-sidemenu state: ', state);
 
 	const menuListItems = state.properties.menuOptions.map((menuOption, i) => {
 		if (menuOption.svgIcon) {
@@ -46,7 +46,7 @@ const view = (state, {updateState, dispatch}) => {
 	);
 };
 
-createCustomElement('snc-optimiz-sidemenu', {
+createCustomElement('opti8-optimiz-sidemenu', {
 	renderer: {type: snabbdom},
 	view,
 	styles,

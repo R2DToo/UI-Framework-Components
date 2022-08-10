@@ -1,5 +1,5 @@
-import './snc-alert-email-view';
-import './snc-alert-email-timeline';
-import './snc-integration-list';
-import './snc-optimiz-sidemenu';
-import './snc-alert-lifecycle';
+import './opti8-alert-email-view';
+import './opti8-alert-email-timeline';
+import './opti8-integration-list';
+import './opti8-optimiz-sidemenu';
+import './opti8-alert-lifecycle';

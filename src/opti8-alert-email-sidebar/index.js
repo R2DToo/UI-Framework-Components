@@ -8,7 +8,7 @@ import '@servicenow/now-avatar';
 import '@servicenow/now-rich-text';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-sidebar state: ', state);
+	console.log('opti8-alert-email-sidebar state: ', state);
 
 	const renderOptions = () => {
 		return state.optionsArray.map((category, index) => {
@@ -85,7 +85,7 @@ const findTempIcon = (categoryTitle) => {
 	return icon;
 };
 
-createCustomElement('snc-alert-email-sidebar', {
+createCustomElement('opti8-alert-email-sidebar', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
@@ -123,7 +123,7 @@ createCustomElement('snc-alert-email-sidebar', {
 	actionHandlers: {
 		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
 			const {state, dispatch} = coeffects;
-			console.log("snc-alert-email-sidebar COMPONENT_BOOTSTRAPPED state: ", state);
+			console.log("opti8-alert-email-sidebar COMPONENT_BOOTSTRAPPED state: ", state);
 			dispatch('FETCH_LIST_CATEGORIES', {
 				table: 'sys_aw_list_category',
 				sysparm_query: `workspace=${state.properties.workspaceId}^sys_idNOT IN${state.properties.excludedMenuCategories.toString()}^active=true^ORDERBYorder`,
@@ -133,7 +133,7 @@ createCustomElement('snc-alert-email-sidebar', {
 		},
 		[COMPONENT_PROPERTY_CHANGED]:(coeffects) => {
 			const {state, dispatch, action} = coeffects;
-			console.log("snc-alert-email-sidebar COMPONENT_PROPERTY_CHANGED: ", action.payload.name);
+			console.log("opti8-alert-email-sidebar COMPONENT_PROPERTY_CHANGED: ", action.payload.name);
 			console.log("sidebar payload: ", action.payload);
 			if (action.payload.name == "uibRefresh") {
 				dispatch('FETCH_LIST_CATEGORIES', {

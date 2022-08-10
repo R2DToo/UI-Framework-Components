@@ -1,12 +1,12 @@
 {
 	"name": "@snc/optimizui-components",
-	"version": "0.6.0",
+	"version": "1.5.2",
 	"private": false,
 	"description": "Custom components for ServiceNow Next Experience. Developed by Optimiz",
 	"keywords": [
 		"ServiceNow",
 		"Now Experience UI Component",
-		"@snc/table-component"
+		"Optimiz"
 	],
 	"readme": "./README.md",
 	"engines": {

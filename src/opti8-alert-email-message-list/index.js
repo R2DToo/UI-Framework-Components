@@ -3,7 +3,7 @@ const { COMPONENT_PROPERTY_CHANGED, COMPONENT_BOOTSTRAPPED, COMPONENT_ERROR_THRO
 import {createHttpEffect} from '@servicenow/ui-effect-http';
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
-import '../snc-alert-lifecycle';
+import '../opti8-alert-lifecycle';
 import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
 import '@servicenow/now-avatar';
@@ -103,7 +103,7 @@ const OPERATING_SYSTEM_ICONS = [
 ];
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-message-list state: ', state);
+	console.log('opti8-alert-email-message-list state: ', state);
 
 
 	const fireEvent = (event_name, value) => {
@@ -347,7 +347,7 @@ const view = (state, {updateState, dispatch}) => {
 	const tableData = () => {
 		return state.tableData.map((row, index) => {
 			return (
-				<tr id={"sys_id-" + row.sys_id.value} onclick={() => fireEvent("TABLE_ROW#CLICKED", row.number.display_value)} class={{active: state.properties.showInfo && state.showingNumber == row.number.display_value}}>
+				<tr id={"sys_id-" + row.sys_id.value} onclick={() => fireEvent("TABLE_ROW#CLICKED", row.sys_id.value)} class={{active: state.properties.showInfo && state.showingNumber == row.sys_id.value}}>
 					{state.tableOrder.map((key) => {
 						if (row[key]) {
 							if (key == "severity" || key == "sn_priority_group") {
@@ -902,7 +902,7 @@ const view = (state, {updateState, dispatch}) => {
 	};
 
 	return (
-		<div id="snc-alert-email-message-list">
+		<div id="opti8-alert-email-message-list">
 			{state.showLifecycle == false && <main id="main">
 				<div className="header">
 					<div className="table-title">
@@ -1031,7 +1031,7 @@ const view = (state, {updateState, dispatch}) => {
 					No records to display
 				</div>}
 			</main>}
-			{state.showLifecycle == true && <snc-alert-lifecycle/>}
+			{state.showLifecycle == true && <opti8-alert-lifecycle/>}
 			<div ref={(contextMenuElement) => updateState({contextMenuRef: contextMenuElement})} class={{'context-menu-container': true, visible: state.showContextMenu}} /*style={{top: state.contextMenuTop, left: state.contextMenuLeft}}*/ style={{/*width: state.contextMenuStyle.width, height: state.contextMenuStyle.height,*/ top: state.contextMenuStyle.top, left: state.contextMenuStyle.left}}>
 				<div className="context-menu">
 					<ul className="context-menu-list">
@@ -1163,7 +1163,7 @@ const findMatchingOsIcon = (class_value) => {
 	return icon;
 };
 
-createCustomElement('snc-alert-email-message-list', {
+createCustomElement('opti8-alert-email-message-list', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
@@ -2432,7 +2432,7 @@ createCustomElement('snc-alert-email-message-list', {
 				}
 			});
 		},
-		'RUN_FLOW': createHttpEffect('/api/x_snc_optimiz_wo_0/workspaceflowcaller/start-subflow', {
+		'RUN_FLOW': createHttpEffect('/api/x_opti8_optimiz_wo_0/workspaceflowcaller/start-subflow', {
 			batch: false,
 			method: 'POST',
 			dataParam: 'data',
@@ -2542,7 +2542,7 @@ createCustomElement('snc-alert-email-message-list', {
 					console.log('%cclickedRecordSysID: %o', 'color:green;font-size:12px;', clickedRecordSysID);
 					console.log('%ccontextMenuRecordIndex: %o', 'color:green;font-size:12px;', contextMenuRecordIndex);
 
-					let parentDiv = action.payload.event.path.find((element) => element.id && element.id == "snc-alert-email-message-list");
+					let parentDiv = action.payload.event.path.find((element) => element.id && element.id == "opti8-alert-email-message-list");
 					console.log('%cParent Div: %o', 'color:green;font-size:12px;', parentDiv);
 
 					//New Positioning Code

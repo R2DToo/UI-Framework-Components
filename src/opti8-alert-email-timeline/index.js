@@ -7,7 +7,7 @@ import styles from './styles.scss';
 import {TAG_COLORS} from '../constants';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-timeline state: ', state);
+	console.log('opti8-alert-email-timeline state: ', state);
 
 	const fireEvent = (event_name, payload) => {
 		dispatch(event_name, payload);
@@ -131,7 +131,7 @@ const view = (state, {updateState, dispatch}) => {
 	});
 
 	return (
-		<div id="snc-alert-email-timeline">
+		<div id="opti8-alert-email-timeline">
 			<div className="wrapper">
 				<div className="gantt">
 					<div className="gantt__row gantt__row--months" style={{gridTemplateColumns: `150px repeat(${numOfColumns}, 100px)`}}>
@@ -163,7 +163,7 @@ const view = (state, {updateState, dispatch}) => {
 	);
 };
 
-createCustomElement('snc-alert-email-timeline', {
+createCustomElement('opti8-alert-email-timeline', {
 	renderer: {type: snabbdom},
 	view,
 	styles,

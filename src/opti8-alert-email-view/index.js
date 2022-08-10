@@ -1,23 +1,23 @@
 import {createCustomElement} from '@servicenow/ui-core';
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
-import '../snc-alert-email-sidebar';
-import '../snc-alert-email-message-list';
-import '../snc-alert-email-preview';
+import '../opti8-alert-email-sidebar';
+import '../opti8-alert-email-message-list';
+import '../opti8-alert-email-preview';
 
 const view = (state, {updateState}) => {
 	console.log('alert email view state: ', state);
 
 	return (
-		<div id="snc-alert-email-view">
-			<snc-alert-email-sidebar
+		<div id="opti8-alert-email-view">
+			<opti8-alert-email-sidebar
 				currentUser={state.properties.currentUser}
 				paramListValue={state.properties.paramListValue}
 				defaultListId={state.properties.defaultListId}
 				excludedMenuCategories={state.properties.excludedMenuCategories}
 				uibRefresh={state.properties.uibRefresh}
 			/>
-			<snc-alert-email-message-list
+			<opti8-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
 				showInfo={state.showInfo}
 				tableName={state.properties.tableName}
@@ -30,8 +30,8 @@ const view = (state, {updateState}) => {
 				defaultListId={state.properties.defaultListId}
 			/>
 			{state.showInfo && (
-				<snc-alert-email-preview
-					focusedRecordNumber={state.focusedRecordNumber}
+				<opti8-alert-email-preview
+					focusedPreviewRecordID={state.focusedPreviewRecordID}
 					actionArray={state.properties.actionArray}
 					currentUser={state.properties.currentUser}
 					className={state.isInfoMounted ? "mounted" : "unmounted"}
@@ -49,7 +49,7 @@ const logEvent = (incomingActionName, payload) => {
 	console.log("%cEvent Payload: %o", "color:cyan;font-size:20px;", payload);
 }
 
-createCustomElement('snc-alert-email-view', {
+createCustomElement('opti8-alert-email-view', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
@@ -90,7 +90,7 @@ createCustomElement('snc-alert-email-view', {
 	},
 	actionHandlers: {
 		'TABLE_ROW#CLICKED': ({action, dispatch, updateState, state}) => {
-			updateState({focusedRecordNumber: action.payload.value});
+			updateState({focusedPreviewRecordID: action.payload.value});
 			if (!state.isInfoMounted) {
 				let newShowInfo = state.showInfo;
 				if (!state.showInfo) {
@@ -168,7 +168,7 @@ createCustomElement('snc-alert-email-view', {
 		return {
 			showInfo: false,
 			isInfoMounted: false,
-			focusedRecordNumber: "Alert0000000",
+			focusedPreviewRecordID: "0",
 		}
 	}
 });
