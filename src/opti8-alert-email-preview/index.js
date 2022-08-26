@@ -468,7 +468,7 @@ const view = (state, {updateState, dispatch}) => {
 					<div>
 						<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
 						<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
-						{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
+						{state.parentRecord[0] && state.parentRecord[0].u_tbac_reasoning && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
 						{state.parentRecord[0] && state.parentRecord[0].tbac_cluster_tags ?
 							(<div className="correlated_tags">{state.parentRecord[0].tbac_cluster_tags.map((tbac_cluster_tag) =>
 								<div className="broker-tag green"><span className="tag-key">{tbac_cluster_tag.key}:</span> {tbac_cluster_tag.value}</div>
@@ -624,7 +624,7 @@ const view = (state, {updateState, dispatch}) => {
 													<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
 													<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
 													<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-													<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
+													{record.u_repeated_alerts && <p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>}
 													{/* <p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p> */}
 													<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 												</div>
@@ -1162,10 +1162,11 @@ createCustomElement('opti8-alert-email-preview', {
 		},
 		'START_FETCH_EXTRA_DATA': (coeffects) => {
 			const { state, dispatch, updateState } = coeffects;
-
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_1');
 			let updatedParentRecord = state.parentRecord;
 			let updatedSecondaryRecords = state.secondaryRecords;
 			if (updatedParentRecord[0] && updatedParentRecord[0].is_group_alert && updatedParentRecord[0].message_key && updatedParentRecord[0].u_repeated_alerts && updatedSecondaryRecords.length > 0) {
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_2');
 				let repeatedAlertsSysparm = '';
 				if (updatedParentRecord[0].is_group_alert.value == 'true') {
 					let baseRecord = updatedSecondaryRecords.find(secondaryRecord => secondaryRecord.sys_id.value == updatedParentRecord[0].message_key.value);
@@ -1179,7 +1180,9 @@ createCustomElement('opti8-alert-email-preview', {
 				}
 				updatedParentRecord[0].u_repeated_alerts.url = encodeURI(`/now/optimiz-workspace/home/params/list/49667e2647974550d0bc5c62e36d43a7/sysparm/${repeatedAlertsSysparm}`);
 			}
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_3');
 			if (updatedParentRecord[0].source && updatedParentRecord[0].source.display_value == "ITOM Agent" && updatedParentRecord[0].cmdb_ci && updatedParentRecord[0].cmdb_ci.value != "" && updatedParentRecord[0]["cmdb_ci.sys_class_name"] && updatedParentRecord[0]["cmdb_ci.sys_class_name"].value != "") {
+				console.log('BSR START_FETCH_EXTRA_DATA TRACE_4');
 				//Query Metrics and Resources
 				dispatch('FETCH_METRIC_OPTIONS', {
 					cmdb_ci_type: updatedParentRecord[0]["cmdb_ci.sys_class_name"].value,
@@ -1196,7 +1199,9 @@ createCustomElement('opti8-alert-email-preview', {
 				// 	opt_record_index: 0
 				// });
 			}
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_5');
 			updatedSecondaryRecords.forEach((secondaryRecord, index) => {
+				console.log('BSR START_FETCH_EXTRA_DATA TRACE_6');
 				if (secondaryRecord.is_group_alert && secondaryRecord.message_key && secondaryRecord.u_repeated_alerts) {
 					let repeatedAlertsSysparm = '';
 					if (secondaryRecord.is_group_alert && secondaryRecord.message_key && secondaryRecord.message_key.value) {
@@ -1226,10 +1231,11 @@ createCustomElement('opti8-alert-email-preview', {
 			});
 			updateState({parentRecord: updatedParentRecord, secondaryRecords: updatedSecondaryRecords});
 
-
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_7');
 			let recordIDs = [];
 			let ciArray = [];
 			state.parentRecord.forEach((record) => {
+				console.log('BSR START_FETCH_EXTRA_DATA TRACE_8');
 				recordIDs.push(record.sys_id.value);
 				if (record.cmdb_ci.value != "") {
 					ciArray.push(record.cmdb_ci.value);
@@ -1242,7 +1248,7 @@ createCustomElement('opti8-alert-email-preview', {
 						alertId: record.sys_id.value
 					});
 				}
-				if (record.u_tbac_reasoning.value != "") {
+				if (record.u_tbac_reasoning && record.u_tbac_reasoning.value != "") {
 					dispatch('FETCH_TBAC_TAGS_USED', {
 						table: 'sn_em_tbac_alert_clustering_definitions',
 						sysparm_query: "name=" + record.u_tbac_reasoning.value,
@@ -1251,7 +1257,9 @@ createCustomElement('opti8-alert-email-preview', {
 					});
 				}
 			});
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_9');
 			state.secondaryRecords.forEach((record) => {
+				console.log('BSR START_FETCH_EXTRA_DATA TRACE_10');
 				recordIDs.push(record.sys_id.value);
 				if (record.cmdb_ci.value != "") {
 					ciArray.push(record.cmdb_ci.value);
@@ -1265,7 +1273,7 @@ createCustomElement('opti8-alert-email-preview', {
 					});
 				}
 			});
-
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_11');
 			if (recordIDs.length > 0) {
 				dispatch('FETCH_WORK_NOTES', {
 					table: 'sys_journal_field',
@@ -1292,6 +1300,7 @@ createCustomElement('opti8-alert-email-preview', {
 					sysparm_display_value: 'all'
 				});
 			}
+			console.log('BSR START_FETCH_EXTRA_DATA TRACE_12');
 		},
 		'FETCH_TBAC_TAGS_USED': createHttpEffect('/api/now/table/:table', {
 			method: 'GET',

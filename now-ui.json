@@ -1,6 +1,6 @@
 {
 	"components": {
-		"snc-alert-email-view": {
+		"opti8-alert-email-view": {
 			"innerComponents": [
 				"now-icon",
 				"now-input",
@@ -11,7 +11,7 @@
 			],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
-				"label": "Alert-Email-View",
+				"label": "Optimiz Table View",
 				"icon": "inbox-fill",
 				"description": "A description of my component",
 				"category": "primitives"
@@ -209,11 +209,11 @@
 				}
 			]
 		},
-		"snc-alert-email-timeline": {
+		"opti8-alert-email-timeline": {
 			"innerComponents": [],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
-				"label": "Alert Timeline",
+				"label": "Optimiz Alert Timeline",
 				"icon": "menu-fill",
 				"description": "A description of my component",
 				"category": "primitives"
@@ -241,13 +241,13 @@
 				}
 			]
 		},
-		"snc-integration-list": {
+		"opti8-integration-list": {
 			"innerComponents": [
 				"now-rich-text"
 			],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
-				"label": "Integration List",
+				"label": "Optimiz Integration List",
 				"icon": "menu-fill",
 				"description": "A description of my component",
 				"category": "primitives"
@@ -262,7 +262,7 @@
 				}
 			]
 		},
-		"snc-optimiz-sidemenu": {
+		"opti8-optimiz-sidemenu": {
 			"innerComponents": [
 				"now-rich-text",
 				"now-avatar"

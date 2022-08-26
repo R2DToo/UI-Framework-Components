@@ -1190,10 +1190,10 @@ createCustomElement('opti8-alert-email-message-list', {
 			default: ''
 		},
 		workspaceId: {
-			default: '9ffb1ca697cf8190ada0b9cfe153af18'
+			default: '300159e687d99510dd8e33773cbb351e'
 		},
 		defaultListId: {
-			default: '7443faee47574550d0bc5c62e36d4319'
+			default: '7a9d11ea879d9510dd8e33773cbb3524'
 		},
 		listRefresh: {
 			default: false
@@ -1659,7 +1659,7 @@ createCustomElement('opti8-alert-email-message-list', {
 			console.log("START_FETCH_TBAC_TAGS_USED");
 			let reasoning_names = [];
 			state.tableData.forEach((td) => {
-				if (td.u_tbac_reasoning.value != "" && !reasoning_names.includes(td.u_tbac_reasoning.value)) {
+				if (td.u_tbac_reasoning && td.u_tbac_reasoning.value != "" && !reasoning_names.includes(td.u_tbac_reasoning.value)) {
 					reasoning_names.push(td.u_tbac_reasoning.value);
 				}
 			});
@@ -2494,13 +2494,18 @@ createCustomElement('opti8-alert-email-message-list', {
 				console.log("contextmenu");
 				console.log(action.payload.event);
 				console.log(action.payload.event.path);
+				console.log(action.payload.event.composedPath());
+				let eventPath = action.payload.event.path;
+				if (action.payload.event.composedPath()) {
+					eventPath = action.payload.event.composedPath();
+				}
 				let clickedRecordSysID = "0"
 				let contextMenuTag = {};
 				let contextMenuRecordIndex = -1;
 				let clickedField = "";
 				let contextMenuStyle = {};
-				if (state.showContextMenu == false && action.payload.event.path) {
-					let clickedRecordElement = action.payload.event.path.find((element) => element.id && element.id.includes("sys_id-"));
+				if (state.showContextMenu == false && eventPath) {
+					let clickedRecordElement = eventPath.find((element) => element.id && element.id.includes("sys_id-"));
 					console.log("clickedRecordElement: ", clickedRecordElement);
 					if (clickedRecordElement) {
 						clickedRecordSysID = clickedRecordElement.id.substring(clickedRecordElement.id.indexOf("-") + 1);
@@ -2511,7 +2516,7 @@ createCustomElement('opti8-alert-email-message-list', {
 						if (clickedRecordIndex > -1) {
 							contextMenuRecordIndex = clickedRecordIndex;
 
-							let clickedTag = action.payload.event.path.find((element) => element.id && element.id.includes("tagindex-"));
+							let clickedTag = eventPath.find((element) => element.id && element.id.includes("tagindex-"));
 							if (clickedTag) {
 								let clickedTagIndex = clickedTag.id.substring(clickedTag.id.indexOf("-") + 1);
 								contextMenuTag = state.tableData[contextMenuRecordIndex].itom_tags[clickedTagIndex];
@@ -2519,9 +2524,9 @@ createCustomElement('opti8-alert-email-message-list', {
 						}
 					}
 					for (let i = 0; i < 10; i++) { //Only loops over the first 10 elements in the path
-						console.log("event path [" + i + "] classList : ", action.payload.event.path[i].classList);
-						if (action.payload.event.path[i].classList) {
-							action.payload.event.path[i].classList.forEach((classString) => {
+						console.log("event path [" + i + "] classList : ", eventPath[i].classList);
+						if (eventPath[i].classList) {
+							eventPath[i].classList.forEach((classString) => {
 								if (classString.includes("data-field")) {
 									clickedField = classString.substring(11);
 								}
@@ -2542,7 +2547,7 @@ createCustomElement('opti8-alert-email-message-list', {
 					console.log('%cclickedRecordSysID: %o', 'color:green;font-size:12px;', clickedRecordSysID);
 					console.log('%ccontextMenuRecordIndex: %o', 'color:green;font-size:12px;', contextMenuRecordIndex);
 
-					let parentDiv = action.payload.event.path.find((element) => element.id && element.id == "opti8-alert-email-message-list");
+					let parentDiv = eventPath.find((element) => element.id && element.id == "opti8-alert-email-message-list");
 					console.log('%cParent Div: %o', 'color:green;font-size:12px;', parentDiv);
 
 					//New Positioning Code
@@ -2581,13 +2586,18 @@ createCustomElement('opti8-alert-email-message-list', {
 			effect({dispatch, state, updateState, action}) {
 				updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px"});
 				console.log(action.payload.event.path);
-				if (action.payload.event.path.some((clickPath) => clickPath.className && clickPath.className.includes("add-filter")) == false) {
+				console.log(action.payload.event.composedPath());
+				let eventPath = action.payload.event.path;
+				if (action.payload.event.composedPath()) {
+					eventPath = action.payload.event.composedPath();
+				}
+				if (eventPath.some((clickPath) => clickPath.className && clickPath.className.includes("add-filter")) == false) {
 
 					console.log("hide add filter results");
 					updateState({showAddFilterResults: false});
 				}
 
-				let clickedFilter = action.payload.event.path.find((clickPath) => clickPath.className && clickPath.className.includes("filter index-"));
+				let clickedFilter = eventPath.find((clickPath) => clickPath.className && clickPath.className.includes("filter index-"));
 				if (!clickedFilter) {
 					let updatedFilters = state.filters;
 					updatedFilters.forEach((filter) => {

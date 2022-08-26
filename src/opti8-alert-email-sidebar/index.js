@@ -61,7 +61,7 @@ const view = (state, {updateState, dispatch}) => {
 					/>
 				</div>
 				<div className="name-job">
-					<div className="profile_name">{state.properties.currentUser.fullName}</div>
+					<div className="profile_name"></div>
 				</div>
 			</div>
 			<ul className="nav-links">
@@ -100,10 +100,10 @@ createCustomElement('opti8-alert-email-sidebar', {
 			}
 		},
 		workspaceId: {
-			default: '9ffb1ca697cf8190ada0b9cfe153af18'
+			default: '300159e687d99510dd8e33773cbb351e'
 		},
 		defaultListId: {
-			default: '7443faee47574550d0bc5c62e36d4319'
+			default: '7a9d11ea879d9510dd8e33773cbb3524'
 		},
 		excludedMenuCategories: {
 			default: []
