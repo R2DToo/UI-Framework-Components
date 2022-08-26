@@ -11,25 +11,27 @@ import '@servicenow/now-rich-text';
 
 import {isEqual} from 'lodash';
 
-import amazonSVG from '../images/amazon-web-services-icon.svg';
+import amazonSVG from '../images/aws3.svg';
 import appDynamicsSVG from '../images/AppDynamics.svg';
 import azureSVG from '../images/microsoft-azure-icon.svg';
 import bmcSVG from '../images/bmc-software-icon.svg';
-import ciscoSVG from '../images/cisco-ar21.svg';
+import ciscoSVG from '../images/cisco2.svg';
 import datadogSVG from '../images/datadog_new.svg';
 import dynatraceSVG from '../images/dynatrace-icon.svg';
+import elasticSVG from "../images/elastic-icon2.svg";
 import emailSVG from '../images/email.svg';
 import googleSVG from '../images/google-cloud-platform.svg';
 import grafanaSVG from '../images/grafana-icon.svg';
-import vmwareSVG from '../images/vmware_v7.svg';
+import vmwareSVG from '../images/vmware4.svg';
 import ibmSVG from '../images/ibm-icon.svg';
 import icingaSVG from '../images/icinga.svg';
+import instanaSVG from '../images/instana-logo.svg';
 import genericcodeSVG from '../images/generic-code.svg';
 import lightstepSVG from '../images/Lightstepv2.svg';
 import logicmonitorSVG from '../images/logicmonitor-icon.svg';
-import nagiosSVG from '../images/nagios.svg';
+import nagiosSVG from '../images/nagios4.svg';
 import newrelicSVG from '../images/new-relic-icon.svg';
-import oracleSVG from '../images/oracle-icon.svg';
+import oracleSVG from '../images/oracle6.svg';
 import op5SVG from '../images/op5.svg';
 import prometheusSVG from '../images/prometheus-icon.svg';
 import microfocusSVG from '../images/microfocus_1.svg';
@@ -38,16 +40,19 @@ import prtgSVG from '../images/prtg.svg';
 import sapSVG from '../images/sap-icon.svg';
 import splunkSVG from '../images/splunk_v6.svg';
 import microsoftSVG from '../images/microsoft-icon.svg';
+import sentrySVG from "../images/sentry_logo.svg";
+import snmptrapSVG from "../images/snmp6.svg";
 import solarwindsSVG from '../images/solarwinds-icon.svg';
 import sumologicSVG from '../images/sumo-logic-icon.svg';
 import zabbixSVG from '../images/zabbix-icon.svg';
 import opsviewSVG from '../images/Opsview.svg';
-import webhookSVG from '../images/webhook.svg';
+import webhookSVG from '../images/webhook_logo.svg';
 import catchpointSVG from '../images/catchpoint_new.svg';
 import servicenowSVG from '../images/servicenow_new.svg';
-
+import honeycombSVG from '../images/honeycomb.svg';
+import kafkaSVG from '../images/kafka.svg';
+import scoutSVG from '../images/scout_apm.svg';
 import linuxSVG from '../images/linux-tux.svg';
-
 export const INTEGRATION_ICONS = [
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
@@ -58,16 +63,20 @@ export const INTEGRATION_ICONS = [
 	{key: 'datadog', value: datadogSVG},
 	{key: 'dynatrace', value: dynatraceSVG},
 	{key: 'eif', value: ibmSVG},
+	{key: 'elastic', value: elasticSVG},
 	{key: 'email', value: emailSVG},
 	{key: 'google', value: googleSVG},
 	{key: 'group alert', value: servicenowSVG},
 	{key: 'gcp', value: googleSVG},
 	{key: 'grafana', value: grafanaSVG},
+	{key: 'honeycomb', value: honeycombSVG},
 	{key: 'hpom', value: microfocusSVG},
 	{key: 'hyperic', value: vmwareSVG},
 	{key: 'ibm', value: ibmSVG},
 	{key: 'icinga', value: icingaSVG},
 	{key: 'itom', value: servicenowSVG},
+	{key: 'instana', value: instanaSVG},
+	{key: 'kafka', value: kafkaSVG},
 	{key: 'lightstep', value: lightstepSVG},
 	{key: 'log analytics', value: servicenowSVG},
 	{key: 'logic monitor', value: logicmonitorSVG},
@@ -87,10 +96,13 @@ export const INTEGRATION_ICONS = [
 	{key: 'thousandeyes', value: ciscoSVG},
 	{key: 'sap', value: sapSVG},
 	{key: 'scom', value: microsoftSVG},
+	{key: 'scout', value: scoutSVG},
 	{key: 'self', value: servicenowSVG},
+	{key: 'sentry', value: sentrySVG},
 	{key: 'solarwinds', value: solarwindsSVG},
 	{key: 'splunk', value: splunkSVG},
 	{key: 'sumologic', value: sumologicSVG},
+	{key: 'trap', value: snmptrapSVG},
 	{key: 'vcenter', value: vmwareSVG},
 	{key: 'vrealize', value: vmwareSVG},
 	{key: 'zabbix', value: zabbixSVG},
@@ -480,6 +492,10 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "host_data") {
 								let data_fields = `data-field-${key}`;
 								return <td class={{[data_fields]: true, 'text-red': row[key].display_value == "Collection failed"}}>{row[key].display_value}</td>
+							} else if (key == "filter" || key == "ci_filter") {
+								return <td className={`view-message description break-message data-field-${key}`}>{row[key].display_value}</td>
+							} else if (key == "u_source_key") {
+								return <td className={`view-message break-message data-field-${key}`}>{row[key].display_value}</td>
 							} else {
 								return <td className={`view-message data-field-${key}`}>{row[key].display_value}</td>
 							}
@@ -802,7 +818,7 @@ const view = (state, {updateState, dispatch}) => {
 
 	const replaceActionQueryVariables = (updateQuery, fromContextMenu = false) => {
 		console.log("replaceActionQueryVariables");
-		if (state.selectedRecordIndexes.length > 0 && fromContextMenu == false) {
+		if (fromContextMenu == false) {
 			console.log("starting query: ", updateQuery);
 			while (updateQuery.includes("<") && updateQuery.includes(">")) {
 				let variableStartIndex = updateQuery.indexOf("<");
@@ -811,7 +827,11 @@ const view = (state, {updateState, dispatch}) => {
 				console.log("Raw Variable: ", rawVariable);
 				let variable = rawVariable.slice(1, rawVariable.length - 1);
 				console.log("Variable: ", variable);
-				updateQuery = updateQuery.replace(rawVariable, state.tableData[state.selectedRecordIndexes[0]][variable].value);
+				if (variable.toLowerCase() == "table") {
+					updateQuery = updateQuery.replace(rawVariable, state.currentList.table);
+				} else if (state.selectedRecordIndexes.length > 0) {
+					updateQuery = updateQuery.replace(rawVariable, state.tableData[state.selectedRecordIndexes[0]][variable].value);
+				}
 				console.log("replaced query: ", updateQuery);
 			}
 		} else if (fromContextMenu == true) {
@@ -825,7 +845,11 @@ const view = (state, {updateState, dispatch}) => {
 					console.log("Raw Variable: ", rawVariable);
 					let variable = rawVariable.slice(1, rawVariable.length - 1);
 					console.log("Variable: ", variable);
-					updateQuery = updateQuery.replace(rawVariable, matchingTableRecord[variable].value);
+					if (variable.toLowerCase() == "table") {
+						updateQuery = updateQuery.replace(rawVariable, state.currentList.table);
+					} else {
+						updateQuery = updateQuery.replace(rawVariable, matchingTableRecord[variable].value);
+					}
 					console.log("replaced query: ", updateQuery);
 				}
 			}
@@ -2492,15 +2516,20 @@ createCustomElement('snc-alert-email-message-list', {
 			effect({state, updateState, dispatch, action}) {
 				action.payload.event.preventDefault();
 				console.log("contextmenu");
-				console.log(action.payload.event);
+				console.log(action.payload);
 				console.log(action.payload.event.path);
+				console.log(action.payload.event.composedPath());
+				let eventPath = action.payload.event.path;
+				if (!eventPath) {
+					eventPath = action.payload.event.composedPath();
+				}
 				let clickedRecordSysID = "0"
 				let contextMenuTag = {};
 				let contextMenuRecordIndex = -1;
 				let clickedField = "";
 				let contextMenuStyle = {};
-				if (state.showContextMenu == false && action.payload.event.path) {
-					let clickedRecordElement = action.payload.event.path.find((element) => element.id && element.id.includes("sys_id-"));
+				if (state.showContextMenu == false && eventPath) {
+					let clickedRecordElement = eventPath.find((element) => element.id && element.id.includes("sys_id-"));
 					console.log("clickedRecordElement: ", clickedRecordElement);
 					if (clickedRecordElement) {
 						clickedRecordSysID = clickedRecordElement.id.substring(clickedRecordElement.id.indexOf("-") + 1);
@@ -2511,7 +2540,7 @@ createCustomElement('snc-alert-email-message-list', {
 						if (clickedRecordIndex > -1) {
 							contextMenuRecordIndex = clickedRecordIndex;
 
-							let clickedTag = action.payload.event.path.find((element) => element.id && element.id.includes("tagindex-"));
+							let clickedTag = eventPath.find((element) => element.id && element.id.includes("tagindex-"));
 							if (clickedTag) {
 								let clickedTagIndex = clickedTag.id.substring(clickedTag.id.indexOf("-") + 1);
 								contextMenuTag = state.tableData[contextMenuRecordIndex].itom_tags[clickedTagIndex];
@@ -2519,9 +2548,9 @@ createCustomElement('snc-alert-email-message-list', {
 						}
 					}
 					for (let i = 0; i < 10; i++) { //Only loops over the first 10 elements in the path
-						console.log("event path [" + i + "] classList : ", action.payload.event.path[i].classList);
-						if (action.payload.event.path[i].classList) {
-							action.payload.event.path[i].classList.forEach((classString) => {
+						console.log("event path [" + i + "] classList : ", eventPath[i].classList);
+						if (eventPath[i].classList) {
+							eventPath[i].classList.forEach((classString) => {
 								if (classString.includes("data-field")) {
 									clickedField = classString.substring(11);
 								}
@@ -2542,7 +2571,7 @@ createCustomElement('snc-alert-email-message-list', {
 					console.log('%cclickedRecordSysID: %o', 'color:green;font-size:12px;', clickedRecordSysID);
 					console.log('%ccontextMenuRecordIndex: %o', 'color:green;font-size:12px;', contextMenuRecordIndex);
 
-					let parentDiv = action.payload.event.path.find((element) => element.id && element.id == "snc-alert-email-message-list");
+					let parentDiv = eventPath.find((element) => element.id && element.id == "snc-alert-email-message-list");
 					console.log('%cParent Div: %o', 'color:green;font-size:12px;', parentDiv);
 
 					//New Positioning Code
@@ -2581,13 +2610,18 @@ createCustomElement('snc-alert-email-message-list', {
 			effect({dispatch, state, updateState, action}) {
 				updateState({showContextMenu: false, contextMenuLeft: "0px", contextMenuTop: "0px"});
 				console.log(action.payload.event.path);
-				if (action.payload.event.path.some((clickPath) => clickPath.className && clickPath.className.includes("add-filter")) == false) {
+				console.log(action.payload.event.composedPath());
+				let eventPath = action.payload.event.path;
+				if (!eventPath) {
+					eventPath = action.payload.event.composedPath();
+				}
+				if (eventPath.some((clickPath) => clickPath.className && clickPath.className.includes("add-filter")) == false) {
 
 					console.log("hide add filter results");
 					updateState({showAddFilterResults: false});
 				}
 
-				let clickedFilter = action.payload.event.path.find((clickPath) => clickPath.className && clickPath.className.includes("filter index-"));
+				let clickedFilter = eventPath.find((clickPath) => clickPath.className && clickPath.className.includes("filter index-"));
 				if (!clickedFilter) {
 					let updatedFilters = state.filters;
 					updatedFilters.forEach((filter) => {

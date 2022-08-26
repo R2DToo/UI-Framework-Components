@@ -5,25 +5,27 @@ import {createHttpEffect} from '@servicenow/ui-effect-http';
 import styles from './styles.scss';
 import '../snc-integration-card';
 
-import amazonSVG from '../images/amazon-web-services-icon.svg';
+import amazonSVG from '../images/aws3.svg';
 import appDynamicsSVG from '../images/AppDynamics.svg';
 import azureSVG from '../images/microsoft-azure-icon.svg';
 import bmcSVG from '../images/bmc-software-icon.svg';
-import ciscoSVG from '../images/cisco-ar21.svg';
+import ciscoSVG from '../images/cisco2.svg';
 import datadogSVG from '../images/datadog_new.svg';
 import dynatraceSVG from '../images/dynatrace-icon.svg';
+import elasticSVG from "../images/elastic-icon2.svg";
 import emailSVG from '../images/email.svg';
 import googleSVG from '../images/google-cloud-platform.svg';
 import grafanaSVG from '../images/grafana-icon.svg';
-import vmwareSVG from '../images/vmware_v7.svg';
+import vmwareSVG from '../images/vmware4.svg';
 import ibmSVG from '../images/ibm-icon.svg';
 import icingaSVG from '../images/icinga.svg';
+import instanaSVG from '../images/instana-logo.svg';
 import genericcodeSVG from '../images/generic-code.svg';
 import lightstepSVG from '../images/Lightstepv2.svg';
 import logicmonitorSVG from '../images/logicmonitor-icon.svg';
-import nagiosSVG from '../images/nagios.svg';
+import nagiosSVG from '../images/nagios4.svg';
 import newrelicSVG from '../images/new-relic-icon.svg';
-import oracleSVG from '../images/oracle-icon.svg';
+import oracleSVG from '../images/oracle6.svg';
 import op5SVG from '../images/op5.svg';
 import prometheusSVG from '../images/prometheus-icon.svg';
 import microfocusSVG from '../images/microfocus_1.svg';
@@ -32,12 +34,16 @@ import prtgSVG from '../images/prtg.svg';
 import sapSVG from '../images/sap-icon.svg';
 import splunkSVG from '../images/splunk_v6.svg';
 import microsoftSVG from '../images/microsoft-icon.svg';
+import sentrySVG from "../images/sentry_logo.svg";
 import solarwindsSVG from '../images/solarwinds-icon.svg';
 import sumologicSVG from '../images/sumo-logic-icon.svg';
 import zabbixSVG from '../images/zabbix-icon.svg';
 import opsviewSVG from '../images/Opsview.svg';
-import webhookSVG from '../images/webhook.svg';
+import webhookSVG from '../images/webhook_logo.svg';
 import catchpointSVG from '../images/catchpoint_new.svg';
+import honeycombSVG from '../images/honeycomb.svg';
+import kafkaSVG from '../images/kafka.svg';
+import scoutSVG from '../images/scout_apm.svg';
 export const INTEGRATION_ICONS = [
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
@@ -47,14 +53,18 @@ export const INTEGRATION_ICONS = [
 	{key: 'datadog', value: datadogSVG},
 	{key: 'dynatrace', value: dynatraceSVG},
 	{key: 'eif', value: ibmSVG},
+	{key: 'elastic', value: elasticSVG},
 	{key: 'email', value: emailSVG},
 	{key: 'google', value: googleSVG},
 	{key: 'gcp', value: googleSVG},
 	{key: 'grafana', value: grafanaSVG},
+	{key: 'honeycomb', value: honeycombSVG},
 	{key: 'hpom', value: microfocusSVG},
 	{key: 'hyperic', value: vmwareSVG},
 	{key: 'ibm', value: ibmSVG},
 	{key: 'icinga', value: icingaSVG},
+	{key: 'instana', value: instanaSVG},
+	{key: 'kafka', value: kafkaSVG},
 	{key: 'lightstep', value: lightstepSVG},
 	{key: 'logic monitor', value: logicmonitorSVG},
 	{key: 'logicmonitor', value: logicmonitorSVG},
@@ -73,6 +83,8 @@ export const INTEGRATION_ICONS = [
 	{key: 'thousandeyes', value: ciscoSVG},
 	{key: 'sap', value: sapSVG},
 	{key: 'scom', value: microsoftSVG},
+	{key: 'scout', value: scoutSVG},
+	{key: 'sentry', value: sentrySVG},
 	{key: 'solarwinds', value: solarwindsSVG},
 	{key: 'splunk', value: splunkSVG},
 	{key: 'sumologic', value: sumologicSVG},
@@ -92,9 +104,9 @@ const view = (state, {updateState, dispatch}) => {
 		} else {
 			let activeIntegrations = cards.filter((card) => card.active == "true");
 			return <section>
-				<div className="sticky">
+				{/* <div className="sticky">
 					<h1 className="divider">Active Integrations</h1>
-				</div>
+				</div> */}
 				<div className="card-grid">
 					{activeIntegrations.map((integrationCard) =>
 						<snc-integration-card
@@ -234,18 +246,18 @@ createCustomElement('snc-integration-list', {
 		},
 		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
 			const { dispatch } = coeffects;
-			// dispatch('FETCH_INSTANCE_NAME', {
-			// 	table: 'sys_properties',
-			// 	sysparm_query: 'name=instance_name',
-			// 	sysparm_fields: 'value',
-			// 	sysparm_display_value: 'true'
-			// });
-			dispatch('FETCH_PUSH_CONNECTORS', {
-				table: 'sn_em_connector_listener',
-				sysparm_query: 'type=1^ORDERBYname',
-				sysparm_fields: 'name,active,source,sys_id',
+			dispatch('FETCH_INSTANCE_NAME', {
+				table: 'sys_properties',
+				sysparm_query: 'name=instance_name',
+				sysparm_fields: 'value',
 				sysparm_display_value: 'true'
 			});
+			// dispatch('FETCH_PUSH_CONNECTORS', {
+			// 	table: 'sn_em_connector_listener',
+			// 	sysparm_query: 'type=1^ORDERBYname',
+			// 	sysparm_fields: 'name,active,source,sys_id',
+			// 	sysparm_display_value: 'true'
+			// });
 		},
 		'FETCH_INSTANCE_NAME': createHttpEffect('/api/now/table/:table', {
 			batch: false,
@@ -282,8 +294,8 @@ createCustomElement('snc-integration-list', {
 				action.payload.result.map((result) => {
 					result.svgIcon = findMatchingIcon(result.name);
 					result.name = cleanNames(result.name);
-					result.type = "Webhook";
-					result.description = "https://<INSTANCE_NAME>.service-now.com/api/sn_em_connector/em/inbound_event?source=" + result.source;
+					result.type = "Copy Webhook";
+					result.description = `https://${state.instanceName}.service-now.com/api/sn_em_connector/em/inbound_event?source=${result.source}`;
 					result.link = "/now/nav/ui/classic/params/target/sn_em_connector_listener.do%3Fsys_id%3D" + result.sys_id;
 					result.count = 0;
 					newIntegrationCards.push(result);
@@ -362,7 +374,7 @@ createCustomElement('snc-integration-list', {
 					if (matchIndex > -1) {
 						updatedCards[matchIndex].count += 1;
 						updatedCards[matchIndex].active = result.active.display_value;
-						updatedCards[matchIndex].description += `${result.name.display_value} - ${result.last_status.display_value} on ${result.last_run_time.display_value} HostIP: ${result.host.display_value}\n`;
+						updatedCards[matchIndex].description += `Last Status: ${result.last_status.display_value} at Last Run Time: ${result.last_run_time.display_value} - HostIP: ${result.host.display_value}\n`;
 					}
 				});
 				updateState({integrationCards: updatedCards, dummyStateChange: !state.dummyStateChange});

@@ -4,6 +4,7 @@
 .card {
 	background-color: RGB($now-color_background--secondary);
 	box-shadow: 0 3px 3px 0 rgba($now-color_text--primary, 0.05), 0 5px 15px 0 rgba($now-color_text--primary, 0.05);
+	border: 1px solid RGB($now-color--primary-1);
 	border-radius: 8px;
 	overflow: hidden;
 	display: flex;
@@ -15,7 +16,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 1rem 1.25rem;
+	padding: 0.75rem 1.25rem;
 	div {
 		display: flex;
 		align-items: center;
@@ -86,9 +87,18 @@
 			background-color: RGB($now-color_background--secondary);
 			&:before {
 				transform: translateX(calc(100% - 2px));
-				background-color: RGB($now-color--primary-1);
+				background-color: rgba(119, 178, 123, 1);
 			}
 		}
+	}
+}
+
+.card-body-compact {
+	padding: 0 1.25rem;
+	font-size: 0.875rem;
+	p {
+		margin-top: 0;
+		vertical-align: middle;
 	}
 }
 
@@ -121,6 +131,10 @@
 		border-radius: 6px;
 		padding: 4px 8px;
 		color: #ffffff;
+		cursor: pointer;
+		&.disabled {
+			cursor: default;
+		}
 	}
 	a {
 		color: RGB($now-color_text--primary);

@@ -8,40 +8,47 @@ import '@servicenow/now-highlighted-value';
 import '@servicenow/now-rich-text';
 import '@servicenow/now-avatar';
 
-import amazonSVG from '../images/amazon-web-services-icon.svg';
+import amazonSVG from '../images/aws3.svg';
 import appDynamicsSVG from '../images/AppDynamics.svg';
 import azureSVG from '../images/microsoft-azure-icon.svg';
 import bmcSVG from '../images/bmc-software-icon.svg';
-import ciscoSVG from '../images/cisco-ar21.svg';
+import ciscoSVG from '../images/cisco2.svg';
 import datadogSVG from '../images/datadog_new.svg';
 import dynatraceSVG from '../images/dynatrace-icon.svg';
+import elasticSVG from "../images/elastic-icon2.svg";
 import emailSVG from '../images/email.svg';
 import googleSVG from '../images/google-cloud-platform.svg';
 import grafanaSVG from '../images/grafana-icon.svg';
-import vmwareSVG from '../images/vmware_v7.svg';
+import vmwareSVG from '../images/vmware4.svg';
 import ibmSVG from '../images/ibm-icon.svg';
 import icingaSVG from '../images/icinga.svg';
+import instanaSVG from '../images/instana-logo.svg';
 import genericcodeSVG from '../images/generic-code.svg';
 import lightstepSVG from '../images/Lightstepv2.svg';
 import logicmonitorSVG from '../images/logicmonitor-icon.svg';
-import nagiosSVG from '../images/nagios.svg';
+import nagiosSVG from '../images/nagios4.svg';
 import newrelicSVG from '../images/new-relic-icon.svg';
-import oracleSVG from '../images/oracle-icon.svg';
+import oracleSVG from '../images/oracle6.svg';
 import op5SVG from '../images/op5.svg';
 import prometheusSVG from '../images/prometheus-icon.svg';
 import microfocusSVG from '../images/microfocus_1.svg';
 import pagerdutySVG from '../images/pagerduty.svg';
 import prtgSVG from '../images/prtg.svg';
 import sapSVG from '../images/sap-icon.svg';
+import sentrySVG from "../images/sentry_logo.svg";
 import splunkSVG from '../images/splunk_v6.svg';
 import microsoftSVG from '../images/microsoft-icon.svg';
+import snmptrapSVG from "../images/snmp6.svg";
 import solarwindsSVG from '../images/solarwinds-icon.svg';
 import sumologicSVG from '../images/sumo-logic-icon.svg';
 import zabbixSVG from '../images/zabbix-icon.svg';
 import opsviewSVG from '../images/Opsview.svg';
-import webhookSVG from '../images/webhook.svg';
+import webhookSVG from '../images/webhook_logo.svg';
 import catchpointSVG from '../images/catchpoint_new.svg';
 import servicenowSVG from '../images/servicenow_new.svg';
+import honeycombSVG from '../images/honeycomb.svg';
+import kafkaSVG from '../images/kafka.svg';
+import scoutSVG from '../images/scout_apm.svg';
 export const INTEGRATION_ICONS = [
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
@@ -52,16 +59,20 @@ export const INTEGRATION_ICONS = [
 	{key: 'datadog', value: datadogSVG},
 	{key: 'dynatrace', value: dynatraceSVG},
 	{key: 'eif', value: ibmSVG},
+	{key: 'elastic', value: elasticSVG},
 	{key: 'email', value: emailSVG},
 	{key: 'google', value: googleSVG},
 	{key: 'group alert', value: servicenowSVG},
 	{key: 'gcp', value: googleSVG},
 	{key: 'grafana', value: grafanaSVG},
+	{key: 'honeycomb', value: honeycombSVG},
 	{key: 'hpom', value: microfocusSVG},
 	{key: 'hyperic', value: vmwareSVG},
 	{key: 'ibm', value: ibmSVG},
 	{key: 'icinga', value: icingaSVG},
 	{key: 'itom', value: servicenowSVG},
+	{key: 'instana', value: instanaSVG},
+	{key: 'kafka', value: kafkaSVG},
 	{key: 'lightstep', value: lightstepSVG},
 	{key: 'log analytics', value: servicenowSVG},
 	{key: 'logic monitor', value: logicmonitorSVG},
@@ -81,10 +92,13 @@ export const INTEGRATION_ICONS = [
 	{key: 'thousandeyes', value: ciscoSVG},
 	{key: 'sap', value: sapSVG},
 	{key: 'scom', value: microsoftSVG},
+	{key: 'scout', value: scoutSVG},
 	{key: 'self', value: servicenowSVG},
+	{key: 'sentry', value: sentrySVG},
 	{key: 'solarwinds', value: solarwindsSVG},
 	{key: 'splunk', value: splunkSVG},
 	{key: 'sumologic', value: sumologicSVG},
+	{key: 'trap', value: snmptrapSVG},
 	{key: 'vcenter', value: vmwareSVG},
 	{key: 'vrealize', value: vmwareSVG},
 	{key: 'zabbix', value: zabbixSVG},
@@ -262,6 +276,62 @@ const view = (state, {updateState, dispatch}) => {
 			</div>
 		)
 	};
+
+	const prcComponent = () => {
+		let record = state.parentRecord[0];
+		let prcArray = record.prc;
+		if (prcArray.length == 0) {
+			prcArray.push({});
+		}
+		return prcArray.map((prc) => {
+			let color = 'low';
+			switch (record.severity.value) {
+				case "5": color = 'low';
+				break;
+				case "4": color = 'info';
+				break;
+				case "3": color = 'warning';
+				break;
+				case "2": color = 'high';
+				break;
+				case "1": color = 'critical';
+				break;
+			}
+			return (
+				<li className="info-card">
+					<div className="card-header">
+						<div className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</div>
+						<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2.01,6L2,18c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18L4,18V6h5.17 l2,2H20V18z M18,12H6v-2h12V12z M14,16H6v-2h8V16z"/></g></svg>'/> {record.source.display_value}</div>
+						<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
+						<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M11,8.75v3.68c0,0.35,0.19,0.68,0.49,0.86l3.12,1.85c0.36,0.21,0.82,0.09,1.03-0.26c0.21-0.36,0.1-0.82-0.26-1.03 l-2.87-1.71v-3.4C12.5,8.34,12.16,8,11.75,8S11,8.34,11,8.75z M21,9.5V4.21c0-0.45-0.54-0.67-0.85-0.35l-1.78,1.78 c-1.81-1.81-4.39-2.85-7.21-2.6c-4.19,0.38-7.64,3.75-8.1,7.94C2.46,16.4,6.69,21,12,21c4.59,0,8.38-3.44,8.93-7.88 c0.07-0.6-0.4-1.12-1-1.12c-0.5,0-0.92,0.37-0.98,0.86c-0.43,3.49-3.44,6.19-7.05,6.14c-3.71-0.05-6.84-3.18-6.9-6.9 C4.94,8.2,8.11,5,12,5c1.93,0,3.68,0.79,4.95,2.05l-2.09,2.09C14.54,9.46,14.76,10,15.21,10h5.29C20.78,10,21,9.78,21,9.5z"/></g></g></svg>'/> {makeRelativeTime(record.sys_updated_on.display_value)}</div>
+					</div>
+					<div className="card-body">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						<p className="prc-key-value">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M14.5,2.5c0,1.5-1.5,6-1.5,6h-2c0,0-1.5-4.5-1.5-6C9.5,1.12,10.62,0,12,0S14.5,1.12,14.5,2.5z M12,10c-1.1,0-2,0.9-2,2 s0.9,2,2,2s2-0.9,2-2S13.1,10,12,10z M16.08,5.11c0.18-0.75,0.33-1.47,0.39-2.06C19.75,4.69,22,8.08,22,12c0,5.52-4.48,10-10,10 S2,17.52,2,12c0-3.92,2.25-7.31,5.53-8.95C7.6,3.64,7.74,4.37,7.92,5.11C5.58,6.51,4,9.07,4,12c0,4.42,3.58,8,8,8s8-3.58,8-8 C20,9.07,18.42,6.51,16.08,5.11z M18,12c0,3.31-2.69,6-6,6s-6-2.69-6-6c0-2,0.98-3.77,2.48-4.86c0.23,0.81,0.65,2.07,0.65,2.07 C8.43,9.93,8,10.92,8,12c0,2.21,1.79,4,4,4s4-1.79,4-4c0-1.08-0.43-2.07-1.13-2.79c0,0,0.41-1.22,0.65-2.07C17.02,8.23,18,10,18,12 z"/></g></svg>
+							<span className="key">&nbsp;Score:&nbsp;&nbsp;</span>{prc.score && <span className="circle-tag">{prc.score.display_value}</span>}
+						</p>
+						<p className="prc-key-value">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><rect attr-fill="none" attr-height="24" attr-width="24" attr-y="0"/><path attr-d="M7,20h4c0,1.1-0.9,2-2,2S7,21.1,7,20z M5,19h8v-2H5V19z M16.5,9.5c0,3.82-2.66,5.86-3.77,6.5H5.27 C4.16,15.36,1.5,13.32,1.5,9.5C1.5,5.36,4.86,2,9,2S16.5,5.36,16.5,9.5z M14.5,9.5C14.5,6.47,12.03,4,9,4S3.5,6.47,3.5,9.5 c0,2.47,1.49,3.89,2.35,4.5h6.3C13.01,13.39,14.5,11.97,14.5,9.5z M21.37,7.37L20,8l1.37,0.63L22,10l0.63-1.37L24,8l-1.37-0.63L22,6 L21.37,7.37z M19,6l0.94-2.06L22,3l-2.06-0.94L19,0l-0.94,2.06L16,3l2.06,0.94L19,6z"/></svg>
+							<span className="key">&nbsp;Type:&nbsp;&nbsp;</span><span>{prc.type ? prc.type.display_value : ''}</span>
+						</p>
+						<p className="prc-key-value">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+							<span className="key">&nbsp;Root Cause Task:&nbsp;&nbsp;</span>{prc.root_cause_task && <span className="record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/optimiz-workspace/record/em_alert/${record.sys_id.value}/sub/record/change_request/${prc.root_cause_task.value}`})}}>{prc.root_cause_task.display_value}</span>}
+						</p>
+						<p className="prc-key-value">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+							<span className="key">&nbsp;Description:&nbsp;&nbsp;</span><span>{prc.description ? prc.description.display_value : ''}</span>
+						</p>
+						<p className="prc-key-value">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><g><path attr-d="M23,11.99l-2.44-2.79l0.34-3.69l-3.61-0.82L15.4,1.5L12,2.96L8.6,1.5L6.71,4.69L3.1,5.5L3.44,9.2L1,11.99l2.44,2.79 l-0.34,3.7l3.61,0.82L8.6,22.5l3.4-1.47l3.4,1.46l1.89-3.19l3.61-0.82l-0.34-3.69L23,11.99z M19.05,13.47l-0.56,0.65l0.08,0.85 l0.18,1.95l-1.9,0.43l-0.84,0.19l-0.44,0.74l-0.99,1.68l-1.78-0.77L12,18.85l-0.79,0.34l-1.78,0.77l-0.99-1.67l-0.44-0.74 l-0.84-0.19l-1.9-0.43l0.18-1.96l0.08-0.85l-0.56-0.65l-1.29-1.47l1.29-1.48l0.56-0.65L5.43,9.01L5.25,7.07l1.9-0.43l0.84-0.19 l0.44-0.74l0.99-1.68l1.78,0.77L12,5.14l0.79-0.34l1.78-0.77l0.99,1.68l0.44,0.74l0.84,0.19l1.9,0.43l-0.18,1.95l-0.08,0.85 l0.56,0.65l1.29,1.47L19.05,13.47z"/><polygon attr-points="10.09,13.75 7.77,11.42 6.29,12.91 10.09,16.72 17.43,9.36 15.95,7.87"/></g></g></svg>
+							<span className="key">&nbsp;Reasoning:&nbsp;&nbsp;</span><span>{prc.reasoning ? prc.reasoning.display_value : ''}</span>
+						</p>
+					</div>
+				</li>
+			)
+		});
+	}
 
 	const imageZoomMouseOver = (index, isParent) => {
 		console.log('imageZoomMouseOver');
@@ -521,7 +591,7 @@ const view = (state, {updateState, dispatch}) => {
 					<input type="radio" name="tabset" id="tab1" aria-controls="activity" onchange={() => {updateState({activeTabIndex: 1})}}/>
 					<label for="tab1">Activity</label>
 					<input type="radio" name="tabset" id="tab4" aria-controls="prc" onchange={() => {updateState({activeTabIndex: 4})}}/>
-					<label for="tab4">PRC</label>
+					<label for="tab4">Root Cause</label>
 					<input type="radio" name="tabset" id="tab2" aria-controls="tags" onchange={() => {updateState({activeTabIndex: 2})}}/>
 					<label for="tab2">Tags</label>
 					<input type="radio" name="tabset" id="tab3" aria-controls="additional" onchange={() => {updateState({activeTabIndex: 3})}}/>
@@ -535,55 +605,7 @@ const view = (state, {updateState, dispatch}) => {
 			</div>
 			<div id="info-cards">
 				<ul>
-					{state.activeTabIndex == 4 && state.parentRecord[0] && state.parentRecord[0].prc && state.parentRecord[0].prc.map((prc) => {
-						let record = state.parentRecord[0];
-						let color = 'low';
-						switch (record.severity.value) {
-							case "5": color = 'low';
-							break;
-							case "4": color = 'info';
-							break;
-							case "3": color = 'warning';
-							break;
-							case "2": color = 'high';
-							break;
-							case "1": color = 'critical';
-							break;
-						}
-						return (
-							<li className="info-card">
-								<div className="card-header">
-									<div className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</div>
-									<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2.01,6L2,18c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18L4,18V6h5.17 l2,2H20V18z M18,12H6v-2h12V12z M14,16H6v-2h8V16z"/></g></svg>'/> {record.source.display_value}</div>
-									<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
-									<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M11,8.75v3.68c0,0.35,0.19,0.68,0.49,0.86l3.12,1.85c0.36,0.21,0.82,0.09,1.03-0.26c0.21-0.36,0.1-0.82-0.26-1.03 l-2.87-1.71v-3.4C12.5,8.34,12.16,8,11.75,8S11,8.34,11,8.75z M21,9.5V4.21c0-0.45-0.54-0.67-0.85-0.35l-1.78,1.78 c-1.81-1.81-4.39-2.85-7.21-2.6c-4.19,0.38-7.64,3.75-8.1,7.94C2.46,16.4,6.69,21,12,21c4.59,0,8.38-3.44,8.93-7.88 c0.07-0.6-0.4-1.12-1-1.12c-0.5,0-0.92,0.37-0.98,0.86c-0.43,3.49-3.44,6.19-7.05,6.14c-3.71-0.05-6.84-3.18-6.9-6.9 C4.94,8.2,8.11,5,12,5c1.93,0,3.68,0.79,4.95,2.05l-2.09,2.09C14.54,9.46,14.76,10,15.21,10h5.29C20.78,10,21,9.78,21,9.5z"/></g></g></svg>'/> {makeRelativeTime(record.sys_updated_on.display_value)}</div>
-								</div>
-								<div className="card-body">
-									<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-									<p className="prc-key-value">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M14.5,2.5c0,1.5-1.5,6-1.5,6h-2c0,0-1.5-4.5-1.5-6C9.5,1.12,10.62,0,12,0S14.5,1.12,14.5,2.5z M12,10c-1.1,0-2,0.9-2,2 s0.9,2,2,2s2-0.9,2-2S13.1,10,12,10z M16.08,5.11c0.18-0.75,0.33-1.47,0.39-2.06C19.75,4.69,22,8.08,22,12c0,5.52-4.48,10-10,10 S2,17.52,2,12c0-3.92,2.25-7.31,5.53-8.95C7.6,3.64,7.74,4.37,7.92,5.11C5.58,6.51,4,9.07,4,12c0,4.42,3.58,8,8,8s8-3.58,8-8 C20,9.07,18.42,6.51,16.08,5.11z M18,12c0,3.31-2.69,6-6,6s-6-2.69-6-6c0-2,0.98-3.77,2.48-4.86c0.23,0.81,0.65,2.07,0.65,2.07 C8.43,9.93,8,10.92,8,12c0,2.21,1.79,4,4,4s4-1.79,4-4c0-1.08-0.43-2.07-1.13-2.79c0,0,0.41-1.22,0.65-2.07C17.02,8.23,18,10,18,12 z"/></g></svg>
-										<span className="key">&nbsp;Score:&nbsp;&nbsp;</span><span className="circle-tag">{prc.score.display_value}</span>
-									</p>
-									<p className="prc-key-value">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><rect attr-fill="none" attr-height="24" attr-width="24" attr-y="0"/><path attr-d="M7,20h4c0,1.1-0.9,2-2,2S7,21.1,7,20z M5,19h8v-2H5V19z M16.5,9.5c0,3.82-2.66,5.86-3.77,6.5H5.27 C4.16,15.36,1.5,13.32,1.5,9.5C1.5,5.36,4.86,2,9,2S16.5,5.36,16.5,9.5z M14.5,9.5C14.5,6.47,12.03,4,9,4S3.5,6.47,3.5,9.5 c0,2.47,1.49,3.89,2.35,4.5h6.3C13.01,13.39,14.5,11.97,14.5,9.5z M21.37,7.37L20,8l1.37,0.63L22,10l0.63-1.37L24,8l-1.37-0.63L22,6 L21.37,7.37z M19,6l0.94-2.06L22,3l-2.06-0.94L19,0l-0.94,2.06L16,3l2.06,0.94L19,6z"/></svg>
-										<span className="key">&nbsp;Type:&nbsp;&nbsp;</span><span>{prc.type.display_value}</span>
-									</p>
-									<p className="prc-key-value">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-										<span className="key">&nbsp;Root Cause Task:&nbsp;&nbsp;</span><span className="record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/optimiz-workspace/record/em_alert/${record.sys_id.value}/sub/record/change_request/${prc.root_cause_task.value}`})}}>{prc.root_cause_task.display_value}</span>
-									</p>
-									<p className="prc-key-value">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
-										<span className="key">&nbsp;Description:&nbsp;&nbsp;</span><span>{prc.description.display_value}</span>
-									</p>
-									<p className="prc-key-value">
-										<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><g><path attr-d="M23,11.99l-2.44-2.79l0.34-3.69l-3.61-0.82L15.4,1.5L12,2.96L8.6,1.5L6.71,4.69L3.1,5.5L3.44,9.2L1,11.99l2.44,2.79 l-0.34,3.7l3.61,0.82L8.6,22.5l3.4-1.47l3.4,1.46l1.89-3.19l3.61-0.82l-0.34-3.69L23,11.99z M19.05,13.47l-0.56,0.65l0.08,0.85 l0.18,1.95l-1.9,0.43l-0.84,0.19l-0.44,0.74l-0.99,1.68l-1.78-0.77L12,18.85l-0.79,0.34l-1.78,0.77l-0.99-1.67l-0.44-0.74 l-0.84-0.19l-1.9-0.43l0.18-1.96l0.08-0.85l-0.56-0.65l-1.29-1.47l1.29-1.48l0.56-0.65L5.43,9.01L5.25,7.07l1.9-0.43l0.84-0.19 l0.44-0.74l0.99-1.68l1.78,0.77L12,5.14l0.79-0.34l1.78-0.77l0.99,1.68l0.44,0.74l0.84,0.19l1.9,0.43l-0.18,1.95l-0.08,0.85 l0.56,0.65l1.29,1.47L19.05,13.47z"/><polygon attr-points="10.09,13.75 7.77,11.42 6.29,12.91 10.09,16.72 17.43,9.36 15.95,7.87"/></g></g></svg>
-										<span className="key">&nbsp;Reasoning:&nbsp;&nbsp;</span><span>{prc.reasoning.display_value}</span>
-									</p>
-								</div>
-							</li>
-						)
-					})}
+					{state.activeTabIndex == 4 && state.parentRecord[0] && state.parentRecord[0].prc && <div>{prcComponent()}</div>}
 					{state.activeTabIndex != 4 && state.parentRecord.map((record, index) => {
 						let color = 'low';
 						switch (record.severity.value) {

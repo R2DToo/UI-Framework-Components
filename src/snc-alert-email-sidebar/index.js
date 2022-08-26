@@ -61,7 +61,7 @@ const view = (state, {updateState, dispatch}) => {
 					/>
 				</div>
 				<div className="name-job">
-					<div className="profile_name">{state.properties.currentUser.fullName}</div>
+					<div className="profile_name"></div>
 				</div>
 			</div>
 			<ul className="nav-links">
