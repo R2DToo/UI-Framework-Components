@@ -43,37 +43,24 @@ createCustomElement('snc-alert-lifecycle', {
 	setInitialState() {
 		return {
 			steps: [
-				{label: 'Events', active: true, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
-					<p>The Alert Correlation capability enhances Event Management with alert data analysis and alert aggregation. Alert Correlation helps organize incoming real-time alerts and reduce alert noise. Out of the box techniques used are Tag-based Alert Clustering, Automated Temporaral Analysis, CMDB Topological Analysis, and Text Analysis.</p>
+				{label: 'Core Business Domain', active: true, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>A boundary for a broad set of differentiating business features/capabilities providing business value and achieve the desired business outcomes.</p>
 				</div>)},
-				{label: 'Event Rules', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>Use event rules to generate alerts for tracking and remediation. Event rules are stored in the Event Rule [em_match_rule] table. Configure and customize event rules to manage events and alert generation.</p></div>)},
-				{label: 'Event Field Mapping', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>Extract and transform attributes when an event source is not capable of passing the values in event field, then pass the values in Additional Information field on event which can be parsed and mapped to other field on alert before alert generation.</p></div>)},
-				{label: 'Alerts', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
-					<p>Alerts are generated from de-duplicated events. You can view more information about them, acknowledge them, and take action to resolve them.</p>
-					<p>You can respond to an alert in the following ways:</p>
-					<ul>
-						<li>Manually remediate the alert.</li>
-						<li>Acknowledge an alert that requires attention.</li>
-						<li>Create an incident or security incident.</li>
-						<li>Create a case.</li>
-						<li>Close the alert.</li>
-						<li>Resolve any incident that is related to the alert.</li>
-						<li>Reopen the alert.</li>
-						<li>As well as endless workflows.</li>
-					</ul>
+				{label: 'Sub Domain', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>Core Business Domains are sliced into smaller segments called Sub Domains, in which it’s capabilities are solved by one or more logical component boundaries.</p>
 				</div>)},
-				{label: 'Alert Management Rules', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>Alert Management Rules provided with the base system help you respond to alerts. You can create filters to specify conditions for the rule so that the remedial action specified in the rule takes effect only when the conditions are met. For example, launch the required subflow or open an incident based on an alert. The alert's execution history is automatically updated to indicate the actions that were invoked.</p></div>)},
-				{label: 'Correlation', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div><p>Alerts are grouped either automatically or manually into (R)Tag-based, (A)utomated, (M)anual, (C)MDB, or (T)ext alert groups. Grouping alerts enables you to narrow down problems by focusing on the primary alerts in the correlated group.</p>
-					<br/>
-					<p>When evaluating incoming alerts to form alert groups, the types of group that alerts might potentially belong to are considered in the following order. After an alert becomes part of a group, it is not available for any other group.</p>
-					<ul>
-						<li>Log Analytics</li>
-						<li>Tag-based</li>
-						<li>Manual</li>
-						<li>Automated</li>
-						<li>CMDB</li>
-						<li>Text</li>
-					</ul>
+				{label: 'Capability', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>
+Represents the desired  features/behaviors that directly fulfill a stakeholder need within a Sub Domain or Generic Domain. Capabilities have a persona, benefit hypothesis, and acceptance criteria. A capability is a solved by one or more component boundaries.</p>
+				</div>)},
+				{label: 'Logical System', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>A set of Logical component boundaries working together to provide the capabilities of one (when modernized) or many (when polluted) domains.</p>
+				</div>)},
+				{label: 'Logical Component Boundary', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>This is a set of Logical Components that support the Logical System. A logical component boundary’s service tier defines its criticality, potential impact to our business, characteristics, and non-functional requirements.</p>
+				</div>)},
+				{label: 'Logical Components', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>A component represents an independently deployed resource that makes up a logical component boundary within a core business domain, or a logical representation of concrete resource or a generic domain.</p>
 				</div>)}
 			],
 			dummyStateChange: false,
