@@ -531,452 +531,373 @@ const view = (state, {updateState, dispatch}) => {
 		})
 	};
 
+	const alertCardComponent = (record, index, isParent) => {
+		console.log("alertCardComponent record: ", record);
+		console.log("alertCardComponent index: ", index);
+		//console.log("alertCardComponent");
+		let color = 'low';
+		switch (record.severity.value) {
+			case "5": color = 'low';
+			break;
+			case "4": color = 'info';
+			break;
+			case "3": color = 'warning';
+			break;
+			case "2": color = 'high';
+			break;
+			case "1": color = 'critical';
+			break;
+		}
+		return (
+			<li className="info-card" id={`sys_id-${record.sys_id.value}`}>
+				<div className="card-header">
+					<div className="card-header-column">
+						<div className="align-items-center">
+							<span className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</span>
+							<svg onclick={(e) => {copyTextToClipboard(e, record.number.display_value)}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
+						</div>
+						<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
+					</div>
+					<img className="card-header-image" src={record.source_icon.value}/>
+				</div>
+				{state.activeTabIndex == 0 && (
+					<div className="card-body alerts">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						<div className="card-row">
+							<div className="card-column">
+								<p className="align-items-center">
+									<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
+									{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
+									{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
+								</p>
+								<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+								<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
+								<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
+								<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
+								<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
+								<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+								<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+								{/* <p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p> */}
+								<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
+							</div>
+							<div className="card-column">
+								<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
+								<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+								<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+								<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
+								<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
+								<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
+								<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
+								<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
+								{/* <p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p> */}
+								<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
+							</div>
+						</div>
+						<div className="card-center">
+							{record.snapshotImage && <div className="card-image-wrapper">
+								<div
+									className="card-image"
+									style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
+									onmouseover={() => {imageZoomMouseOver(index, true)}}
+									onmouseout={() => {imageZoomMouseOut(index, true)}}
+									onmousemove={(e) => {imageZoomMouseMove(e, index, true)}}
+								></div>
+							</div>}
+						</div>
+					</div>
+				)}
+				{state.activeTabIndex == 1 && (
+					<div className="card-body">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						{workNoteComponent(record.work_notes || [], isParent, index)}
+					</div>
+				)}
+				{state.activeTabIndex == 2 && (
+					<div className="card-body">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						<div className="tags-title">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
+							&nbsp;&nbsp;Alert Tags (normalized):
+						</div>
+						<div className="tags">
+							{record.tags && record.tags.length > 0 ? record.tags.filter((tag) => tag.type == "itom_tags").map((tag) =>
+								<div className="broker-tag"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
+							):
+								<div className="broker-tag"><span className="tag-key">No Tags</span></div>
+							}
+						</div>
+						<div className="tags-title">
+							<svg attrs={{class: "g-icon green", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
+							&nbsp;&nbsp;CI Tags ({record.cmdb_ci.display_value}):
+						</div>
+						<div className="tags">
+							{record.tags && record.tags.length > 0 ? record.tags.filter((tag) => tag.type == "ci").map((tag) =>
+								<div className="broker-tag green"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
+							):
+								<div className="broker-tag green"><span className="tag-key">No Tags</span></div>
+							}
+						</div>
+					</div>
+				)}
+				{state.activeTabIndex == 3 && (
+					<div className="card-body overflow">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						{record.additional_info.display_value != '' && (
+							<div>
+								<p><span className="key">Additional Info:</span></p>
+								<pre className="">{JSON.stringify(JSON.parse(record.additional_info.display_value), null, 2)}</pre>
+							</div>
+						)}
+					</div>
+				)}
+				{state.activeTabIndex == 5 && (
+					<div className="card-body">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						<div className="card-row">
+							<div className="card-column">
+								<p className="align-items-center">
+									<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
+									{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
+									{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
+								</p>
+								<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
+								<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
+							</div>
+							<div className="card-column">
+								<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+								<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+								<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
+							</div>
+						</div>
+						<div className="card-center">
+							{/* <button className="open_metric_explorer" onclick={() => {dispatch("METRIC_EXPLORER_LINK#CLICKED", {ciSysId: record.cmdb_ci ? record.cmdb_ci.value : ''})}}>Metric Explorer</button> */}
+							{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
+								{record.metric_options && <div className="metric-filters-container">
+									<select onchange={(e) => {setSelectedMetricOption(e, index, isParent)}}>
+										{record.metric_options.map((option) => <option class={{selected: option.selected}} value={option.value}>{option.display_value}</option>)}
+									</select>
+								</div>}
+								<div className="chart-wrapper">
+									{record.metrics && <table id="line-example-15" className="charts-css line show-heading show-data-on-hover multiple show-labels show-primary-axis show-4-secondary-axes show-data-axes">
+										<caption>{`${record.metrics.ci_name}-${record.metrics.metric_name}`}</caption>
+										<tbody>
+											{record.metrics.datapoints.map((dataPoint, i) => {
+												if (record.metrics.datapoints[i + 1]) {
+													return <tr>
+														<th class={{'hide-label': i % 2 == 1}} scope="row">{displayDateFromTimestamp(dataPoint.timestamp)}</th>
+														{record.metrics.resource_names.map((resource_name) =>
+															<td style={{'--start': `${dataPoint[resource_name] / record.metrics.max_value}`, '--size': `${record.metrics.datapoints[i + 1][resource_name] / record.metrics.max_value}`}}>
+																<span className="data">{record.metrics.datapoints[i + 1][resource_name].toFixed(2)}</span>
+																{/* <span className="tooltip">{record.metrics.datapoints[i + 1].value}</span> */}
+															</td>
+														)}
+													</tr>
+												}
+											})}
+										</tbody>
+									</table>}
+									{record.metrics && <ul className="charts-css legend legend-inline legend-circle">
+											{record.metrics.resource_names.map((resource_name) =>
+												<li>{resource_name == "" ? "No Resource" : resource_name}</li>
+											)}
+									</ul>}
+								</div>
+							</div>}
+						</div>
+					</div>
+				)}
+			</li>
+		)
+	};
+
+	const serviceCardComponent = (record, index, isParent) => {
+		console.log("serviceCardComponent record: ", record);
+		let color = 'low';
+		let severityLabel = "";
+		if (record.busines_criticality && record.busines_criticality.value) {
+			severityLabel = record.busines_criticality.display_value;
+			switch (record.busines_criticality.value) {
+				case "4 - not critical": color = 'low';
+				break;
+				case "3 - less critical": color = 'warning';
+				break;
+				case "2 - somewhat critical": color = 'high';
+				break;
+				case "1 - most critical": color = 'critical';
+				break;
+			}
+		} else if (record.impact && record.impact.value) {
+			severityLabel = record.impact.display_value;
+			switch (record.impact.value) {
+				case "3": color = 'low';
+				break;
+				case "2": color = 'warning';
+				break;
+				case "1": color = 'critical';
+				break;
+			}
+		}
+		return (
+			<li className="info-card" id={`sys_id-${record.sys_id.value}`}>
+				<div className="card-header">
+					<div className="card-header-column">
+						<div className="align-items-center">
+							<span className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: record.sys_class_name.value, sys_id: record.sys_id.value})}}>{record.name ? record.name.display_value : record.number.display_value}</span>
+							<svg onclick={(e) => {copyTextToClipboard(e, record.name.display_value)}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
+						</div>
+						<div className=""><now-highlighted-value label={severityLabel} color={color} variant="secondary"/></div>
+					</div>
+					{/* <img className="card-header-image" src={record.source_icon.value}/> */}
+				</div>
+				{state.activeTabIndex == 0 && (
+					<div className="card-body alerts">
+						{/* <p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p> */}
+						<div className="card-row">
+							<div className="card-column">
+								<p className="elipse-value"><span className="key">Name:</span> <span className="">{record.name.display_value}</span> {record.parent.value != "" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'cmdb_ci_service', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
+								<p><span className="key">Owned By:</span> <span>{record.owned_by.display_value}</span></p>
+								<p><span className="key">Class:</span> <span>{record.sys_class_name.display_value}</span></p>
+								{/* <p className="elipse-value"><span className="key">SysId:</span> <span className="">{record.sys_id.display_value}</span></p> */}
+							</div>
+							<div className="card-column">
+								<p><span className="key">Used For:</span> <span>{record.used_for.display_value}</span></p>
+								<p><span className="key">Managed By:</span> <span>{record.managed_by.display_value}</span></p>
+								<p><span className="key">Location:</span> <span>{record.location.display_value}</span></p>
+								{/* <p className="elipse-value"><span className="key">SysId:</span> <span className="">{record.sys_id.display_value}</span></p> */}
+							</div>
+						</div>
+						{/* <div className="card-center">
+							{record.snapshotImage && <div className="card-image-wrapper">
+								<div
+									className="card-image"
+									style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
+									onmouseover={() => {imageZoomMouseOver(index, true)}}
+									onmouseout={() => {imageZoomMouseOut(index, true)}}
+									onmousemove={(e) => {imageZoomMouseMove(e, index, true)}}
+								></div>
+							</div>}
+						</div> */}
+					</div>
+				)}
+				{state.activeTabIndex == 1 && (
+					<div className="card-body alerts">
+						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.short_description.display_value}</span></p>
+						<div className="card-row">
+							<div className="card-column">
+								<p className="elipse-value"><span className="key">Number:</span> <span className="">{record.number.display_value}</span></p>
+								<p><span className="key">Type:</span> <span>{record.type.display_value}</span></p>
+								<p><span className="key">Impact:</span> <span>{record.impact.display_value}</span></p>
+								<p className="elipse-value"><span className="key">Opened By:</span> <span className="">{record.opened_by.display_value}</span></p>
+							</div>
+							<div className="card-column">
+								<p><span className="key">State:</span> <span>{record.state.display_value}</span></p>
+								<p><span className="key">Escalation:</span> <span>{record.escalation.display_value}</span></p>
+								<p><span className="key">Urgency:</span> <span>{record.urgency.display_value}</span></p>
+								<p><span className="key">Opened At:</span> <span>{makeRelativeTime(record.opened_at.display_value)}</span></p>
+							</div>
+						</div>
+						{/* <div className="card-center">
+							{record.snapshotImage && <div className="card-image-wrapper">
+								<div
+									className="card-image"
+									style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
+									onmouseover={() => {imageZoomMouseOver(index, true)}}
+									onmouseout={() => {imageZoomMouseOut(index, true)}}
+									onmousemove={(e) => {imageZoomMouseMove(e, index, true)}}
+								></div>
+							</div>}
+						</div> */}
+					</div>
+				)}
+			</li>
+		)
+	};
+
 	return (
 		<div id="info-container" oncontextmenu={(e) => {handleContextMenu(e)}} onclick={() => {closeContextMenu()}}>
-			{/* <div id="preview-header">
-				<div id="preview-title-split">
-					<div id="preview-title-left">
-						<svg onclick={() => {fireEvent("OPEN_TIMELINE_BUTTON#CLICKED", {parentRecord: state.parentRecord, secondaryRecords: state.secondaryRecords})}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Open Timeline</title><path attr-d="M6.275 16.75H11.725V15.25H6.275ZM12.275 8.75H17.725V7.25H12.275ZM9.275 12.75H14.725V11.25H9.275ZM5.3 20.5Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H18.7Q19.45 3.5 19.975 4.025Q20.5 4.55 20.5 5.3V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5ZM5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V5.3Q19 5.2 18.9 5.1Q18.8 5 18.7 5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19ZM5 19Q5 19 5 18.9Q5 18.8 5 18.7V5.3Q5 5.2 5 5.1Q5 5 5 5Q5 5 5 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5 18.9Q5 19 5 19Z"/></svg>
-					</div>
-					<div id="preview-title-right">
-						<div className="preview-title">360&#176; View</div>
-						<svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg>
-					</div>
-				</div>
-				<div id="preview-header-split">
-					<div id="preview-header-left">
-
-					</div>
-					<div id="preview-header-right">
+			{state.properties.previewQuery.table == "em_alert" && <div>
+				<div id="info-header">
+					<div>
+						<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
 						<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
 						{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
-						{state.parentRecord && state.parentRecord[0] && state.parentRecord[0].group_source && state.parentRecord[0].group_source.display_value && <div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>}
+						{state.parentRecord[0] && state.parentRecord[0].tbac_cluster_tags ?
+							(<div className="correlated_tags">{state.parentRecord[0].tbac_cluster_tags.map((tbac_cluster_tag) =>
+								<div className="broker-tag green"><span className="tag-key">{tbac_cluster_tag.key}:</span> {tbac_cluster_tag.value}</div>
+							)}</div>) :
+							(<div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>)
+						}
+					</div>
+					<div id="right-side">
+						<div className="dials-container">
+							<div className="dial">
+								<div title="Noise Reduction" className={`green progress-radial progress-${calculateDial(0)}`}><b></b></div>
+								<div className="dial-description">NR</div>
+							</div>
+							<div className="dial">
+								<div title="Alert Compression" className={`orange progress-radial progress-${calculateDial(1)}`}><b></b></div>
+								<div className="dial-description">AC</div>
+							</div>
+							<div className="dial">
+								<div title="Incident Reduction" className={`yellow progress-radial progress-${calculateDial(2)}`}><b></b></div>
+								<div className="dial-description">IR</div>
+							</div>
+						</div>
+						<now-rich-text title="Open Timeline" className="g-icon primary-color" onclick={() => {fireEvent("OPEN_TIMELINE_BUTTON#CLICKED", {parentRecord: state.parentRecord, secondaryRecords: state.secondaryRecords})}} html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px"><g><rect fill="none" height="24" width="24"/></g><g><g><rect height="2" width="6" x="6" y="15"/><rect height="2" width="6" x="12" y="7"/><rect height="2" width="6" x="9" y="11"/><path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M19,19H5V5h14V19z"/></g></g></svg>'/>
 					</div>
 				</div>
-			</div> */}
-			<div id="info-header">
-				<div>
-					<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
-					<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
-					{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
-					{state.parentRecord[0] && state.parentRecord[0].tbac_cluster_tags ?
-						(<div className="correlated_tags">{state.parentRecord[0].tbac_cluster_tags.map((tbac_cluster_tag) =>
-							<div className="broker-tag green"><span className="tag-key">{tbac_cluster_tag.key}:</span> {tbac_cluster_tag.value}</div>
-						)}</div>) :
-						(<div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>)
-					}
-				</div>
-				<div id="right-side">
-					<div className="dials-container">
-						<div className="dial">
-							<div title="Noise Reduction" className={`green progress-radial progress-${calculateDial(0)}`}><b></b></div>
-							<div className="dial-description">NR</div>
-						</div>
-						<div className="dial">
-							<div title="Alert Compression" className={`orange progress-radial progress-${calculateDial(1)}`}><b></b></div>
-							<div className="dial-description">AC</div>
-						</div>
-						<div className="dial">
-							<div title="Incident Reduction" className={`yellow progress-radial progress-${calculateDial(2)}`}><b></b></div>
-							<div className="dial-description">IR</div>
-						</div>
+				<div id="cards-header">
+					<div className="tabset">
+						<input type="radio" name="tabset" id="tab0" aria-controls="alerts" checked onchange={() => {updateState({activeTabIndex: 0})}}/>
+						<label for="tab0">Alerts</label>
+						<input type="radio" name="tabset" id="tab1" aria-controls="activity" onchange={() => {updateState({activeTabIndex: 1})}}/>
+						<label for="tab1">Activity</label>
+						<input type="radio" name="tabset" id="tab4" aria-controls="prc" onchange={() => {updateState({activeTabIndex: 4})}}/>
+						<label for="tab4">Root Cause</label>
+						<input type="radio" name="tabset" id="tab2" aria-controls="tags" onchange={() => {updateState({activeTabIndex: 2})}}/>
+						<label for="tab2">Tags</label>
+						<input type="radio" name="tabset" id="tab3" aria-controls="additional" onchange={() => {updateState({activeTabIndex: 3})}}/>
+						<label for="tab3">Additional</label>
+						{((state.parentRecord.length > 0 && state.parentRecord[0].source && state.parentRecord[0].source.display_value == "ITOM Agent") ||
+						(state.secondaryRecords.length > 0 && state.secondaryRecords.findIndex((sr) => sr.source && sr.source.display_value == "ITOM Agent") > -1)) && <div>
+							<input type="radio" name="tabset" id="tab5" aria-controls="metrics" onchange={() => {updateState({activeTabIndex: 5})}}/>
+							<label for="tab5">Metrics</label>
+						</div>}
 					</div>
-					<now-rich-text title="Open Timeline" className="g-icon primary-color" onclick={() => {fireEvent("OPEN_TIMELINE_BUTTON#CLICKED", {parentRecord: state.parentRecord, secondaryRecords: state.secondaryRecords})}} html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px"><g><rect fill="none" height="24" width="24"/></g><g><g><rect height="2" width="6" x="6" y="15"/><rect height="2" width="6" x="12" y="7"/><rect height="2" width="6" x="9" y="11"/><path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M19,19H5V5h14V19z"/></g></g></svg>'/>
 				</div>
-			</div>
-			<div id="cards-header">
-				<div className="tabset">
-					<input type="radio" name="tabset" id="tab0" aria-controls="alerts" checked onchange={() => {updateState({activeTabIndex: 0})}}/>
-					<label for="tab0">Alerts</label>
-					<input type="radio" name="tabset" id="tab1" aria-controls="activity" onchange={() => {updateState({activeTabIndex: 1})}}/>
-					<label for="tab1">Activity</label>
-					<input type="radio" name="tabset" id="tab4" aria-controls="prc" onchange={() => {updateState({activeTabIndex: 4})}}/>
-					<label for="tab4">Root Cause</label>
-					<input type="radio" name="tabset" id="tab2" aria-controls="tags" onchange={() => {updateState({activeTabIndex: 2})}}/>
-					<label for="tab2">Tags</label>
-					<input type="radio" name="tabset" id="tab3" aria-controls="additional" onchange={() => {updateState({activeTabIndex: 3})}}/>
-					<label for="tab3">Additional</label>
-					{((state.parentRecord.length > 0 && state.parentRecord[0].source && state.parentRecord[0].source.display_value == "ITOM Agent") ||
-					(state.secondaryRecords.length > 0 && state.secondaryRecords.findIndex((sr) => sr.source && sr.source.display_value == "ITOM Agent") > -1)) && <div>
-						<input type="radio" name="tabset" id="tab5" aria-controls="metrics" onchange={() => {updateState({activeTabIndex: 5})}}/>
-						<label for="tab5">Metrics</label>
-					</div>}
+				<div id="info-cards">
+					<ul>
+						{state.activeTabIndex == 4 && state.parentRecord[0] && state.parentRecord[0].prc && <div>{prcComponent()}</div>}
+						{state.activeTabIndex != 4 && state.parentRecord.map((record, index) => alertCardComponent(record, index, true))}
+						{state.activeTabIndex != 4 && state.secondaryRecords.map((record, index) => alertCardComponent(record, index, false))}
+					</ul>
 				</div>
-			</div>
-			<div id="info-cards">
-				<ul>
-					{state.activeTabIndex == 4 && state.parentRecord[0] && state.parentRecord[0].prc && <div>{prcComponent()}</div>}
-					{state.activeTabIndex != 4 && state.parentRecord.map((record, index) => {
-						let color = 'low';
-						switch (record.severity.value) {
-							case "5": color = 'low';
-							break;
-							case "4": color = 'info';
-							break;
-							case "3": color = 'warning';
-							break;
-							case "2": color = 'high';
-							break;
-							case "1": color = 'critical';
-							break;
-						}
-						return (
-							<li className="info-card" id={`sys_id-${record.sys_id.value}`}>
-								<div className="card-header">
-									<div className="card-header-column">
-										<div className="align-items-center">
-											<span className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</span>
-											<svg onclick={(e) => {copyTextToClipboard(e, record.number.display_value)}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
-										</div>
-										<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
-									</div>
-									<img className="card-header-image" src={record.source_icon.value}/>
-								</div>
-								{/* <div className="card-header">
-									<div className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</div>
-									<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2.01,6L2,18c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18L4,18V6h5.17 l2,2H20V18z M18,12H6v-2h12V12z M14,16H6v-2h8V16z"/></g></svg>'/> {record.source.display_value}</div>
-									<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
-									<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M11,8.75v3.68c0,0.35,0.19,0.68,0.49,0.86l3.12,1.85c0.36,0.21,0.82,0.09,1.03-0.26c0.21-0.36,0.1-0.82-0.26-1.03 l-2.87-1.71v-3.4C12.5,8.34,12.16,8,11.75,8S11,8.34,11,8.75z M21,9.5V4.21c0-0.45-0.54-0.67-0.85-0.35l-1.78,1.78 c-1.81-1.81-4.39-2.85-7.21-2.6c-4.19,0.38-7.64,3.75-8.1,7.94C2.46,16.4,6.69,21,12,21c4.59,0,8.38-3.44,8.93-7.88 c0.07-0.6-0.4-1.12-1-1.12c-0.5,0-0.92,0.37-0.98,0.86c-0.43,3.49-3.44,6.19-7.05,6.14c-3.71-0.05-6.84-3.18-6.9-6.9 C4.94,8.2,8.11,5,12,5c1.93,0,3.68,0.79,4.95,2.05l-2.09,2.09C14.54,9.46,14.76,10,15.21,10h5.29C20.78,10,21,9.78,21,9.5z"/></g></g></svg>'/> {makeRelativeTime(record.sys_updated_on.display_value)}</div>
-								</div> */}
-								{state.activeTabIndex == 0 && (
-									<div className="card-body alerts">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="card-row">
-											<div className="card-column">
-												<p className="align-items-center">
-													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
-													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
-													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
-												</p>
-												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
-												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
-												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
-												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
-												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
-												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
-												{/* <p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p> */}
-												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
-											</div>
-											<div className="card-column">
-												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
-												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
-												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
-												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
-												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
-												{/* <p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p> */}
-												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
-											</div>
-										</div>
-										<div className="card-center">
-											{record.snapshotImage && <div className="card-image-wrapper">
-												<div
-													className="card-image"
-													style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
-													onmouseover={() => {imageZoomMouseOver(index, true)}}
-													onmouseout={() => {imageZoomMouseOut(index, true)}}
-													onmousemove={(e) => {imageZoomMouseMove(e, index, true)}}
-												></div>
-											</div>}
-										</div>
-									</div>
-								)}
-								{state.activeTabIndex == 1 && (
-									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										{workNoteComponent(record.work_notes || [], true, index)}
-									</div>
-								)}
-								{state.activeTabIndex == 2 && (
-									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="tags-title">
-											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
-											&nbsp;&nbsp;Alert Tags (normalized):
-										</div>
-										<div className="tags">
-											{record.tags && record.tags.length > 0 ? record.tags.filter((tag) => tag.type == "itom_tags").map((tag) =>
-												<div className="broker-tag"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
-											):
-												<div className="broker-tag"><span className="tag-key">No Tags</span></div>
-											}
-										</div>
-										<div className="tags-title">
-											<svg attrs={{class: "g-icon green", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
-											&nbsp;&nbsp;CI Tags ({record.cmdb_ci.display_value}):
-										</div>
-										<div className="tags">
-											{record.tags && record.tags.length > 0 ? record.tags.filter((tag) => tag.type == "ci").map((tag) =>
-												<div className="broker-tag green"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
-											):
-												<div className="broker-tag green"><span className="tag-key">No Tags</span></div>
-											}
-										</div>
-									</div>
-								)}
-								{state.activeTabIndex == 3 && (
-									<div className="card-body overflow">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										{record.additional_info.display_value != '' && (
-											<div>
-												<p><span className="key">Additional Info:</span></p>
-												<pre className="">{JSON.stringify(JSON.parse(record.additional_info.display_value), null, 2)}</pre>
-											</div>
-										)}
-									</div>
-								)}
-								{state.activeTabIndex == 5 && (
-									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="card-row">
-											<div className="card-column">
-												<p className="align-items-center">
-													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
-													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
-													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
-												</p>
-												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
-												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
-											</div>
-											<div className="card-column">
-												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
-											</div>
-										</div>
-										<div className="card-center">
-											{/* <button className="open_metric_explorer" onclick={() => {dispatch("METRIC_EXPLORER_LINK#CLICKED", {ciSysId: record.cmdb_ci ? record.cmdb_ci.value : ''})}}>Metric Explorer</button> */}
-											{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
-												{record.metric_options && <div className="metric-filters-container">
-													<select onchange={(e) => {setSelectedMetricOption(e, index, true)}}>
-														{record.metric_options.map((option) => <option class={{selected: option.selected}} value={option.value}>{option.display_value}</option>)}
-													</select>
-												</div>}
-												<div className="chart-wrapper">
-													{record.metrics && <table id="line-example-15" className="charts-css line show-heading show-data-on-hover multiple show-labels show-primary-axis show-4-secondary-axes show-data-axes">
-														<caption>{`${record.metrics.ci_name}-${record.metrics.metric_name}`}</caption>
-														<tbody>
-															{record.metrics.datapoints.map((dataPoint, i) => {
-																if (record.metrics.datapoints[i + 1]) {
-																	return <tr>
-																		<th class={{'hide-label': i % 2 == 1}} scope="row">{displayDateFromTimestamp(dataPoint.timestamp)}</th>
-																		{record.metrics.resource_names.map((resource_name) =>
-																			<td style={{'--start': `${dataPoint[resource_name] / record.metrics.max_value}`, '--size': `${record.metrics.datapoints[i + 1][resource_name] / record.metrics.max_value}`}}>
-																				<span className="data">{record.metrics.datapoints[i + 1][resource_name].toFixed(2)}</span>
-																				{/* <span className="tooltip">{record.metrics.datapoints[i + 1].value}</span> */}
-																			</td>
-																		)}
-																	</tr>
-																}
-															})}
-														</tbody>
-													</table>}
-													{record.metrics && <ul className="charts-css legend legend-inline legend-circle">
-															{record.metrics.resource_names.map((resource_name) =>
-																<li>{resource_name == "" ? "No Resource" : resource_name}</li>
-															)}
-													</ul>}
-												</div>
-											</div>}
-										</div>
-									</div>
-								)}
-							</li>
-						)
-					})}
-					{state.activeTabIndex != 4 && state.secondaryRecords.map((record, index) => {
-						let color = 'low';
-						switch (record.severity.value) {
-							case "5": color = 'low';
-							break;
-							case "4": color = 'info';
-							break;
-							case "3": color = 'warning';
-							break;
-							case "2": color = 'high';
-							break;
-							case "1": color = 'critical';
-							break;
-						}
-						return (
-							<li className="info-card" id={`sys_id-${record.sys_id.value}`}>
-								<div className="card-header">
-									<div className="card-header-column">
-										<div className="align-items-center">
-											<span className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</span>
-											<svg onclick={(e) => {copyTextToClipboard(e, record.number.display_value)}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M9.25 17.8Q8.5 17.8 7.975 17.275Q7.45 16.75 7.45 16V4.625Q7.45 3.85 7.975 3.325Q8.5 2.8 9.25 2.8H17.625Q18.4 2.8 18.925 3.325Q19.45 3.85 19.45 4.625V16Q19.45 16.75 18.925 17.275Q18.4 17.8 17.625 17.8ZM9.25 16.3H17.625Q17.75 16.3 17.85 16.212Q17.95 16.125 17.95 16V4.625Q17.95 4.5 17.85 4.4Q17.75 4.3 17.625 4.3H9.25Q9.125 4.3 9.038 4.4Q8.95 4.5 8.95 4.625V16Q8.95 16.125 9.038 16.212Q9.125 16.3 9.25 16.3ZM5.75 21.3Q5 21.3 4.475 20.775Q3.95 20.25 3.95 19.5V6.8H5.45V19.5Q5.45 19.625 5.537 19.712Q5.625 19.8 5.75 19.8H15.45V21.3ZM8.95 4.3Q8.95 4.3 8.95 4.387Q8.95 4.475 8.95 4.625V16Q8.95 16.125 8.95 16.212Q8.95 16.3 8.95 16.3Q8.95 16.3 8.95 16.212Q8.95 16.125 8.95 16V4.625Q8.95 4.475 8.95 4.387Q8.95 4.3 8.95 4.3Z"/></svg>
-										</div>
-										<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
-									</div>
-									<img className="card-header-image" src={record.source_icon.value}/>
-								</div>
-								{/* <div className="card-header">
-									<div className="record-link" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value})}}>{record.number.display_value}</div>
-									<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/><path d="M20,6h-8l-2-2H4C2.9,4,2.01,4.9,2.01,6L2,18c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M20,18L4,18V6h5.17 l2,2H20V18z M18,12H6v-2h12V12z M14,16H6v-2h8V16z"/></g></svg>'/> {record.source.display_value}</div>
-									<div className=""><now-highlighted-value label={record.severity.display_value} color={color} variant="secondary"/></div>
-									<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M11,8.75v3.68c0,0.35,0.19,0.68,0.49,0.86l3.12,1.85c0.36,0.21,0.82,0.09,1.03-0.26c0.21-0.36,0.1-0.82-0.26-1.03 l-2.87-1.71v-3.4C12.5,8.34,12.16,8,11.75,8S11,8.34,11,8.75z M21,9.5V4.21c0-0.45-0.54-0.67-0.85-0.35l-1.78,1.78 c-1.81-1.81-4.39-2.85-7.21-2.6c-4.19,0.38-7.64,3.75-8.1,7.94C2.46,16.4,6.69,21,12,21c4.59,0,8.38-3.44,8.93-7.88 c0.07-0.6-0.4-1.12-1-1.12c-0.5,0-0.92,0.37-0.98,0.86c-0.43,3.49-3.44,6.19-7.05,6.14c-3.71-0.05-6.84-3.18-6.9-6.9 C4.94,8.2,8.11,5,12,5c1.93,0,3.68,0.79,4.95,2.05l-2.09,2.09C14.54,9.46,14.76,10,15.21,10h5.29C20.78,10,21,9.78,21,9.5z"/></g></g></svg>'/> {makeRelativeTime(record.sys_updated_on.display_value)}</div>
-								</div> */}
-								{state.activeTabIndex == 0 && (
-									<div className="card-body alerts">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="card-row">
-											<div className="card-column">
-												<p className="align-items-center">
-													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
-													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
-													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
-												</p>
-												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
-												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
-												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
-												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
-												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
-												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
-												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
-											</div>
-											<div className="card-column">
-												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
-												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
-												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
-												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
-												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
-												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
-												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
-												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
-											</div>
-										</div>
+			</div>}
+			{state.properties.previewQuery.table == "cmdb_ci_service" && <div>
+				<div id="info-header">
+					<div>
+						<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
+						<div className="inline-header">Offerings <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
+					</div>
+				</div>
+				<div id="cards-header">
+					<div className="tabset">
+						<input type="radio" name="tabset" id="tab0" aria-controls="preview" checked onchange={() => {updateState({activeTabIndex: 0})}}/>
+						<label for="tab0">Preview</label>
+						<input type="radio" name="tabset" id="tab1" aria-controls="changes" onchange={() => {updateState({activeTabIndex: 1})}}/>
+						<label for="tab1">Changes</label>
+					</div>
+				</div>
+				<div id="info-cards">
+					<ul>
+						{state.activeTabIndex == 0 && state.parentRecord.map((record, index) => serviceCardComponent(record, index, true))}
+						{state.activeTabIndex == 0 && state.secondaryRecords.map((record, index) => serviceCardComponent(record, index, false))}
 
-										<div className="card-center">
-											{record.snapshotImage && <div className="card-image-wrapper">
-												<div
-													className="card-image"
-													style={{'background-image': `url(${record.snapshotImage.display_value})`, transform: `scale(${record.snapshotImage.scale})`, 'transform-origin': record.snapshotImage.transform_origin}}
-													onmouseover={() => {imageZoomMouseOver(index, false)}}
-													onmouseout={() => {imageZoomMouseOut(index, false)}}
-													onmousemove={(e) => {imageZoomMouseMove(e, index, false)}}
-												></div>
-											</div>}
-										</div>
-									</div>
-								)}
-								{state.activeTabIndex == 1 && (
-									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										{workNoteComponent(record.work_notes || [], false, index)}
-										{/* {record.work_notes && record.work_notes.map((note) =>
-											<p>
-												<now-avatar className="" size="sm" user-name={note.sys_created_by.display_value} image-src={note.sys_created_by.avatar}/>
-												<now-rich-text html={note.value.display_value}/>
-												<br/><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 20 20" height="18px" viewBox="0 0 20 20" width="18px"><g><rect fill="none" height="20" width="20"/></g><g><g><path d="M8.5,8.53v3.24c0,0.18,0.09,0.34,0.24,0.43l2.52,1.51c0.23,0.14,0.52,0.06,0.66-0.16l0,0c0.14-0.23,0.06-0.53-0.16-0.66 L9.5,11.55V8.53c0-0.26-0.21-0.48-0.48-0.48H8.98C8.71,8.05,8.5,8.26,8.5,8.53z"/><path d="M13.9,10c0.07,0.32,0.1,0.66,0.1,1c0,2.76-2.24,5-5,5s-5-2.24-5-5s2.24-5,5-5c0.71,0,1.39,0.15,2,0.42V5.35 C10.37,5.13,9.7,5,9,5c-3.31,0-6,2.69-6,6s2.69,6,6,6s6-2.69,6-6c0-0.34-0.04-0.67-0.09-1H13.9z"/><path d="M15,6V4.5C15,4.22,14.78,4,14.5,4h0C14.22,4,14,4.22,14,4.5V6h0h-1.5C12.22,6,12,6.22,12,6.5v0C12,6.78,12.22,7,12.5,7H14 v1.5C14,8.78,14.22,9,14.5,9h0C14.78,9,15,8.78,15,8.5V7v0h1.5C16.78,7,17,6.78,17,6.5v0C17,6.22,16.78,6,16.5,6H15z"/></g></g></svg>'/> {note.sys_created_on.display_value}
-											</p>
-										)} */}
-									</div>
-								)}
-								{state.activeTabIndex == 2 && (
-									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="tags-title">
-											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
-											&nbsp;&nbsp;Alert Tags (normalized):
-										</div>
-										<div className="tags">
-											{record.tags && record.tags.length > 0 ? record.tags.filter((tag) => tag.type == "itom_tags").map((tag) =>
-												<div className="broker-tag"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
-											):
-												<div className="broker-tag"><span className="tag-key">No Tags</span></div>
-											}
-										</div>
-										<div className="tags-title">
-											<svg attrs={{class: "g-icon green", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
-											&nbsp;&nbsp;CI Tags ({record.cmdb_ci.display_value}):
-										</div>
-										<div className="tags">
-											{record.tags && record.tags.length > 0 ? record.tags.filter((tag) => tag.type == "ci").map((tag) =>
-												<div className="broker-tag green"><span className="tag-key">{tag.key}:</span> {tag.value}</div>
-											):
-												<div className="broker-tag green"><span className="tag-key">No Tags</span></div>
-											}
-										</div>
-									</div>
-								)}
-								{state.activeTabIndex == 3 && (
-									<div className="card-body overflow">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										{record.additional_info.display_value != '' && (
-											<div>
-												<p><span className="key">Additional Info:</span></p>
-												<pre className="">{JSON.stringify(JSON.parse(record.additional_info.display_value), null, 2)}</pre>
-											</div>
-										)}
-									</div>
-								)}
-								{state.activeTabIndex == 5 && (
-									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
-										<div className="card-row">
-											<div className="card-column">
-												<p className="align-items-center">
-													<span className="key">Source: </span> <span className="">{record.source.display_value}</span>
-													{record.source.display_value == "ITOM Agent" && <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}/params/selected-tab-index/2`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M3.25 15.225V13.1L10 6.35L14 10.35L20.75 3.6V5.725L14 12.475L10 8.475ZM19.25 20.75V11.1L20.75 9.6V20.75ZM7.25 20.75V15.1L8.75 13.6V20.75ZM11.25 20.75V13.6L12.75 15.125V20.75ZM15.25 20.75V15.125L16.75 13.625V20.75ZM3.25 20.75V19.1L4.75 17.6V20.75Z"/></svg>}
-													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
-												</p>
-												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
-												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
-											</div>
-											<div className="card-column">
-												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">Resource:</span> <span className="">{record.resource.display_value}</span></p>
-											</div>
-										</div>
-										<div className="card-center">
-											{/* <button className="open_metric_explorer" onclick={() => {dispatch("METRIC_EXPLORER_LINK#CLICKED", {ciSysId: record.cmdb_ci ? record.cmdb_ci.value : ''})}}>Metric Explorer</button> */}
-											{record.source && record.source.display_value == "ITOM Agent" && <div className="metric-container">
-												{record.metric_options && <div className="metric-filters-container">
-													<select onchange={(e) => {setSelectedMetricOption(e, index, false)}}>
-														{record.metric_options.map((option) => <option class={{selected: option.selected}} value={option.value}>{option.display_value}</option>)}
-													</select>
-												</div>}
-												<div className="chart-wrapper">
-													{record.metrics && <table id="line-example-15" className="charts-css line show-heading show-data-on-hover multiple show-labels show-primary-axis show-4-secondary-axes show-data-axes">
-														<caption>{`${record.metrics.ci_name}-${record.metrics.metric_name}`}</caption>
-														<tbody>
-															{record.metrics.datapoints.map((dataPoint, i) => {
-																if (record.metrics.datapoints[i + 1]) {
-																	return <tr>
-																		<th class={{'hide-label': i % 2 == 1}} scope="row">{displayDateFromTimestamp(dataPoint.timestamp)}</th>
-																		{record.metrics.resource_names.map((resource_name) =>
-																			<td style={{'--start': `${dataPoint[resource_name] / record.metrics.max_value}`, '--size': `${record.metrics.datapoints[i + 1][resource_name] / record.metrics.max_value}`}}>
-																				<span className="data">{record.metrics.datapoints[i + 1][resource_name].toFixed(2)}</span>
-																				{/* <span className="tooltip">{record.metrics.datapoints[i + 1].value}</span> */}
-																			</td>
-																		)}
-																	</tr>
-																}
-															})}
-														</tbody>
-													</table>}
-													{record.metrics && <ul className="charts-css legend legend-inline legend-circle">
-															{record.metrics.resource_names.map((resource_name) =>
-																<li>{resource_name == "" ? "No Resource" : resource_name}</li>
-															)}
-													</ul>}
-												</div>
-											</div>}
-										</div>
-									</div>
-								)}
-							</li>
-						)
-					})}
-				</ul>
-			</div>
+						{state.activeTabIndex == 1 && state.parentRecord[0].changes && state.parentRecord[0].changes.map((record, index) => serviceCardComponent(record, index, true))}
+
+					</ul>
+				</div>
+			</div>}
 			<div class={{'context-menu-container': true, visible: state.showContextMenu}} hook-update={(oldNode, newNode) => updateContextMenuPosition(newNode.elm)} style={{top: state.contextMenuStyle.top, left: state.contextMenuStyle.left}}>
 				<div className="context-menu">
 					<ul className="context-menu-list">
@@ -1064,30 +985,39 @@ createCustomElement('snc-alert-email-preview', {
 	actionHandlers: {
 		[COMPONENT_PROPERTY_CHANGED]: (coeffects) => {
 			const { dispatch, action } = coeffects;
-			console.log('COMPONENT_PROPERTY_CHANGED payload: ', action.payload);
+			console.log('snc-alert-email-preview COMPONENT_PROPERTY_CHANGED payload: ', action.payload);
 			dispatch("REFRESH_MAIN_QUERY");
 		},
 		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
-			const { dispatch } = coeffects;
-			console.log("COMPONENT_BOOTSTRAPPED");
+			const { dispatch, state } = coeffects;
+			console.log("snc-alert-email-preview COMPONENT_BOOTSTRAPPED");
 			dispatch("REFRESH_MAIN_QUERY");
 		},
 		'REFRESH_MAIN_QUERY': (coeffects) => {
 			const { state, dispatch } = coeffects;
-			console.log("REFRESH_MAIN_QUERY");
+			console.log("snc-alert-email-preview REFRESH_MAIN_QUERY");
 			console.log("state: ", state);
 			dispatch('FETCH_PARENT_RECORD', {
-				table: 'em_alert',
-				sysparm_query: 'number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent,initial_event_time,resource',
+				table: state.properties.previewQuery.table,
+				sysparm_query: 'sys_id=' + state.properties.previewQuery.sys_id,
+				sysparm_fields: state.properties.tableColumns[state.properties.previewQuery.table],
 				sysparm_display_value: 'all'
 			});
-			dispatch('FETCH_CHILD_RECORD', {
-				table: 'em_alert',
-				sysparm_query: 'parent.number=' + state.properties.focusedRecordNumber,
-				sysparm_fields: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent,initial_event_time,resource',
-				sysparm_display_value: 'all'
-			});
+			if (state.properties.previewQuery.table == "em_alert") {
+				dispatch('FETCH_CHILD_RECORD', {
+					table: state.properties.previewQuery.table,
+					sysparm_query: 'parent=' + state.properties.previewQuery.sys_id,
+					sysparm_fields: state.properties.tableColumns[state.properties.previewQuery.table],
+					sysparm_display_value: 'all'
+				});
+			} else if (state.properties.previewQuery.table == "cmdb_ci_service") {
+				dispatch('FETCH_CHILD_RECORD', {
+					table: "service_offering",
+					sysparm_query: 'parent=' + state.properties.previewQuery.sys_id,
+					sysparm_fields: state.properties.tableColumns[state.properties.previewQuery.table],
+					sysparm_display_value: 'all'
+				});
+			}
 		},
 		'FETCH_PARENT_RECORD': createHttpEffect('/api/now/table/:table', {
 			batch: true,
@@ -1202,7 +1132,7 @@ createCustomElement('snc-alert-email-preview', {
 		},
 		'START_FETCH_EXTRA_DATA': (coeffects) => {
 			const { state, dispatch, updateState } = coeffects;
-
+			console.log('START_FETCH_EXTRA_DATA');
 			let updatedParentRecord = state.parentRecord;
 			let updatedSecondaryRecords = state.secondaryRecords;
 			if (updatedParentRecord[0] && updatedParentRecord[0].is_group_alert && updatedParentRecord[0].message_key && updatedParentRecord[0].u_repeated_alerts && updatedSecondaryRecords.length > 0) {
@@ -1271,10 +1201,10 @@ createCustomElement('snc-alert-email-preview', {
 			let ciArray = [];
 			state.parentRecord.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
-				if (record.cmdb_ci.value != "") {
+				if (record.cmdb_ci && record.cmdb_ci.value != "") {
 					ciArray.push(record.cmdb_ci.value);
 				}
-				if (record.additional_info.value.includes("snapshot")) {
+				if (record.additional_info && record.additional_info.value.includes("snapshot")) {
 					dispatch('FETCH_DATADOG_SNAPSHOT', {
 						retrieveLaunchApplications: true,
 						retrieveRemediations: false,
@@ -1282,7 +1212,7 @@ createCustomElement('snc-alert-email-preview', {
 						alertId: record.sys_id.value
 					});
 				}
-				if (record.u_tbac_reasoning.value != "") {
+				if (record.u_tbac_reasoning && record.u_tbac_reasoning.value != "") {
 					dispatch('FETCH_TBAC_TAGS_USED', {
 						table: 'sn_em_tbac_alert_clustering_definitions',
 						sysparm_query: "name=" + record.u_tbac_reasoning.value,
@@ -1290,13 +1220,21 @@ createCustomElement('snc-alert-email-preview', {
 						sysparm_display_value: 'all'
 					});
 				}
+				if (state.properties.previewQuery.table == "cmdb_ci_service") {
+					dispatch('FETCH_CHANGES', {
+						table: 'change_request',
+						sysparm_query: "cmdb_ci=" + record.sys_id.value,
+						sysparm_fields: 'number,sys_id,sys_class_name,sys_updated_on,type,escalation,impact,opened_at,opened_by,urgency,state,short_description',
+						sysparm_display_value: 'all'
+					})
+				}
 			});
 			state.secondaryRecords.forEach((record) => {
 				recordIDs.push(record.sys_id.value);
-				if (record.cmdb_ci.value != "") {
+				if (record.cmdb_ci && record.cmdb_ci.value != "") {
 					ciArray.push(record.cmdb_ci.value);
 				}
-				if (record.additional_info.value.includes("snapshot")) {
+				if (record.additional_info && record.additional_info.value.includes("snapshot")) {
 					dispatch('FETCH_DATADOG_SNAPSHOT', {
 						retrieveLaunchApplications: true,
 						retrieveRemediations: false,
@@ -1332,6 +1270,23 @@ createCustomElement('snc-alert-email-preview', {
 					sysparm_display_value: 'all'
 				});
 			}
+		},
+		'FETCH_CHANGES': createHttpEffect('/api/now/table/:table', {
+			method: 'GET',
+			pathParams: ['table'],
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_CHANGES_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true,
+			batch: false
+		}),
+		'FETCH_CHANGES_SUCCESS': (coeffects) => {
+			const { state, dispatch, action, updateState } = coeffects;
+			console.log("FETCH_CHANGES_SUCCESS payload: ", action.payload);
+			let updatedParentRecord = state.parentRecord;
+			updatedParentRecord[0].changes = action.payload.result;
+
+			updateState({parentRecord: updatedParentRecord});
 		},
 		'FETCH_TBAC_TAGS_USED': createHttpEffect('/api/now/table/:table', {
 			method: 'GET',
@@ -1840,6 +1795,7 @@ createCustomElement('snc-alert-email-preview', {
 		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
+			//coeffects.dispatch("CLOSE_INFO_BUTTON#CLICKED");
 		},
 		'QUERY_ERROR': (coeffects) => {
 			const { action } = coeffects;
@@ -1847,14 +1803,23 @@ createCustomElement('snc-alert-email-preview', {
 		},
 	},
 	properties: {
-		focusedRecordNumber: {
-			default: 'Alert0000000',
+		previewQuery: {
+			default: {
+				table: '',
+				sys_id: ''
+			}
 		},
 		actionArray: {
 			default: []
 		},
 		currentUser: {
 			default: {}
+		},
+		tableColumns: {
+			default: {
+				em_alert: 'number,sys_id,parent,cmdb_ci,description,severity,sys_updated_on,source,group_source,type,additional_info,node,incident,incident.assignment_group,state,metric_name,assignment_group,message_key,cmdb_ci.sys_class_name,sys_created_on,initial_remote_time,event_count,assigned_to,acknowledged,u_itom_tags,is_group_alert,u_tbac_reasoning,u_repeated_alerts,parent,initial_event_time,resource',
+				cmdb_ci_service: 'name,sys_id,busines_criticality,sys_class_name,parent,location,managed_by,owned_by,used_for'
+			}
 		}
 	},
 	setInitialState() {

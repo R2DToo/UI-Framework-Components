@@ -46,22 +46,25 @@
 }
 
 #progress-bar-container li.step0:before {
-	content: url(images/grain.svg);
+	content: url(images/business_center.svg);
 }
 #progress-bar-container li.step1:before {
-	content: url(images/map.svg);
+	content: url(images/lan.svg);
 }
 #progress-bar-container li.step2:before {
-	content: url(images/transform.svg);
+	content: url(images/language.svg);
 }
 #progress-bar-container li.step3:before {
-	content: url(images/notifications_active.svg);
+	content: url(images/app_registration.svg);
 }
 #progress-bar-container li.step4:before {
-	content: url(images/precision_manufacturing.svg);
+	content: url(images/insert_chart.svg);
 }
 #progress-bar-container li.step5:before {
-	content: url(images/crisis_alert.svg);
+	content: url(images/select_all.svg);
+}
+#progress-bar-container li.step6:before {
+	content: url(images/extension.svg);
 }
 
 #progress-bar-container li.active:before, #progress-bar-container li:hover:before {
@@ -71,7 +74,7 @@
 #progress-bar-container li {
 	list-style:none;
 	float:left;
-	width:16.65%;
+	width:14.28%;
 	text-align:center;
 	color: RGB($now-color_text--primary);
 	text-transform:uppercase;

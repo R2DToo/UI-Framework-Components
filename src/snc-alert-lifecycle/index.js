@@ -49,6 +49,9 @@ createCustomElement('snc-alert-lifecycle', {
 				{label: 'Sub Domain', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
 					<p>Core Business Domains are sliced into smaller segments called Sub Domains, in which it’s capabilities are solved by one or more logical component boundaries.</p>
 				</div>)},
+				{label: 'Generic Domain', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
+					<p>Generic Domain is a boundary set of capabilities that are cross-cutting, such as identity, platform, and infrastructure. A generic domain’s capabilities are by one or more logical component boundaries.</p>
+				</div>)},
 				{label: 'Capability', active: false, link: (<div onclick={() => {dispatch("UPDATE_PAGE#PARAMETER", {params: {list: "f089c8d297230150ada0b9cfe153af09"}});}}>Events</div>), description: (<div>
 					<p>
 Represents the desired  features/behaviors that directly fulfill a stakeholder need within a Sub Domain or Generic Domain. Capabilities have a persona, benefit hypothesis, and acceptance criteria. A capability is a solved by one or more component boundaries.</p>
@@ -77,7 +80,7 @@ Represents the desired  features/behaviors that directly fulfill a stakeholder n
 			let updatedSteps = state.steps;
 			updatedSteps.forEach((step) => step.active = false);
 			updatedSteps[action.payload.index].active = true;
-			let progress = (100 / 5) * (action.payload.index);
+			let progress = (100 / 6) * (action.payload.index);
 			updateState({steps: updatedSteps, dummyStateChange: !state.dummyStateChange, progress: progress});
 		},
 	},

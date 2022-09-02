@@ -116,19 +116,24 @@ const OPERATING_SYSTEM_ICONS = [
 
 const view = (state, {updateState, dispatch}) => {
 	console.log('snc-alert-email-message-list state: ', state);
-
+	const PREVIEW_ENABLED_TABLES = ["em_alert", "cmdb_ci_service"];
 
 	const fireEvent = (event_name, value) => {
 		console.log("%cFiring Event: " + event_name, "color:blue;font-size:20px;");
 		console.log("%cEvent Payload: %o", "color:blue;font-size:20px;", value);
-		if (event_name == "TABLE_ROW#CLICKED") {
-			updateState({showingNumber: value});
-		} else if (event_name == "TABLE_ACTION_BAR_BUTTON#CLICKED") {
+		if (event_name == "TABLE_ACTION_BAR_BUTTON#CLICKED") {
 			dispatch('REFRESH_MAIN_QUERY', {force: true});
 		}
 		dispatch(event_name, {
 			value: value
 		});
+	};
+
+	const openPreview = (sys_id) => {
+		if (PREVIEW_ENABLED_TABLES.includes(state.currentList.table)) {
+			updateState({showingNumber: sys_id});
+			dispatch("TABLE_ROW#CLICKED", {table: state.currentList.table, sys_id: sys_id});
+		}
 	};
 
 	const allowDrop = (e, droppingColumnIndex) => {
@@ -202,17 +207,19 @@ const view = (state, {updateState, dispatch}) => {
 
 	const getSeverityColor = (severityNumber) => {
 		let color = 'positive';
-		switch (parseInt(severityNumber)) {
-			case 4: color = 'moderate';
-			break;
-			case 3: color = 'warning';
-			break;
-			case 2: color = 'high';
-			break;
-			case 1: color = 'critical';
-			break;
-			default: color = 'positive';
-			break;
+		if (severityNumber != "") {
+			switch (parseInt(severityNumber)) {
+				case 4: color = 'moderate';
+				break;
+				case 3: color = 'warning';
+				break;
+				case 2: color = 'high';
+				break;
+				case 1: color = 'critical';
+				break;
+				default: color = 'positive';
+				break;
+			}
 		}
 		return color;
 	};
@@ -359,7 +366,7 @@ const view = (state, {updateState, dispatch}) => {
 	const tableData = () => {
 		return state.tableData.map((row, index) => {
 			return (
-				<tr id={"sys_id-" + row.sys_id.value} onclick={() => fireEvent("TABLE_ROW#CLICKED", row.number.display_value)} class={{active: state.properties.showInfo && state.showingNumber == row.number.display_value}}>
+				<tr id={"sys_id-" + row.sys_id.value} onclick={() => {openPreview(row.sys_id.value)}} class={{active: state.properties.showInfo && state.showingNumber == row.number.display_value}}>
 					{state.tableOrder.map((key) => {
 						if (row[key]) {
 							if (key == "severity" || key == "sn_priority_group") {
@@ -400,6 +407,10 @@ const view = (state, {updateState, dispatch}) => {
 									return <div className={"tag " + getSeverityColor(service.impact)} onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{service.display_value}</div>
 								});
 								return <td className={`tags data-field-${key}`}>{serviceTags}</td>
+							} else if (key == "impact") {
+								return <td className={`tags data-field-${key}`}>
+									<div className={"tag " + getSeverityColor(row[key].value)}>{row[key].display_value}</div>
+								</td>
 							} else if (key == "secondary_alerts") {
 								return <td className={`tags data-field-${key}`}>
 									{row[key].display_value != "0" && <div className="circle-tags">
@@ -540,6 +551,11 @@ const view = (state, {updateState, dispatch}) => {
 				case 'ci_dependency_view':
 					if (contextRecord) {
 						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/nav/ui/classic/params/target/%24ngbsm.do%3Fid%3D${contextRecord.cmdb_ci.value}`});
+					}
+					break;
+				case 'relationship_map':
+					if (contextRecord) {
+						dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/optimiz-workspace/map/${contextRecord.sys_id.value}`});
 					}
 					break;
 				case 'alert_tbac':
@@ -1062,6 +1078,7 @@ const view = (state, {updateState, dispatch}) => {
 						{state.properties.actionArray.map((action) =>
 							<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, action.label, true)}}><now-rich-text html={action.svgIcon} className="context-menu-icon"/>{action.label}</button></li>
 						)}
+						<li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "relationship_map")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M15.25 20.75v-3h-4v-10h-2.5v3h-6.5v-7.5h6.5v3h6.5v-3h6.5v7.5h-6.5v-3h-2.5v8.5h2.5v-3h6.5v7.5Zm-11.5-16v4.5Zm13 10v4.5Zm0-10v4.5Zm0 4.5h3.5v-4.5h-3.5Zm0 10h3.5v-4.5h-3.5Zm-13-10h3.5v-4.5h-3.5Z"/></svg>Open Relationship Map</button></li>
 						<li className="context-menu-item"><a className="context-menu-link" href={getCSVLink()} download={`itom_${state.currentList.table}_${Date.now()}.csv`}><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M12 15.625 7.725 11.35 8.775 10.25 11.25 12.725V4.325H12.75V12.725L15.225 10.25L16.275 11.35ZM6.3 19.5Q5.55 19.5 5.025 18.975Q4.5 18.45 4.5 17.7V15H6V17.7Q6 17.8 6.1 17.9Q6.2 18 6.3 18H17.7Q17.8 18 17.9 17.9Q18 17.8 18 17.7V15H19.5V17.7Q19.5 18.45 18.975 18.975Q18.45 19.5 17.7 19.5Z"/></svg>Export CSV</button></a></li>
 						{state.currentList.table == "em_alert" && <li className="context-menu-item"><button className="context-menu-button" onclick={(e) => {contextMenuOptionClicked(e, "interactive_analysis")}}><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M3 19.75Q2.275 19.75 1.762 19.238Q1.25 18.725 1.25 18Q1.25 17.275 1.762 16.762Q2.275 16.25 3 16.25Q3.175 16.25 3.312 16.262Q3.45 16.275 3.575 16.35L8.35 11.575Q8.275 11.45 8.262 11.312Q8.25 11.175 8.25 11Q8.25 10.275 8.762 9.762Q9.275 9.25 10 9.25Q10.725 9.25 11.238 9.762Q11.75 10.275 11.75 11Q11.75 11.1 11.65 11.55L14.45 14.35Q14.575 14.275 14.7 14.262Q14.825 14.25 15 14.25Q15.175 14.25 15.3 14.262Q15.425 14.275 15.55 14.35L19.35 10.55Q19.275 10.425 19.263 10.3Q19.25 10.175 19.25 10Q19.25 9.275 19.763 8.762Q20.275 8.25 21 8.25Q21.725 8.25 22.238 8.762Q22.75 9.275 22.75 10Q22.75 10.725 22.238 11.238Q21.725 11.75 21 11.75Q20.825 11.75 20.7 11.738Q20.575 11.725 20.45 11.65L16.65 15.45Q16.725 15.575 16.738 15.7Q16.75 15.825 16.75 16Q16.75 16.725 16.238 17.238Q15.725 17.75 15 17.75Q14.275 17.75 13.762 17.238Q13.25 16.725 13.25 16Q13.25 15.825 13.262 15.688Q13.275 15.55 13.35 15.425L10.575 12.65Q10.45 12.725 10.312 12.738Q10.175 12.75 10 12.75Q9.9 12.75 9.45 12.65L4.65 17.45Q4.725 17.575 4.738 17.7Q4.75 17.825 4.75 18Q4.75 18.725 4.237 19.238Q3.725 19.75 3 19.75ZM15 8.4 14.25 6.75 12.6 6 14.25 5.25 15 3.6 15.75 5.25 17.4 6 15.75 6.75ZM4 9.575 3.5 8.5 2.425 8 3.5 7.5 4 6.425 4.5 7.5 5.575 8 4.5 8.5Z"/></svg>Interactive Analysis</button></li>}
 						{state.currentList.table == "em_alert" && <li className="context-menu-item"><button className="context-menu-button"><svg attrs={{class: "context-menu-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M10.125 20.5 11.05 13.875H7.95Q7.575 13.875 7.5 13.688Q7.425 13.5 7.6 13.175L12.95 3.5H13.875L12.95 10.125H16.05Q16.4 10.125 16.488 10.312Q16.575 10.5 16.4 10.825L11.05 20.5Z"/></svg>Alert Playbooks<svg attrs={{class: "context-menu-icon",xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg></button>
@@ -1357,7 +1374,7 @@ createCustomElement('snc-alert-email-message-list', {
 			console.log("FETCH_CURRENT_LIST_SUCCESS payload: ", action.payload);
 			console.log("FETCH_CURRENT_LIST_SUCCESS action: ", action);
 			if (action.payload && action.payload.result && action.payload.result[0]) {
-				if (action.payload.result[0].title == "Lifecycle") {
+				if (action.payload.result[0].title == "Lifecycle" || action.payload.result[0].title == "Definitions") {
 					updateState({showLifecycle: true});
 				} else {
 					updateState({showLifecycle: false});
@@ -1674,6 +1691,16 @@ createCustomElement('snc-alert-email-message-list', {
 			updateState({tableData: result, tableOrder: updatedTableOrder, totalCount: parseInt(action.meta.responseHeaders['x-total-count']), isMainQueryRunning: result.length == 0 ? false : true});
 			dispatch('START_FETCH_COLUMN_LABELS');
 			dispatch('START_FETCH_TBAC_TAGS_USED');
+			if (state.currentList.table == "cmdb_ci_service_discovered") {
+				let impactSysparm = "business_service!=NULL^business_serviceSAMEASelement_id^vt_end>javascript:gs.endOfNextMonth()^business_serviceIN";
+				let appServiceArray = [];
+				result.forEach((r) => {appServiceArray.push(r.sys_id.value)});
+				dispatch('FETCH_SERVICE_IMPACT', {
+					sysparm_query: impactSysparm + appServiceArray.toString(),
+					sysparm_fields: "business_service,severity",
+					sysparm_display_value: 'all'
+				});
+			}
 		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);
@@ -1856,6 +1883,33 @@ createCustomElement('snc-alert-email-message-list', {
 			}else {
 				dispatch('START_FETCH_SECONDARY_ALERTS');
 			}
+		},
+		'FETCH_SERVICE_IMPACT': createHttpEffect('api/now/table/em_impact_status', {
+			method: 'GET',
+			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
+			successActionType: 'FETCH_SERVICE_IMPACT_SUCCESS',
+			errorActionType: 'QUERY_ERROR',
+			cacheable: true
+		}),
+		'FETCH_SERVICE_IMPACT_SUCCESS': (coeffects) => {
+			const { action, state, updateState, dispatch } = coeffects;
+			console.log('FETCH_SERVICE_IMPACT_SUCCESS payload: ', action.payload);
+			let updatedTableData = state.tableData;
+			let updatedTableOrder = state.tableOrder;
+			updatedTableData.forEach((tableRow, i) => {
+				let matchResult = action.payload.result.find((r) => r.business_service.value == tableRow.sys_id.value);
+				if (matchResult) {
+					console.log('matchResult: ', matchResult);
+					updatedTableData[i].impact = {value: matchResult.severity.value, display_value: matchResult.severity.display_value, label: 'Impact'};
+
+				} else {
+					updatedTableData[i].impact = {value: '', display_value: '', label: 'Impact'};
+				}
+			});
+			if (!updatedTableOrder.includes("impact")) {
+				updatedTableOrder.splice(3, 0, "impact");
+			}
+			updateState({tableData: updatedTableData, tableOrder: updatedTableOrder, dummyStateChange: !state.dummyStateChange});
 		},
 		'FETCH_APP_SERVICE_IMPACT': createHttpEffect('api/now/table/em_impact_status', {
 			method: 'GET',

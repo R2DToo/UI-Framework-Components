@@ -31,7 +31,7 @@ const view = (state, {updateState}) => {
 			/>
 			{state.showInfo && (
 				<snc-alert-email-preview
-					focusedRecordNumber={state.focusedRecordNumber}
+					previewQuery={state.previewQuery}
 					actionArray={state.properties.actionArray}
 					currentUser={state.properties.currentUser}
 					className={state.isInfoMounted ? "mounted" : "unmounted"}
@@ -90,7 +90,7 @@ createCustomElement('snc-alert-email-view', {
 	},
 	actionHandlers: {
 		'TABLE_ROW#CLICKED': ({action, dispatch, updateState, state}) => {
-			updateState({focusedRecordNumber: action.payload.value});
+			updateState({previewQuery: action.payload});
 			if (!state.isInfoMounted) {
 				let newShowInfo = state.showInfo;
 				if (!state.showInfo) {
@@ -168,7 +168,10 @@ createCustomElement('snc-alert-email-view', {
 		return {
 			showInfo: false,
 			isInfoMounted: false,
-			focusedRecordNumber: "Alert0000000",
+			previewQuery: {
+				table: '',
+				sys_id: ''
+			}
 		}
 	}
 });
