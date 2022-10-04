@@ -11,8 +11,11 @@
   &.green {
     fill: rgba(119, 178, 123, 1);
   }
+  &.clickable {
+    cursor: pointer;
+  }
   &.clickable:hover {
-    fill: RGB($now-color--primary-0);
+    fill: rgba($now-color--primary-1, 0.5);
   }
 }
 
@@ -149,7 +152,7 @@
 }
 
 #info-cards {
-  height: 63vh;
+  height: 61vh;
   overflow-y: auto;
 
   > ul {

@@ -1,13 +1,14 @@
 import {createCustomElement, actionTypes} from '@servicenow/ui-core';
 const { COMPONENT_PROPERTY_CHANGED, COMPONENT_BOOTSTRAPPED, COMPONENT_ERROR_THROWN} = actionTypes;
 import {createHttpEffect} from '@servicenow/ui-effect-http';
-import snabbdom from '@servicenow/ui-renderer-snabbdom';
+import {snabbdom, Fragment, createRef} from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
 import '../snc-alert-lifecycle';
 import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
 import '@servicenow/now-avatar';
 import '@servicenow/now-rich-text';
+import '@servicenow/now-button';
 
 import {isEqual} from 'lodash';
 
@@ -41,7 +42,7 @@ import sapSVG from '../images/sap-icon.svg';
 import splunkSVG from '../images/splunk_v6.svg';
 import microsoftSVG from '../images/microsoft-icon.svg';
 import sentrySVG from "../images/sentry_logo.svg";
-import snmptrapSVG from "../images/snmp6.svg";
+import snmptrapSVG from "../images/snmp_traps_v7.svg";
 import solarwindsSVG from '../images/solarwinds-icon.svg';
 import sumologicSVG from '../images/sumo-logic-icon.svg';
 import zabbixSVG from '../images/zabbix-icon.svg';
@@ -53,7 +54,19 @@ import honeycombSVG from '../images/honeycomb.svg';
 import kafkaSVG from '../images/kafka.svg';
 import scoutSVG from '../images/scout_apm.svg';
 import linuxSVG from '../images/linux-tux.svg';
+import aristaSVG from '../images/arista.svg';
+import panoramaSVG from '../images/panorama.svg';
+import office365SVG from '../images/office_365.svg';
+import foglightSVG from '../images/foglight.svg';
+import citrixSVG from '../images/citrix.svg';
+import silverpeakSVG from '../images/silverpeak.svg';
 export const INTEGRATION_ICONS = [
+	{key: 'arista', value: aristaSVG},
+	{key: 'panorama', value: panoramaSVG},
+	{key: 'office 365', value: office365SVG},
+	{key: 'foglight', value: foglightSVG},
+	{key: 'citrix', value: citrixSVG},
+	{key: 'silver peak', value: silverpeakSVG},
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
 	{key: 'azure', value: azureSVG},
@@ -387,7 +400,15 @@ const view = (state, {updateState, dispatch}) => {
 									/>
 								</td>
 							} else if (key == "description") {
-								return <td className={`description break-message data-field-${key}`}>{row[key].display_value}</td>
+								return <td className={`description break-message data-field-${key}`}>
+									{row[key].short_length == false && <Fragment>
+										{row[key].unfold ?
+											<svg attrs={{class: "g-icon purple", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+											<svg attrs={{class: "g-icon purple", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+										}
+									</Fragment>}
+									{row[key].unfold ? row[key].value : row[key].display_value}
+								</td>
 							} else if (key == "application_service") {
 								let services = [];
 								row[key].forEach(service => {
@@ -397,9 +418,9 @@ const view = (state, {updateState, dispatch}) => {
 								});
 								var serviceTags = services.map((service, i) => {
 									let url = "/$ngbsm.do?id=" + service.value;
-									return <div className={"tag " + getSeverityColor(service.impact)} onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{service.display_value}</div>
+									return <div className={"tag break-message " + getSeverityColor(service.impact)} onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{service.display_value}</div>
 								});
-								return <td className={`tags data-field-${key}`}>{serviceTags}</td>
+								return <td className={`reasoning-tags-container data-field-${key}`}>{serviceTags}</td>
 							} else if (key == "secondary_alerts") {
 								return <td className={`tags data-field-${key}`}>
 									{row[key].display_value != "0" && <div className="circle-tags">
@@ -408,7 +429,7 @@ const view = (state, {updateState, dispatch}) => {
 								</td>
 							} else if (key == "cmdb_ci") {
 								let url = state.currentList.table == "sn_agent_ci_extended_info" ? `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}/params/selected-tab-index/2` : `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}`;
-								return <td className={`view-message data-field-${key}`}>
+								return <td className={`view-message name-message force-center data-field-${key} break-message`}>
 									{row[key].value ?
 										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span>
 										: row[key].display_value
@@ -925,6 +946,8 @@ const view = (state, {updateState, dispatch}) => {
 		}
 	};
 
+	const quickSearchRef = createRef();
+
 	return (
 		<div id="snc-alert-email-message-list">
 			{state.showLifecycle == false && <main id="main">
@@ -934,10 +957,9 @@ const view = (state, {updateState, dispatch}) => {
 							Count (<span className="primary-color">{state.totalCount.toLocaleString()}</span>)
 						</h1>
 					</div>
-					<div className="filter-container">
+					{/* <div className="filter-container">
 						<div className="filter">
 							<svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-							{/* <svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><path attr-d="M0,0h24v24H0V0z" attr-fill="none"/></g><g><path attr-d="M7,9H2V7h5V9z M7,12H2v2h5V12z M20.59,19l-3.83-3.83C15.96,15.69,15.02,16,14,16c-2.76,0-5-2.24-5-5s2.24-5,5-5s5,2.24,5,5 c0,1.02-0.31,1.96-0.83,2.75L22,17.59L20.59,19z M17,11c0-1.65-1.35-3-3-3s-3,1.35-3,3s1.35,3,3,3S17,12.65,17,11z M2,19h10v-2H2 V19z"/></g></svg> */}
 							{state.showAddFilter && <div className="add-filter">
 								<input
 									type="text"
@@ -965,8 +987,6 @@ const view = (state, {updateState, dispatch}) => {
 								<div className="filter-icon-container">
 									<span className="filter-icon-label">{filter.inputs.column.label}</span>
 									<svg onclick={() => {fireEvent('TOGGLE_SHOW_FILTER_INPUTS', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><g><path attr-d="M18.19,12.44l-3.24-1.62c1.29-1,2.12-2.56,2.12-4.32c0-3.03-2.47-5.5-5.5-5.5s-5.5,2.47-5.5,5.5c0,2.13,1.22,3.98,3,4.89 v3.26c-2.15-0.46-2.02-0.44-2.26-0.44c-0.53,0-1.03,0.21-1.41,0.59L4,16.22l5.09,5.09C9.52,21.75,10.12,22,10.74,22h6.3 c0.98,0,1.81-0.7,1.97-1.67l0.8-4.71C20.03,14.32,19.38,13.04,18.19,12.44z M17.84,15.29L17.04,20h-6.3 c-0.09,0-0.17-0.04-0.24-0.1l-3.68-3.68l4.25,0.89V6.5c0-0.28,0.22-0.5,0.5-0.5c0.28,0,0.5,0.22,0.5,0.5v6h1.76l3.46,1.73 C17.69,14.43,17.91,14.86,17.84,15.29z M8.07,6.5c0-1.93,1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5c0,0.95-0.38,1.81-1,2.44V6.5 c0-1.38-1.12-2.5-2.5-2.5c-1.38,0-2.5,1.12-2.5,2.5v2.44C8.45,8.31,8.07,7.45,8.07,6.5z"/></g></g></svg>
-									{/* <svg onclick={() => {fireEvent('TOGGLE_SHOW_FILTER_INPUTS', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M12 7c-.55 0-1 .45-1 1v3H8c-.55 0-1 .45-1 1s.45 1 1 1h3v3c0 .55.45 1 1 1s1-.45 1-1v-3h3c.55 0 1-.45 1-1s-.45-1-1-1h-3V8c0-.55-.45-1-1-1zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg> */}
-									{/* <svg onclick={() => {fireEvent('TOGGLE_SHOW_FILTER_INPUTS', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><path attr-d="M0,0h24v24H0V0z" attr-fill="none"/></g><g><path attr-d="M7,9H2V7h5V9z M7,12H2v2h5V12z M20.59,19l-3.83-3.83C15.96,15.69,15.02,16,14,16c-2.76,0-5-2.24-5-5s2.24-5,5-5s5,2.24,5,5 c0,1.02-0.31,1.96-0.83,2.75L22,17.59L20.59,19z M17,11c0-1.65-1.35-3-3-3s-3,1.35-3,3s1.35,3,3,3S17,12.65,17,11z M2,19h10v-2H2 V19z"/></g></svg> */}
 								</div>
 								{filter.showInputs && <div className="filter-inputs">
 									<div className="filter-inputs-operator">
@@ -1007,10 +1027,96 @@ const view = (state, {updateState, dispatch}) => {
 									</div>
 								</div>}
 								<svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>
-								{/* <svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M13.89 8.7L12 10.59 10.11 8.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 8.7 13.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l1.89 1.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l1.89-1.89c.39-.39.39-1.02 0-1.41-.39-.38-1.03-.38-1.41 0zM12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg> */}
 							</div>
 						)}
 						<svg onclick={() => {dispatch('SAVE_MY_LIST')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><path attr-d="M21,12.4V7l-4-4H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h7.4l2-2H5V5h11.17L19,7.83v6.57L21,12.4z M15,15 c0,1.66-1.34,3-3,3s-3-1.34-3-3s1.34-3,3-3S15,13.34,15,15z M6,6h9v4H6V6z M19.99,16.25l1.77,1.77L16.77,23H15v-1.77L19.99,16.25z M23.25,16.51l-0.85,0.85l-1.77-1.77l0.85-0.85c0.2-0.2,0.51-0.2,0.71,0l1.06,1.06C23.45,16,23.45,16.32,23.25,16.51z"/></g></svg>
+					</div> */}
+					<div className="filter-container">
+						{/* <div className="search-bar">
+							<input type="search" name="search" placeholder="Quick Search" oninput={(e) => {dispatch("UPDATE_QUICK_SEARCH", {value: e.target.value})}}/>
+							<button className="search-btn" type="submit" onclick={() => {dispatch("REFRESH_MAIN_QUERY", {force: true})}}>
+								<span>Search</span>
+							</button>
+						</div> */}
+						<div className="search-container">
+							<input value={state.quickSearchValue} ref={quickSearchRef} type="text" autocomplete="off" placeholder="Quick Search" maxLength="100" oninput={(e) => {dispatch("UPDATE_QUICK_SEARCH", {value: e.target.value})}} onkeyup={(e) => {dispatch("QUICK_SEARCH_KEYUP", {e: e})}}/>
+							{state.quickSearchValue != "" && <now-button icon="circle-close-outline" bare onclick={() => {dispatch("UPDATE_QUICK_SEARCH", {value: ""}); quickSearchRef.current.value = ""; dispatch("REFRESH_MAIN_QUERY", {force: true});}}></now-button>}
+							<now-button icon="magnifying-glass-fill" bare onclick={() => {dispatch("REFRESH_MAIN_QUERY", {force: true})}}></now-button>
+						</div>
+
+						<div className="filter">
+							<svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", 'enable-background': "new 0 0 24 24", viewBox: "0 0 24 24"}}><g><path attr-d="M0,0h24 M24,24H0" attr-fill="none"/><path attr-d="M7,6h10l-5.01,6.3L7,6z M4.25,5.61C6.27,8.2,10,13,10,13v6c0,0.55,0.45,1,1,1h2c0.55,0,1-0.45,1-1v-6 c0,0,3.72-4.8,5.74-7.39C20.25,4.95,19.78,4,18.95,4H5.04C4.21,4,3.74,4.95,4.25,5.61z"/><path attr-d="M0,0h24v24H0V0z" attr-fill="none"/></g></svg>
+							{/* <svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M11.375 19.5q-.375 0-.625-.25t-.25-.625v-5.8l-5.6-7.1q-.275-.4-.075-.813.2-.412.675-.412h13q.475 0 .675.412.2.413-.075.813l-5.6 7.1v5.8q0 .375-.25.625t-.625.25ZM12 12.3 16.95 6h-9.9Zm0 0Z"/></svg> */}
+							{/* <svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> */}
+							{state.showAddFilter && <div className="add-filter">
+								<input
+									type="text"
+									onkeyup={(e) => {fireEvent('ADD_FILTER_KEYDOWN', {event: e, value: e.target.value})}}
+									onfocus={(e) => {fireEvent('ADD_FILTER_FOCUS', e.target.value)}}
+									className="filter-input"
+									placeholder="Enter alert field"
+								/>
+								{state.showAddFilterResults && state.addFilterResults.length > 0 && <ul className="filter-results">
+									{state.addFilterResults.map((result, i) => <li
+										id={`filter-result-${i}`}
+										className={`filter-result`}
+										role="option"
+										onclick={() => {addNewFilter(result)}}
+									>{result.label}</li>)}
+								</ul>}
+							</div>}
+						</div>
+
+						{state.filters.map((filter, index) =>
+							<div className={"filter index-" + index}>
+								{index > 0 && <div className={"and-or-button " + filter.inputs.and_or.label} onclick={() => {updateFilterAnd_Or(index)}}>
+									{filter.inputs.and_or.label}
+								</div>}
+								<div className="filter-icon-container">
+									<span className="filter-icon-label">{filter.inputs.column.label}</span>
+									<svg onclick={() => {fireEvent('TOGGLE_SHOW_FILTER_INPUTS', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><g><path attr-d="M18.19,12.44l-3.24-1.62c1.29-1,2.12-2.56,2.12-4.32c0-3.03-2.47-5.5-5.5-5.5s-5.5,2.47-5.5,5.5c0,2.13,1.22,3.98,3,4.89 v3.26c-2.15-0.46-2.02-0.44-2.26-0.44c-0.53,0-1.03,0.21-1.41,0.59L4,16.22l5.09,5.09C9.52,21.75,10.12,22,10.74,22h6.3 c0.98,0,1.81-0.7,1.97-1.67l0.8-4.71C20.03,14.32,19.38,13.04,18.19,12.44z M17.84,15.29L17.04,20h-6.3 c-0.09,0-0.17-0.04-0.24-0.1l-3.68-3.68l4.25,0.89V6.5c0-0.28,0.22-0.5,0.5-0.5c0.28,0,0.5,0.22,0.5,0.5v6h1.76l3.46,1.73 C17.69,14.43,17.91,14.86,17.84,15.29z M8.07,6.5c0-1.93,1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5c0,0.95-0.38,1.81-1,2.44V6.5 c0-1.38-1.12-2.5-2.5-2.5c-1.38,0-2.5,1.12-2.5,2.5v2.44C8.45,8.31,8.07,7.45,8.07,6.5z"/></g></g></svg>
+								</div>
+								{filter.showInputs && <div className="filter-inputs">
+									<div className="filter-inputs-operator">
+										<input
+											type="text"
+											value={filter.inputs.operator.label}
+											onkeyup={(e) => {fireEvent('FILTER_KEYDOWN', {event: e, value: e.target.value, operator: true, index: index})}}
+											onfocus={(e) => {fireEvent('FILTER_FOCUS', {value: e.target.value, operator: true, index: index})}}
+											className="filter-input operator"
+										/>
+										{filter.showResults.operator && filter.results.operator.length > 0 && <ul className="filter-results operator">
+											{filter.results.operator.map((result, i) => <li
+												id={`filter-result-${i}`}
+												className={`filter-result operator`}
+												role="option"
+												onclick={() => {setFilterOperator(index, result)}}
+											>{result.label}</li>)}
+										</ul>}
+									</div>
+
+									<div className="filter-inputs-value">
+										<input
+											type="text"
+											value={filter.inputs.value.label}
+											onkeyup={(e) => {fireEvent('FILTER_KEYDOWN', {event: e, value: e.target.value, operator: false, index: index})}}
+											onfocus={(e) => {fireEvent('FILTER_FOCUS', {value: e.target.value, operator: false, index: index})}}
+											onblur={(e) => {setFilterValue(index, {label: e.target.value, value: e.target.value})}}
+											className="filter-input"
+										/>
+										{filter.showResults.value && filter.results.value.length > 0 && <ul className="filter-results">
+											{filter.results.value.map((result, i) => <li
+												id={`filter-result-${i}`}
+												className={`filter-result`}
+												role="option"
+												onclick={() => {setFilterValue(index, result)}}
+											>{result.label}</li>)}
+										</ul>}
+									</div>
+								</div>}
+								<svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>
+							</div>
+						)}
 					</div>
 					<div className="action-bar">
 						<ul>
@@ -1221,9 +1327,12 @@ createCustomElement('snc-alert-email-message-list', {
 		},
 		listRefresh: {
 			default: false
-		}
+		},
+		paramQuickSearchValue: {
+			default: ''
+		},
 	},
-	setInitialState() {
+	setInitialState({properties}) {
 		return {
 			draggingColumnIndex: 0,
 			showingNumber: "0",
@@ -1284,7 +1393,8 @@ createCustomElement('snc-alert-email-message-list', {
 			alertActions: [],
 			currentList: {condition: '', columns: '', table: ''},
 			showPrettyLogList: [],
-			showLifecycle: false
+			showLifecycle: false,
+			quickSearchValue: properties.paramQuickSearchValue
 		}
 	},
 	transformState(state) {
@@ -1540,6 +1650,11 @@ createCustomElement('snc-alert-email-message-list', {
 				}
 				encodedSysparm += state.currentList.condition;
 
+				if (state.quickSearchValue != "") {
+					encodedSysparm += `^descriptionLIKE${state.quickSearchValue}^ORu_itom_tagsLIKE${state.quickSearchValue}`
+				}
+				dispatch("UPDATE_PAGE#PARAMETER", {params: {quickSearch: state.quickSearchValue}});
+
 				console.log("main query sysparam: ", encodedSysparm);
 				dispatch('FETCH_MAIN_TABLE', {
 					table: state.currentList.table,
@@ -1579,6 +1694,16 @@ createCustomElement('snc-alert-email-message-list', {
 					resultRow.selected = true;
 				} else {
 					resultRow.selected = false;
+				}
+
+				if (resultRow.description) {
+					if (resultRow.description.value.length < 350) {
+						resultRow.description.short_length = true;
+					} else {
+						resultRow.description.short_length = false;
+						resultRow.description.display_value = resultRow.description.value.substring(0, 349) + '...';
+					}
+					resultRow.description.unfold = false;
 				}
 
 				if (resultRow.u_itom_tags) {
@@ -1683,7 +1808,7 @@ createCustomElement('snc-alert-email-message-list', {
 			console.log("START_FETCH_TBAC_TAGS_USED");
 			let reasoning_names = [];
 			state.tableData.forEach((td) => {
-				if (td.u_tbac_reasoning.value != "" && !reasoning_names.includes(td.u_tbac_reasoning.value)) {
+				if (td.u_tbac_reasoning && td.u_tbac_reasoning.value != "" && !reasoning_names.includes(td.u_tbac_reasoning.value)) {
 					reasoning_names.push(td.u_tbac_reasoning.value);
 				}
 			});
@@ -1866,6 +1991,7 @@ createCustomElement('snc-alert-email-message-list', {
 		}),
 		'FETCH_APP_SERVICE_IMPACT_SUCCESS': (coeffects) => {
 			const { action, state, updateState, dispatch } = coeffects;
+			console.log("FETCH_APP_SERVICE_IMPACT_SUCCESS payload: ", action.payload);
 			let updatedTableData = state.tableData;
 			updatedTableData.forEach((tableRow, i) => {
 				tableRow.application_service.forEach((app_service, j) => {
@@ -1874,7 +2000,19 @@ createCustomElement('snc-alert-email-message-list', {
 							updatedTableData[i].application_service[j].impact = result.severity;
 						}
 					});
-				})
+				});
+				tableRow.application_service.sort((a, b) => parseInt(a.impact) - parseInt(b.impact));
+				if (tableRow.application_service.length >= 5) {
+					let num_hidden = tableRow.application_service.length - 5;
+					tableRow.application_service = tableRow.application_service.slice(0, 5);
+					tableRow.application_service.push({
+						display_value: `${num_hidden} more hidden`,
+						impact: "5",
+						link: "",
+						value: ""
+					});
+				}
+				console.log("tableRow.application_service: ", tableRow.application_service);
 			});
 			updateState({tableData: updatedTableData});
 			dispatch('START_FETCH_SECONDARY_ALERTS');
@@ -2508,6 +2646,23 @@ createCustomElement('snc-alert-email-message-list', {
 				updatedShowPrettyLogList.push(action.payload.sys_id);
 			}
 			updateState({showPrettyLogList: updatedShowPrettyLogList, dummyStateChange: !state.dummyStateChange});
+		},
+		'SET_DESCRIPTION_UNFOLD': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			let updatedTableData = state.tableData;
+			updatedTableData[action.payload.index].description.unfold = action.payload.value;
+			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
+		},
+		'UPDATE_QUICK_SEARCH': (coeffects) => {
+			const {action, state, updateState, dispatch} = coeffects;
+			console.log("UPDATE_QUICK_SEARCH value: ", action.payload.value);
+			updateState({quickSearchValue: action.payload.value, dummyStateChange: !state.dummyStateChange});
+		},
+		'QUICK_SEARCH_KEYUP': (coeffects) => {
+			const {action, dispatch} = coeffects;
+			if (action.payload.e.key === 'Enter' || e.keyCode === 13) {
+				dispatch("REFRESH_MAIN_QUERY", {force: true});
+			}
 		},
 	},
 	eventHandlers: [

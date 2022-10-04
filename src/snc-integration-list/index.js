@@ -44,7 +44,19 @@ import catchpointSVG from '../images/catchpoint_new.svg';
 import honeycombSVG from '../images/honeycomb.svg';
 import kafkaSVG from '../images/kafka.svg';
 import scoutSVG from '../images/scout_apm.svg';
+import aristaSVG from '../images/arista.svg';
+import panoramaSVG from '../images/panorama.svg';
+import office365SVG from '../images/office_365.svg';
+import foglightSVG from '../images/foglight.svg';
+import citrixSVG from '../images/citrix.svg';
+import silverpeakSVG from '../images/silverpeak.svg';
 export const INTEGRATION_ICONS = [
+	{key: 'arista', value: aristaSVG},
+	{key: 'panorama', value: panoramaSVG},
+	{key: 'office 365', value: office365SVG},
+	{key: 'foglight', value: foglightSVG},
+	{key: 'citrix', value: citrixSVG},
+	{key: 'silver peak', value: silverpeakSVG},
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
 	{key: 'azure', value: azureSVG},

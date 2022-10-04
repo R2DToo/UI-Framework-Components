@@ -1,7 +1,7 @@
 import {createCustomElement, actionTypes} from '@servicenow/ui-core';
 const {COMPONENT_PROPERTY_CHANGED,COMPONENT_ERROR_THROWN,COMPONENT_BOOTSTRAPPED} = actionTypes;
 import {createHttpEffect} from '@servicenow/ui-effect-http';
-import snabbdom, {dangerouslyCreateElementFromString} from '@servicenow/ui-renderer-snabbdom';
+import {dangerouslyCreateElementFromString, snabbdom, Fragment} from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
 import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
@@ -38,7 +38,7 @@ import sapSVG from '../images/sap-icon.svg';
 import sentrySVG from "../images/sentry_logo.svg";
 import splunkSVG from '../images/splunk_v6.svg';
 import microsoftSVG from '../images/microsoft-icon.svg';
-import snmptrapSVG from "../images/snmp6.svg";
+import snmptrapSVG from "../images/snmp_traps_v7.svg";
 import solarwindsSVG from '../images/solarwinds-icon.svg';
 import sumologicSVG from '../images/sumo-logic-icon.svg';
 import zabbixSVG from '../images/zabbix-icon.svg';
@@ -49,7 +49,19 @@ import servicenowSVG from '../images/servicenow_new.svg';
 import honeycombSVG from '../images/honeycomb.svg';
 import kafkaSVG from '../images/kafka.svg';
 import scoutSVG from '../images/scout_apm.svg';
+import aristaSVG from '../images/arista.svg';
+import panoramaSVG from '../images/panorama.svg';
+import office365SVG from '../images/office_365.svg';
+import foglightSVG from '../images/foglight.svg';
+import citrixSVG from '../images/citrix.svg';
+import silverpeakSVG from '../images/silverpeak.svg';
 export const INTEGRATION_ICONS = [
+	{key: 'arista', value: aristaSVG},
+	{key: 'panorama', value: panoramaSVG},
+	{key: 'office 365', value: office365SVG},
+	{key: 'foglight', value: foglightSVG},
+	{key: 'citrix', value: citrixSVG},
+	{key: 'silver peak', value: silverpeakSVG},
 	{key: 'aws', value: amazonSVG},
 	{key: 'appdynamics', value: appDynamicsSVG},
 	{key: 'azure', value: azureSVG},
@@ -306,7 +318,16 @@ const view = (state, {updateState, dispatch}) => {
 						<div className="right"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M11,8.75v3.68c0,0.35,0.19,0.68,0.49,0.86l3.12,1.85c0.36,0.21,0.82,0.09,1.03-0.26c0.21-0.36,0.1-0.82-0.26-1.03 l-2.87-1.71v-3.4C12.5,8.34,12.16,8,11.75,8S11,8.34,11,8.75z M21,9.5V4.21c0-0.45-0.54-0.67-0.85-0.35l-1.78,1.78 c-1.81-1.81-4.39-2.85-7.21-2.6c-4.19,0.38-7.64,3.75-8.1,7.94C2.46,16.4,6.69,21,12,21c4.59,0,8.38-3.44,8.93-7.88 c0.07-0.6-0.4-1.12-1-1.12c-0.5,0-0.92,0.37-0.98,0.86c-0.43,3.49-3.44,6.19-7.05,6.14c-3.71-0.05-6.84-3.18-6.9-6.9 C4.94,8.2,8.11,5,12,5c1.93,0,3.68,0.79,4.95,2.05l-2.09,2.09C14.54,9.46,14.76,10,15.21,10h5.29C20.78,10,21,9.78,21,9.5z"/></g></g></svg>'/> {makeRelativeTime(record.sys_updated_on.display_value)}</div>
 					</div>
 					<div className="card-body">
-						<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+						<p className="description">
+							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+								{record.description.short_length == false && <Fragment>
+									{record.description.unfold ?
+										<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: 0, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+										<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: 0, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+									}
+								</Fragment>}
+							<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+						</p>
 						<p className="prc-key-value">
 							<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="24" attr-width="24"/></g><g><path attr-d="M14.5,2.5c0,1.5-1.5,6-1.5,6h-2c0,0-1.5-4.5-1.5-6C9.5,1.12,10.62,0,12,0S14.5,1.12,14.5,2.5z M12,10c-1.1,0-2,0.9-2,2 s0.9,2,2,2s2-0.9,2-2S13.1,10,12,10z M16.08,5.11c0.18-0.75,0.33-1.47,0.39-2.06C19.75,4.69,22,8.08,22,12c0,5.52-4.48,10-10,10 S2,17.52,2,12c0-3.92,2.25-7.31,5.53-8.95C7.6,3.64,7.74,4.37,7.92,5.11C5.58,6.51,4,9.07,4,12c0,4.42,3.58,8,8,8s8-3.58,8-8 C20,9.07,18.42,6.51,16.08,5.11z M18,12c0,3.31-2.69,6-6,6s-6-2.69-6-6c0-2,0.98-3.77,2.48-4.86c0.23,0.81,0.65,2.07,0.65,2.07 C8.43,9.93,8,10.92,8,12c0,2.21,1.79,4,4,4s4-1.79,4-4c0-1.08-0.43-2.07-1.13-2.79c0,0,0.41-1.22,0.65-2.07C17.02,8.23,18,10,18,12 z"/></g></svg>
 							<span className="key">&nbsp;Score:&nbsp;&nbsp;</span>{prc.score && <span className="circle-tag">{prc.score.display_value}</span>}
@@ -334,7 +355,7 @@ const view = (state, {updateState, dispatch}) => {
 	}
 
 	const imageZoomMouseOver = (index, isParent) => {
-		console.log('imageZoomMouseOver');
+		//console.log('imageZoomMouseOver');
 		if (isParent) {
 			let updatedParentRecord = state.parentRecord;
 			updatedParentRecord[index].snapshotImage.scale = ZOOM_LEVEL;
@@ -347,7 +368,7 @@ const view = (state, {updateState, dispatch}) => {
 	};
 
 	const imageZoomMouseOut = (index, isParent) => {
-		console.log('imageZoomMouseOut');
+		//console.log('imageZoomMouseOut');
 		if (isParent) {
 			let updatedParentRecord = state.parentRecord;
 			updatedParentRecord[index].snapshotImage.scale = 1;
@@ -360,9 +381,14 @@ const view = (state, {updateState, dispatch}) => {
 	};
 
 	const imageZoomMouseMove = (event, index, isParent) => {
-		console.log('imageZoomMouseMove event: ', event);
+		//console.log('imageZoomMouseMove event: ', event);
 		//let imageElement = event.path[0];
-		let imageWrapperElement = event.path[1];
+		let path = event.path;
+		if (!path) {
+			path = event.composedPath();
+		}
+		let imageWrapperElement = path[1];
+
 		let rect = imageWrapperElement.getBoundingClientRect();
 		if (isParent) {
 			let updatedParentRecord = state.parentRecord;
@@ -556,14 +582,14 @@ const view = (state, {updateState, dispatch}) => {
 			</div> */}
 			<div id="info-header">
 				<div>
-					<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon primary-color", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
+					<h1><svg onclick={() => {dispatch("CLOSE_INFO_BUTTON#CLICKED")}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><title>Close Preview</title><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg> 360&#176; View</h1>
 					<div className="inline-header">Secondary Alerts <div className="circle-tag big">{state.secondaryRecords.length}</div></div>
-					{state.parentRecord[0] && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
+					{state.parentRecord[0] && state.parentRecord[0].u_tbac_reasoning && <div className="inline-header-2">{state.parentRecord[0].u_tbac_reasoning.display_value}</div>}
 					{state.parentRecord[0] && state.parentRecord[0].tbac_cluster_tags ?
 						(<div className="correlated_tags">{state.parentRecord[0].tbac_cluster_tags.map((tbac_cluster_tag) =>
 							<div className="broker-tag green"><span className="tag-key">{tbac_cluster_tag.key}:</span> {tbac_cluster_tag.value}</div>
 						)}</div>) :
-						(<div className="inline-header-2">{state.parentRecord[0].group_source.display_value}</div>)
+						(<div className="inline-header-2">{state.parentRecord[0] && state.parentRecord[0].group_source ? state.parentRecord[0].group_source.display_value : ''}</div>)
 					}
 				</div>
 				<div id="right-side">
@@ -581,7 +607,7 @@ const view = (state, {updateState, dispatch}) => {
 							<div className="dial-description">IR</div>
 						</div>
 					</div>
-					<now-rich-text title="Open Timeline" className="g-icon primary-color" onclick={() => {fireEvent("OPEN_TIMELINE_BUTTON#CLICKED", {parentRecord: state.parentRecord, secondaryRecords: state.secondaryRecords})}} html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px"><g><rect fill="none" height="24" width="24"/></g><g><g><rect height="2" width="6" x="6" y="15"/><rect height="2" width="6" x="12" y="7"/><rect height="2" width="6" x="9" y="11"/><path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M19,19H5V5h14V19z"/></g></g></svg>'/>
+					<now-rich-text title="Open Timeline" className="g-icon clickable" onclick={() => {fireEvent("OPEN_TIMELINE_BUTTON#CLICKED", {parentRecord: state.parentRecord, secondaryRecords: state.secondaryRecords})}} html='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px"><g><rect fill="none" height="24" width="24"/></g><g><g><rect height="2" width="6" x="6" y="15"/><rect height="2" width="6" x="12" y="7"/><rect height="2" width="6" x="9" y="11"/><path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M19,19H5V5h14V19z"/></g></g></svg>'/>
 				</div>
 			</div>
 			<div id="cards-header">
@@ -640,7 +666,16 @@ const view = (state, {updateState, dispatch}) => {
 								</div> */}
 								{state.activeTabIndex == 0 && (
 									<div className="card-body alerts">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										<div className="card-row">
 											<div className="card-column">
 												<p className="align-items-center">
@@ -649,26 +684,26 @@ const view = (state, {updateState, dispatch}) => {
 													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
 												</p>
 												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
-												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
+												<p className="elipse-value"><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
 												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
-												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
 												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
-												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+												<p className="elipse-value"><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
 												{/* <p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p> */}
 												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
 											</div>
 											<div className="card-column">
-												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
-												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
+												<p className="elipse-value"><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+												<p className="elipse-value"><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
 												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
-												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
-												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
-												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
-												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
+												<p className="elipse-value"><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
+												{record.u_repeated_alerts && <p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>}
 												{/* <p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p> */}
-												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
 										<div className="card-center">
@@ -686,13 +721,31 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 1 && (
 									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										{workNoteComponent(record.work_notes || [], true, index)}
 									</div>
 								)}
 								{state.activeTabIndex == 2 && (
 									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										<div className="tags-title">
 											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
 											&nbsp;&nbsp;Alert Tags (normalized):
@@ -719,7 +772,16 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 3 && (
 									<div className="card-body overflow">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										{record.additional_info.display_value != '' && (
 											<div>
 												<p><span className="key">Additional Info:</span></p>
@@ -730,7 +792,16 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 5 && (
 									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										<div className="card-row">
 											<div className="card-column">
 												<p className="align-items-center">
@@ -821,7 +892,16 @@ const view = (state, {updateState, dispatch}) => {
 								</div> */}
 								{state.activeTabIndex == 0 && (
 									<div className="card-body alerts">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: false})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: false})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										<div className="card-row">
 											<div className="card-column">
 												<p className="align-items-center">
@@ -830,25 +910,25 @@ const view = (state, {updateState, dispatch}) => {
 													{record.source.display_value == "Log Analytics" && <svg onclick={() => {dispatch("OPEN_CONTEXTUAL#LOG_VIEWER", {sysparm: `host=${record.node.display_value}^${getLogTimeSysparm(record.initial_event_time.display_value)}`})}} attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M2.25 5.75V1.25H6.75V2.75H3.75V5.75ZM20.25 5.75V2.75H17.25V1.25H21.75V5.75ZM2.25 22.75V18.25H3.75V21.25H6.75V22.75ZM17.25 22.75V21.25H20.25V18.25H21.75V22.75ZM6.75 17.95Q6.75 18.05 6.85 18.15Q6.95 18.25 7.05 18.25H16.95Q17.05 18.25 17.15 18.15Q17.25 18.05 17.25 17.95V6.05Q17.25 5.95 17.15 5.85Q17.05 5.75 16.95 5.75H7.05Q6.95 5.75 6.85 5.85Q6.75 5.95 6.75 6.05ZM7.05 19.75Q6.3 19.75 5.775 19.225Q5.25 18.7 5.25 17.95V6.05Q5.25 5.3 5.775 4.775Q6.3 4.25 7.05 4.25H16.95Q17.7 4.25 18.225 4.775Q18.75 5.3 18.75 6.05V17.95Q18.75 18.7 18.225 19.225Q17.7 19.75 16.95 19.75ZM9.25 9.75H14.75V8.25H9.25ZM9.25 12.75H14.75V11.25H9.25ZM9.25 15.75H14.75V14.25H9.25ZM6.75 17.95V6.05Q6.75 5.95 6.75 5.85Q6.75 5.75 6.75 5.75Q6.75 5.75 6.75 5.85Q6.75 5.95 6.75 6.05V17.95Q6.75 18.05 6.75 18.15Q6.75 18.25 6.75 18.25Q6.75 18.25 6.75 18.15Q6.75 18.05 6.75 17.95Z"/></svg>}
 												</p>
 												<p className="elipse-value"><span className="key">CI:</span> <span className="underline-record-link" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: `/now/sow/record/${record['cmdb_ci.sys_class_name'].value}/${record.cmdb_ci.value}`})}}>{record.cmdb_ci.display_value}</span></p>
-												<p><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
+												<p className="elipse-value"><span className="key">Group:</span> <span className="">{record.group_source.display_value}</span> {record.group_source.value == "5" && <span className="record-link green" title="Open Record" onclick={() => {dispatch("RECORD_LINK#CLICKED", {table: 'em_alert', sys_id: record.parent.value})}}>{record.parent.display_value}</span>}</p>
 												<p className="elipse-value"><span className="key">Type:</span> <span className="">{record.type.display_value}</span></p>
-												<p><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Incident:</span> <span class={{'record-link': record.incident.value != ""}} onclick={() => {dispatch("RECORD_SUB_LINK#CLICKED", {table: 'em_alert', sys_id: record.sys_id.value, subrecord_table: 'task', subrecord_sys_id: record.incident.value})}}>{record.incident.display_value}</span></p>
 												<p className="elipse-value"><span className="key">Node:</span> <span className="">{record.node.display_value}</span></p>
-												<p><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
-												<p><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
+												<p className="elipse-value"><span className="key">Created:</span> <span className="">{record.sys_created_on.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Event Count:</span> <div className="circle-tag">{record.event_count.display_value}</div></p>
 												<p className="elipse-value"><span className="key">Message Key:</span> <span className="">{record.message_key.display_value}</span></p>
 											</div>
 											<div className="card-column">
-												<p><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
-												<p><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
-												<p><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Updated:</span> <span className="">{makeRelativeTime(record.sys_updated_on.display_value)}</span></p>
+												<p className="elipse-value"><span className="key">CI Class:</span> <span className="">{record['cmdb_ci.sys_class_name'].display_value}</span></p>
+												<p className="elipse-value"><span className="key">State:</span> <span class={{'green-text': record.state.display_value == "Open"}}>{record.state.display_value}</span></p>
 												<p className="elipse-value"><span className="key">Metric:</span> <span className="">{record.metric_name.display_value}</span></p>
-												<p><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
-												<p><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
-												<p><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Task AG:</span> <span className="">{record['incident.assignment_group'].display_value}</span></p>
+												<p className="elipse-value"><span className="key">Assigned To:</span> <span className="">{record.assigned_to.display_value}</span></p>
+												<p className="elipse-value"><span className="key">Updated:</span> <span className="">{record.sys_updated_on.display_value}</span></p>
 												{/* onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} */}
-												<p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>
-												<p><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
+												{record.u_repeated_alerts && <p className="align-items-center"><span className="key">Repeated Alerts:</span> <div className="circle-tag secondary" onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}}>{record.u_repeated_alerts ? shortNumFormat(record.u_repeated_alerts.value) : '0'}</div> <svg onclick={() => {dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: record.u_repeated_alerts.url})}} attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M20.5 12.375V18.7Q20.5 19.45 19.975 19.975Q19.45 20.5 18.7 20.5H5.3Q4.55 20.5 4.025 19.975Q3.5 19.45 3.5 18.7V5.3Q3.5 4.55 4.025 4.025Q4.55 3.5 5.3 3.5H11.625V5H5.3Q5.2 5 5.1 5.1Q5 5.2 5 5.3V18.7Q5 18.8 5.1 18.9Q5.2 19 5.3 19H18.7Q18.8 19 18.9 18.9Q19 18.8 19 18.7V12.375ZM9.725 15.325 8.675 14.275 17.95 5H14V3.5H20.5V10H19V6.05Z"/></svg> <span className="">{record.temp_uniqueness.display_value}</span></p>}
+												<p className="elipse-value"><span className="key">Acknowledged:</span> <span className="">{record.acknowledged.display_value}</span></p>
 											</div>
 										</div>
 
@@ -867,7 +947,16 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 1 && (
 									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										{workNoteComponent(record.work_notes || [], false, index)}
 										{/* {record.work_notes && record.work_notes.map((note) =>
 											<p>
@@ -880,7 +969,16 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 2 && (
 									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										<div className="tags-title">
 											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/><circle attr-cx="6.5" attr-cy="6.5" attr-r="1.5"/></svg>
 											&nbsp;&nbsp;Alert Tags (normalized):
@@ -907,7 +1005,16 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 3 && (
 									<div className="card-body overflow">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										{record.additional_info.display_value != '' && (
 											<div>
 												<p><span className="key">Additional Info:</span></p>
@@ -918,7 +1025,16 @@ const view = (state, {updateState, dispatch}) => {
 								)}
 								{state.activeTabIndex == 5 && (
 									<div className="card-body">
-										<p className="description"><now-rich-text className="g-icon" html='<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 17H5c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1zm6-8H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1zM4 6c0 .55.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1z"/></svg>' /> <span className="">{record.description.display_value}</span></p>
+										<p className="description">
+											<svg attrs={{class: "g-icon", xmlns: "http://www.w3.org/2000/svg", height: "24", width: "24"}}><path attr-d="M4.25 18.75v-1.5h9.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Zm0-4v-1.5h15.5v1.5Z"/></svg>
+												{record.description.short_length == false && <Fragment>
+													{record.description.unfold ?
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: false, index: index, isParent: true})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+														<svg attrs={{class: "g-icon clickable", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_DESCRIPTION_UNFOLD", {value: true, index: index, isParent: true})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+													}
+												</Fragment>}
+											<span className="">{record.description.unfold ? record.description.value : record.description.display_value}</span>
+										</p>
 										<div className="card-row">
 											<div className="card-column">
 												<p className="align-items-center">
@@ -1102,6 +1218,15 @@ createCustomElement('snc-alert-email-preview', {
 			console.log('%cFETCH_PARENT_RECORD_SUCCESS', 'color:green');
 			console.log("%cpayload: %o", 'color:green', action.payload);
 			let newParentRecord = action.payload.result;
+			if (newParentRecord[0] && newParentRecord[0].description) {
+				if (newParentRecord[0].description.value.length < 350) {
+					newParentRecord[0].description.short_length = true;
+				} else {
+					newParentRecord[0].description.short_length = false;
+					newParentRecord[0].description.display_value = newParentRecord[0].description.value.substring(0, 349) + '...';
+				}
+				newParentRecord[0].description.unfold = false;
+			}
 			if (newParentRecord[0] && newParentRecord[0].u_itom_tags && newParentRecord[0].u_itom_tags.value) {
 				try {
 					newParentRecord[0].tags = [];
@@ -1155,6 +1280,16 @@ createCustomElement('snc-alert-email-preview', {
 			if (action.payload && action.payload.result) {
 				newSecondaryRecords = action.payload.result;
 				newSecondaryRecords.map((secondaryRecord) => {
+					if (secondaryRecord.description) {
+						if (secondaryRecord.description.value.length < 350) {
+							secondaryRecord.description.short_length = true;
+						} else {
+							secondaryRecord.description.short_length = false;
+							secondaryRecord.description.display_value = secondaryRecord.description.value.substring(0, 349) + '...';
+						}
+						secondaryRecord.description.unfold = false;
+					}
+
 					if (secondaryRecord.u_itom_tags && secondaryRecord.u_itom_tags.value) {
 						try {
 							secondaryRecord.tags = [];
@@ -1282,7 +1417,7 @@ createCustomElement('snc-alert-email-preview', {
 						alertId: record.sys_id.value
 					});
 				}
-				if (record.u_tbac_reasoning.value != "") {
+				if (record.u_tbac_reasoning && record.u_tbac_reasoning.value != "") {
 					dispatch('FETCH_TBAC_TAGS_USED', {
 						table: 'sn_em_tbac_alert_clustering_definitions',
 						sysparm_query: "name=" + record.u_tbac_reasoning.value,
@@ -1837,6 +1972,16 @@ createCustomElement('snc-alert-email-preview', {
 			const { action, dispatch } = coeffects;
 			console.log("POST_WORK_NOTE_SUCCESS payload: ", action.payload);
 			dispatch("REFRESH_MAIN_QUERY");
+		},
+		'SET_DESCRIPTION_UNFOLD': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			let records = action.payload.isParent ? state.parentRecord : state.secondaryRecords;
+			records[action.payload.index].description.unfold = action.payload.value;
+			if (action.payload.isParent) {
+				updateState({parentRecord: records, dummyStateChange: !state.dummyStateChange});
+			} else {
+				updateState({secondaryRecords: records, dummyStateChange: !state.dummyStateChange});
+			}
 		},
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
 			console.log("%cERROR_THROWN: %o", "color:red", coeffects.action.payload);

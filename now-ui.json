@@ -74,6 +74,14 @@
 					"description": "Should be set to equal the optional sysparm parameter using dynamic data binding"
 				},
 				{
+					"name": "paramQuickSearchValue",
+					"label": "Quick Search Parameter Value",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "",
+					"description": "Should be set to equal the optional quick search parameter using dynamic data binding"
+				},
+				{
 					"name": "tableLimit",
 					"label": "Number of records per page",
 					"readOnly": false,

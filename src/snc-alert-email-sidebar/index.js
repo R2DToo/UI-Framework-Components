@@ -60,9 +60,6 @@ const view = (state, {updateState, dispatch}) => {
 						presence={state.properties.currentUser.presence}
 					/>
 				</div>
-				<div className="name-job">
-					<div className="profile_name"></div>
-				</div>
 			</div>
 			<ul className="nav-links">
 				{renderOptions()}

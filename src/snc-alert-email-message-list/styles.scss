@@ -70,7 +70,7 @@ ul {
   align-items: center;
 	gap: 10px;
 	width: 100%;
-	padding: 0 6px;
+	padding: 5px 6px;
 	.table-title {
 		flex-basis: auto;
 		h1 {
@@ -184,7 +184,7 @@ ul {
 
 .table-wrapper {
 	overflow: auto;
-	height: 80vh;
+	height: 79vh;
 	width: 100%;
 
 	&::-webkit-scrollbar {
@@ -219,7 +219,7 @@ ul {
 	transition-property: background-color;
 }
 .table-inbox tr th {
-  padding: 8px !important;
+  padding: 2px !important;
   background-color: RGB($now-color_background--secondary);
   position: sticky;
   top: 0;
@@ -376,6 +376,12 @@ ul {
 	&:hover {
 		fill: rgba($now-color_text--primary, 0.5);
 	}
+	&.purple {
+		fill: RGB($now-color--primary-1);
+		&:hover {
+			fill: rgba($now-color--primary-1, 0.5);
+		}
+	}
 }
 
 .primary-color {
@@ -509,31 +515,137 @@ ul {
 	color: rgba(119, 178, 123, 1);
 }
 
-// .context-menu {
-// 	display: none;
-// 	z-index: 100;
-// 	color: RGB($now-color_text--primary);
-// 	font-size: 1em;
-// 	border-radius: 8px;
-// 	width: 150px;
-// 	position: absolute;
-// 	background-color: RGB($now-color_background--tertiary);
-// 	border: 1px solid RGB($now-color_border--primary);
-// 	&.visible {
-// 		display: block;
-// 	}
+.search-bar, .search-bar * {
+	border: 0;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+.search-bar, input {
+	color: RGB($now-color_text--primary);
+}
+.search-bar {
+	display: flex;
+}
+.search-bar input,
+.search-btn,
+.search-btn:before,
+.search-btn:after {
+	transition: all 0.25s ease-out;
+}
+.search-btn {
+	width: 2.5em;
+	height: 2.5em;
+}
+.search-bar input:invalid:not(:focus),
+.search-btn {
+	cursor: pointer;
+}
+.search-bar input:focus,
+.search-bar input:not(:focus) + .search-btn:focus {
+	outline: transparent;
+}
+.search-bar {
+	//margin: auto;
+	padding-bottom: 0.5em;
+	justify-content: center;
+	max-width: 30em;
+}
+.search-bar input {
+	background: RGB($now-color_background--secondary);
+	border-radius: 1.5em;
+	box-shadow: 0 0 0 0.4em #171717 inset;
+	padding: 0.5em;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 300px;
+	font-size: 1em;
+}
+.search-bar input::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+.search-bar input:focus,
+.search-bar input:valid {
+	background: RGB($now-color_background--secondary);
+	border-radius: 0.375em 0 0 0.375em;
+	box-shadow: 0 0 0 0.1em RGB($now-color_border--primary) inset;
+}
+.search-btn {
+	background: #171717;
+	border-radius: 0 0.5em 0.5em 0 / 0 1.5em 1.5em 0;
+	padding: 0.5em;
+	position: relative;
+	transform: translate(0.25em,0.25em) rotate(45deg) scale(0.25,0.125);
+	transform-origin: 0 50%;
+}
+.search-btn:before,
+.search-btn:after {
+	content: "";
+	display: block;
+	opacity: 0;
+	position: absolute;
+}
+.search-btn:before {
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.2em #f1f1f1 inset;
+	top: 0.5em;
+	left: 0.5em;
+	width: 1.2em;
+	height: 1.2em;
+}
+.search-btn:after {
+	background: #f1f1f1;
+	border-radius: 0 0.25em 0.25em 0;
+	top: 51%;
+	left: 51%;
+	width: 0.75em;
+	height: 0.25em;
+	transform: translate(0.2em,0) rotate(45deg);
+	transform-origin: 0 50%;
+}
+.search-btn span {
+	display: inline-block;
+	overflow: hidden;
+	width: 1px;
+	height: 1px;
+}
 
-// 	.context-option {
-// 		padding: 6px;
-// 		border-radius: 8px;
-// 		cursor: pointer;
-// 		&:hover {
-// 			background-color: RGB($now-color--primary-1);
-// 		}
-// 	}
-// 	hr {
-// 		border: 1px solid RGB($now-color--primary-1);
-// 		margin-block-start: 0.2em;
-// 		margin-block-end: 0.2em;
-// 	}
-// }
+/* Active state */
+.search-bar input:focus + .search-btn,
+.search-bar input:valid + .search-btn {
+	background: RGB($now-color--primary-1);
+	border-radius: 0 0.375em 0.375em 0;
+	transform: scale(1);
+}
+.search-bar input:focus + .search-btn:before,
+.search-bar input:focus + .search-btn:after,
+.search-bar input:valid + .search-btn:before,
+.search-bar input:valid + .search-btn:after {
+	opacity: 1;
+}
+.search-bar input:focus + .search-btn:hover,
+.search-bar input:valid + .search-btn:hover,
+.search-bar input:valid:not(:focus) + .search-btn:focus {
+	background: rgba($now-color--primary-1, 0.5);
+}
+.search-bar input:focus + .search-btn:active,
+.search-bar input:valid + .search-btn:active {
+	transform: translateY(1px);
+}
+
+
+.search-container {
+	display: flex;
+	border: 1px solid RGB($now-container--border-color);
+	border-radius: 2px;
+	background-color: RGB($now-color_background--secondary);
+	width: 240px;
+	input {
+		border: none;
+		outline: none;
+		background-color: transparent;
+		width: 100%;
+		padding-left: 4px;
+	}
+}

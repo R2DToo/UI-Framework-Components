@@ -28,6 +28,7 @@ const view = (state, {updateState}) => {
 				actionArray={state.properties.actionArray}
 				paramListValue={state.properties.paramListValue}
 				defaultListId={state.properties.defaultListId}
+				paramQuickSearchValue={state.properties.paramQuickSearchValue}
 			/>
 			{state.showInfo && (
 				<snc-alert-email-preview
@@ -86,7 +87,10 @@ createCustomElement('snc-alert-email-view', {
 		},
 		uibRefresh: {
 			default: false
-		}
+		},
+		paramQuickSearchValue: {
+			default: ''
+		},
 	},
 	actionHandlers: {
 		'TABLE_ROW#CLICKED': ({action, dispatch, updateState, state}) => {
