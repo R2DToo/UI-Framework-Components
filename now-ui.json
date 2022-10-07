@@ -348,6 +348,18 @@
 					"description": "Link to external page clicked"
 				}
 			]
+		},
+		"snc-filter": {
+			"innerComponents": [],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Optimiz Filter",
+				"icon": "menu-fill",
+				"description": "A filter component",
+				"category": "primitives"
+			},
+			"properties": [],
+			"actions": []
 		}
 	},
 	"scopeName": "x_snc_optimizui"

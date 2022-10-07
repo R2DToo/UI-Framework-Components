@@ -50,6 +50,7 @@ import office365SVG from '../images/office_365.svg';
 import foglightSVG from '../images/foglight.svg';
 import citrixSVG from '../images/citrix.svg';
 import silverpeakSVG from '../images/silverpeak.svg';
+import spectrumSVG from '../images/spectrum.svg';
 export const INTEGRATION_ICONS = [
 	{key: 'arista', value: aristaSVG},
 	{key: 'panorama', value: panoramaSVG},
@@ -63,6 +64,7 @@ export const INTEGRATION_ICONS = [
 	{key: 'bmc', value: bmcSVG},
 	{key: 'catchpoint', value: catchpointSVG},
 	{key: 'datadog', value: datadogSVG},
+	{key: 'dx', value: spectrumSVG},
 	{key: 'dynatrace', value: dynatraceSVG},
 	{key: 'eif', value: ibmSVG},
 	{key: 'elastic', value: elasticSVG},
@@ -98,6 +100,7 @@ export const INTEGRATION_ICONS = [
 	{key: 'scout', value: scoutSVG},
 	{key: 'sentry', value: sentrySVG},
 	{key: 'solarwinds', value: solarwindsSVG},
+	{key: 'spectrum', value: spectrumSVG},
 	{key: 'splunk', value: splunkSVG},
 	{key: 'sumologic', value: sumologicSVG},
 	{key: 'vcenter', value: vmwareSVG},

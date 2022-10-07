@@ -23,6 +23,7 @@
 		"@servicenow/now-highlighted-value": "^19.8.2-ecd",
 		"@servicenow/now-icon": "^19.8.2-ecd",
 		"@servicenow/now-input": "^19.8.2-ecd",
+		"@servicenow/now-popover": "^19.8.2-ecd",
 		"@servicenow/now-rich-text": "^19.8.2-ecd",
 		"@servicenow/now-template-message": "^19.8.2-ecd",
 		"@servicenow/now-typeahead": "^19.8.2-ecd",

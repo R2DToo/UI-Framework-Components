@@ -60,6 +60,7 @@ import office365SVG from '../images/office_365.svg';
 import foglightSVG from '../images/foglight.svg';
 import citrixSVG from '../images/citrix.svg';
 import silverpeakSVG from '../images/silverpeak.svg';
+import spectrumSVG from '../images/spectrum.svg';
 export const INTEGRATION_ICONS = [
 	{key: 'arista', value: aristaSVG},
 	{key: 'panorama', value: panoramaSVG},
@@ -74,6 +75,7 @@ export const INTEGRATION_ICONS = [
 	{key: 'catchpoint', value: catchpointSVG},
 	{key: 'cisco', value: ciscoSVG},
 	{key: 'datadog', value: datadogSVG},
+	{key: 'dx', value: spectrumSVG},
 	{key: 'dynatrace', value: dynatraceSVG},
 	{key: 'eif', value: ibmSVG},
 	{key: 'elastic', value: elasticSVG},
@@ -113,6 +115,7 @@ export const INTEGRATION_ICONS = [
 	{key: 'self', value: servicenowSVG},
 	{key: 'sentry', value: sentrySVG},
 	{key: 'solarwinds', value: solarwindsSVG},
+	{key: 'spectrum', value: spectrumSVG},
 	{key: 'splunk', value: splunkSVG},
 	{key: 'sumologic', value: sumologicSVG},
 	{key: 'trap', value: snmptrapSVG},
@@ -315,8 +318,6 @@ const view = (state, {updateState, dispatch}) => {
 				switch (key) {
 					case "application_service": label = "Application Service";
 					break;
-					case "itom_tags": label = "ITOM Tags";
-					break;
 					case "tbac_cluster_tags": label = "Correlation Tags";
 					break;
 				}
@@ -422,13 +423,16 @@ const view = (state, {updateState, dispatch}) => {
 								});
 								return <td className={`reasoning-tags-container data-field-${key}`}>{serviceTags}</td>
 							} else if (key == "secondary_alerts") {
-								return <td className={`tags data-field-${key}`}>
+								return <td className={`tags data-field-${key} table-tooltip-container`}>
 									{row[key].display_value != "0" && <div className="circle-tags">
-										<div className={"circle-tag"}>{row[key].display_value}</div>
+										<div className="circle-tag">
+											{row[key].display_value}
+										</div>
 									</div>}
+									{row[key].display_value != "0" && <span className="table-tooltip">{row[key].title}</span>}
 								</td>
 							} else if (key == "cmdb_ci") {
-								let url = state.currentList.table == "sn_agent_ci_extended_info" ? `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}/params/selected-tab-index/2` : `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}`;
+								let url = state.currentList.table == "sn_agent_ci_extended_info" ? `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}/params/selected-tab-index/2` : `/now/sow/record/${row['cmdb_ci.sys_class_name'].value}/${row[key].value}/params/extra-params/subTabIndex%2F1/selected-tab-index/1`;
 								return <td className={`view-message name-message force-center data-field-${key} break-message`}>
 									{row[key].value ?
 										<span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span>
@@ -445,10 +449,26 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "itom_tags") {
 								return <td className={`broker-tags-container data-field-${key}`}>
 									<div className="broker-tags">
-										{row[key].map((tag, index) =>
+										{row[key].short_length == false && <Fragment>
+											{row[key].unfold ?
+												<svg attrs={{class: "g-icon purple", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_ITOM_TAGS_UNFOLD", {value: false, index: index})}}><title>Unfold Less</title><path attr-d="M8.9 19.65 7.85 18.6 12 14.45l4.15 4.15-1.05 1.05-3.1-3.1ZM12 9.55 7.85 5.4 8.9 4.35l3.1 3.1 3.1-3.1 1.05 1.05Z"/></svg> :
+												<svg attrs={{class: "g-icon purple", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}} onclick={(e) => {e.stopPropagation(); dispatch("SET_ITOM_TAGS_UNFOLD", {value: true, index: index})}}><title>Unfold More</title><path attr-d="M12 20.625 7.825 16.45 8.9 15.375l3.1 3.1 3.1-3.1 1.075 1.075ZM8.9 8.675 7.825 7.6 12 3.425 16.175 7.6 15.1 8.675 12 5.6Z"/></svg>
+											}
+										</Fragment>}
+										{row[key].unfold ?
+											row[key].value.map((tag, index) =>
+												<div className="broker-tag" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
+											) :
+											row[key].display_value.map((tag, index) =>
+												<div className="broker-tag" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
+											)
+										}
+									</div>
+									{/* <div className="broker-tags">
+										{row[key].value.map((tag, index) =>
 											<div className="broker-tag" id={`tagindex-${index}`}><span className="tag-key">{tag.key}:</span> {tag.value}</div>
 										)}
-									</div>
+									</div> */}
 								</td>
 							} else if (key == "tbac_cluster_tags") {
 								return <td className={`reasoning-tags-container data-field-${key}`}>
@@ -468,7 +488,12 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "node") {
 								return <td className={`name-message break-message force-center data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "source_icon" || key == "os_icon") {
-								return <td className={`view-message data-field-${key}`}><img className="table-image" src={row[key].value}/></td>
+								return <td className={`view-message data-field-${key}`}>
+									<div className="table-image-container">
+										<img className="table-image" src={row[key].value}/>
+										{row[key].title != "" && <span className="table-image-tooltip">{row[key].title}</span>}
+									</div>
+								</td>
 							// } else if (key == "incident.priority") {
 							// 	return <td className="view-message"><span class={{"text-red": row[key].value == "1"}}>{row[key].display_value}</span></td>
 							} else if (key == "u_tbac_reasoning") {
@@ -476,10 +501,13 @@ const view = (state, {updateState, dispatch}) => {
 							} else if (key == "prc") {
 								return <td className={`name-message force-center data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "u_repeated_alerts") {
-								return <td className={`tags data-field-${key}`}>
+								return <td className={`tags data-field-${key} table-tooltip-container`}>
 									<div className="circle-tags">
-										<div className={"circle-tag secondary"}>{shortNumFormat(row[key].value)}</div>
+										<div className={"circle-tag secondary"}>
+											{shortNumFormat(row[key].value)}
+										</div>
 									</div>
+									<span className="table-tooltip">{row[key].title}</span>
 								</td>
 							} else if (key == "u_normalized_key") {
 								return <td className={`view-message data-field-${key}`}>
@@ -905,6 +933,8 @@ const view = (state, {updateState, dispatch}) => {
 							//csvContent += state.tableData[row][key].display_value.replaceAll('"', '""').replaceAll('#', '/').replaceAll('{', '"{').replaceAll('}', '}"') + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
 						} else if (key == "u_itom_tags") {
 							csvContent += '"' + state.tableData[row][key].display_value.replaceAll('"', '""').replaceAll('#', '/').replaceAll(/\n/g, '').replaceAll(/\t/g, '') + '"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
+						} else if (key == "itom_tags") {
+
 						} else {
 							csvContent += '"' + state.tableData[row][key].display_value.replaceAll('"', '""').replaceAll('#', '/').replaceAll(/\n/g, '').replaceAll(/\t/g, '') + '"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
 						}
@@ -922,7 +952,7 @@ const view = (state, {updateState, dispatch}) => {
 						csvContent += '"[' + array.toString() + ']"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
 					} else if (key == "itom_tags") {
 						let array = [];
-						state.tableData[row][key].forEach(itom_tag => {
+						state.tableData[row][key].value.forEach(itom_tag => {
 							array.push(`${itom_tag.key}: ${itom_tag.value}`);
 						});
 						csvContent += '"[' + array.toString() + ']"' + (keysCounter + 1 < keysAmount ? ',' : '\r\n');
@@ -957,87 +987,8 @@ const view = (state, {updateState, dispatch}) => {
 							Count (<span className="primary-color">{state.totalCount.toLocaleString()}</span>)
 						</h1>
 					</div>
-					{/* <div className="filter-container">
-						<div className="filter">
-							<svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-							{state.showAddFilter && <div className="add-filter">
-								<input
-									type="text"
-									onkeyup={(e) => {fireEvent('ADD_FILTER_KEYDOWN', {event: e, value: e.target.value})}}
-									onfocus={(e) => {fireEvent('ADD_FILTER_FOCUS', e.target.value)}}
-									className="filter-input"
-									placeholder="Enter alert field"
-								/>
-								{state.showAddFilterResults && state.addFilterResults.length > 0 && <ul className="filter-results">
-									{state.addFilterResults.map((result, i) => <li
-										id={`filter-result-${i}`}
-										className={`filter-result`}
-										role="option"
-										onclick={() => {addNewFilter(result)}}
-									>{result.label}</li>)}
-								</ul>}
-							</div>}
-						</div>
 
-						{state.filters.map((filter, index) =>
-							<div className={"filter index-" + index}>
-								{index > 0 && <div className={"and-or-button " + filter.inputs.and_or.label} onclick={() => {updateFilterAnd_Or(index)}}>
-									{filter.inputs.and_or.label}
-								</div>}
-								<div className="filter-icon-container">
-									<span className="filter-icon-label">{filter.inputs.column.label}</span>
-									<svg onclick={() => {fireEvent('TOGGLE_SHOW_FILTER_INPUTS', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><g><path attr-d="M18.19,12.44l-3.24-1.62c1.29-1,2.12-2.56,2.12-4.32c0-3.03-2.47-5.5-5.5-5.5s-5.5,2.47-5.5,5.5c0,2.13,1.22,3.98,3,4.89 v3.26c-2.15-0.46-2.02-0.44-2.26-0.44c-0.53,0-1.03,0.21-1.41,0.59L4,16.22l5.09,5.09C9.52,21.75,10.12,22,10.74,22h6.3 c0.98,0,1.81-0.7,1.97-1.67l0.8-4.71C20.03,14.32,19.38,13.04,18.19,12.44z M17.84,15.29L17.04,20h-6.3 c-0.09,0-0.17-0.04-0.24-0.1l-3.68-3.68l4.25,0.89V6.5c0-0.28,0.22-0.5,0.5-0.5c0.28,0,0.5,0.22,0.5,0.5v6h1.76l3.46,1.73 C17.69,14.43,17.91,14.86,17.84,15.29z M8.07,6.5c0-1.93,1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5c0,0.95-0.38,1.81-1,2.44V6.5 c0-1.38-1.12-2.5-2.5-2.5c-1.38,0-2.5,1.12-2.5,2.5v2.44C8.45,8.31,8.07,7.45,8.07,6.5z"/></g></g></svg>
-								</div>
-								{filter.showInputs && <div className="filter-inputs">
-									<div className="filter-inputs-operator">
-										<input
-											type="text"
-											value={filter.inputs.operator.label}
-											onkeyup={(e) => {fireEvent('FILTER_KEYDOWN', {event: e, value: e.target.value, operator: true, index: index})}}
-											onfocus={(e) => {fireEvent('FILTER_FOCUS', {value: e.target.value, operator: true, index: index})}}
-											className="filter-input operator"
-										/>
-										{filter.showResults.operator && filter.results.operator.length > 0 && <ul className="filter-results operator">
-											{filter.results.operator.map((result, i) => <li
-												id={`filter-result-${i}`}
-												className={`filter-result operator`}
-												role="option"
-												onclick={() => {setFilterOperator(index, result)}}
-											>{result.label}</li>)}
-										</ul>}
-									</div>
-
-									<div className="filter-inputs-value">
-										<input
-											type="text"
-											value={filter.inputs.value.label}
-											onkeyup={(e) => {fireEvent('FILTER_KEYDOWN', {event: e, value: e.target.value, operator: false, index: index})}}
-											onfocus={(e) => {fireEvent('FILTER_FOCUS', {value: e.target.value, operator: false, index: index})}}
-											onblur={(e) => {setFilterValue(index, {label: e.target.value, value: e.target.value})}}
-											className="filter-input"
-										/>
-										{filter.showResults.value && filter.results.value.length > 0 && <ul className="filter-results">
-											{filter.results.value.map((result, i) => <li
-												id={`filter-result-${i}`}
-												className={`filter-result`}
-												role="option"
-												onclick={() => {setFilterValue(index, result)}}
-											>{result.label}</li>)}
-										</ul>}
-									</div>
-								</div>}
-								<svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>
-							</div>
-						)}
-						<svg onclick={() => {dispatch('SAVE_MY_LIST')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><path attr-d="M21,12.4V7l-4-4H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h7.4l2-2H5V5h11.17L19,7.83v6.57L21,12.4z M15,15 c0,1.66-1.34,3-3,3s-3-1.34-3-3s1.34-3,3-3S15,13.34,15,15z M6,6h9v4H6V6z M19.99,16.25l1.77,1.77L16.77,23H15v-1.77L19.99,16.25z M23.25,16.51l-0.85,0.85l-1.77-1.77l0.85-0.85c0.2-0.2,0.51-0.2,0.71,0l1.06,1.06C23.45,16,23.45,16.32,23.25,16.51z"/></g></svg>
-					</div> */}
 					<div className="filter-container">
-						{/* <div className="search-bar">
-							<input type="search" name="search" placeholder="Quick Search" oninput={(e) => {dispatch("UPDATE_QUICK_SEARCH", {value: e.target.value})}}/>
-							<button className="search-btn" type="submit" onclick={() => {dispatch("REFRESH_MAIN_QUERY", {force: true})}}>
-								<span>Search</span>
-							</button>
-						</div> */}
 						<div className="search-container">
 							<input value={state.quickSearchValue} ref={quickSearchRef} type="text" autocomplete="off" placeholder="Quick Search" maxLength="100" oninput={(e) => {dispatch("UPDATE_QUICK_SEARCH", {value: e.target.value})}} onkeyup={(e) => {dispatch("QUICK_SEARCH_KEYUP", {e: e})}}/>
 							{state.quickSearchValue != "" && <now-button icon="circle-close-outline" bare onclick={() => {dispatch("UPDATE_QUICK_SEARCH", {value: ""}); quickSearchRef.current.value = ""; dispatch("REFRESH_MAIN_QUERY", {force: true});}}></now-button>}
@@ -1048,12 +999,12 @@ const view = (state, {updateState, dispatch}) => {
 							<svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", 'enable-background': "new 0 0 24 24", viewBox: "0 0 24 24"}}><g><path attr-d="M0,0h24 M24,24H0" attr-fill="none"/><path attr-d="M7,6h10l-5.01,6.3L7,6z M4.25,5.61C6.27,8.2,10,13,10,13v6c0,0.55,0.45,1,1,1h2c0.55,0,1-0.45,1-1v-6 c0,0,3.72-4.8,5.74-7.39C20.25,4.95,19.78,4,18.95,4H5.04C4.21,4,3.74,4.95,4.25,5.61z"/><path attr-d="M0,0h24v24H0V0z" attr-fill="none"/></g></svg>
 							{/* <svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M11.375 19.5q-.375 0-.625-.25t-.25-.625v-5.8l-5.6-7.1q-.275-.4-.075-.813.2-.412.675-.412h13q.475 0 .675.412.2.413-.075.813l-5.6 7.1v5.8q0 .375-.25.625t-.625.25ZM12 12.3 16.95 6h-9.9Zm0 0Z"/></svg> */}
 							{/* <svg onclick={() => {fireEvent('TOGGLE_ADD_FILTER')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> */}
-							{state.showAddFilter && <div className="add-filter">
+							{state.showAddFilter && <div className="search-container medium add-filter">
 								<input
 									type="text"
 									onkeyup={(e) => {fireEvent('ADD_FILTER_KEYDOWN', {event: e, value: e.target.value})}}
 									onfocus={(e) => {fireEvent('ADD_FILTER_FOCUS', e.target.value)}}
-									className="filter-input"
+									//className="filter-input"
 									placeholder="Enter alert field"
 								/>
 								{state.showAddFilterResults && state.addFilterResults.length > 0 && <ul className="filter-results">
@@ -1077,13 +1028,13 @@ const view = (state, {updateState, dispatch}) => {
 									<svg onclick={() => {fireEvent('TOGGLE_SHOW_FILTER_INPUTS', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><g><path attr-d="M18.19,12.44l-3.24-1.62c1.29-1,2.12-2.56,2.12-4.32c0-3.03-2.47-5.5-5.5-5.5s-5.5,2.47-5.5,5.5c0,2.13,1.22,3.98,3,4.89 v3.26c-2.15-0.46-2.02-0.44-2.26-0.44c-0.53,0-1.03,0.21-1.41,0.59L4,16.22l5.09,5.09C9.52,21.75,10.12,22,10.74,22h6.3 c0.98,0,1.81-0.7,1.97-1.67l0.8-4.71C20.03,14.32,19.38,13.04,18.19,12.44z M17.84,15.29L17.04,20h-6.3 c-0.09,0-0.17-0.04-0.24-0.1l-3.68-3.68l4.25,0.89V6.5c0-0.28,0.22-0.5,0.5-0.5c0.28,0,0.5,0.22,0.5,0.5v6h1.76l3.46,1.73 C17.69,14.43,17.91,14.86,17.84,15.29z M8.07,6.5c0-1.93,1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5c0,0.95-0.38,1.81-1,2.44V6.5 c0-1.38-1.12-2.5-2.5-2.5c-1.38,0-2.5,1.12-2.5,2.5v2.44C8.45,8.31,8.07,7.45,8.07,6.5z"/></g></g></svg>
 								</div>
 								{filter.showInputs && <div className="filter-inputs">
-									<div className="filter-inputs-operator">
+									<div className="search-container small filter-inputs-operator">
 										<input
 											type="text"
 											value={filter.inputs.operator.label}
 											onkeyup={(e) => {fireEvent('FILTER_KEYDOWN', {event: e, value: e.target.value, operator: true, index: index})}}
 											onfocus={(e) => {fireEvent('FILTER_FOCUS', {value: e.target.value, operator: true, index: index})}}
-											className="filter-input operator"
+											//className="filter-input operator"
 										/>
 										{filter.showResults.operator && filter.results.operator.length > 0 && <ul className="filter-results operator">
 											{filter.results.operator.map((result, i) => <li
@@ -1095,14 +1046,14 @@ const view = (state, {updateState, dispatch}) => {
 										</ul>}
 									</div>
 
-									<div className="filter-inputs-value">
+									<div className="search-container medium filter-inputs-value">
 										<input
 											type="text"
 											value={filter.inputs.value.label}
 											onkeyup={(e) => {fireEvent('FILTER_KEYDOWN', {event: e, value: e.target.value, operator: false, index: index})}}
 											onfocus={(e) => {fireEvent('FILTER_FOCUS', {value: e.target.value, operator: false, index: index})}}
 											onblur={(e) => {setFilterValue(index, {label: e.target.value, value: e.target.value})}}
-											className="filter-input"
+											//className="filter-input"
 										/>
 										{filter.showResults.value && filter.results.value.length > 0 && <ul className="filter-results">
 											{filter.results.value.map((result, i) => <li
@@ -1117,6 +1068,7 @@ const view = (state, {updateState, dispatch}) => {
 								<svg onclick={() => {fireEvent('REMOVE_FILTER', {index: index})}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24"}}><path attr-d="M0 0h24v24H0V0z" attr-fill="none"/><path attr-d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>
 							</div>
 						)}
+						{state.filters.length > 0 && <svg onclick={() => {dispatch('SAVE_MY_LIST')}} attrs={{class: "filter-icon", xmlns: "http://www.w3.org/2000/svg", height: "30px", width: "30px", viewBox: "0 0 24 24", 'enable-background': "new 0 0 24 24"}}><g><rect attr-fill="none" attr-height="30" attr-width="30"/></g><g><path attr-d="M21,12.4V7l-4-4H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h7.4l2-2H5V5h11.17L19,7.83v6.57L21,12.4z M15,15 c0,1.66-1.34,3-3,3s-3-1.34-3-3s1.34-3,3-3S15,13.34,15,15z M6,6h9v4H6V6z M19.99,16.25l1.77,1.77L16.77,23H15v-1.77L19.99,16.25z M23.25,16.51l-0.85,0.85l-1.77-1.77l0.85-0.85c0.2-0.2,0.51-0.2,0.71,0l1.06,1.06C23.45,16,23.45,16.32,23.25,16.51z"/></g></svg>}
 					</div>
 					<div className="action-bar">
 						<ul>
@@ -1707,18 +1659,28 @@ createCustomElement('snc-alert-email-message-list', {
 				}
 
 				if (resultRow.u_itom_tags) {
-					resultRow.itom_tags = [];
+					resultRow.itom_tags = {};
+					resultRow.itom_tags.label = "ITOM Tags"
+					resultRow.itom_tags.value = [];
+					resultRow.itom_tags.display_value = [];
 					if (resultRow.u_itom_tags.value) {
 						try {
 							let itom_tags = JSON.parse(resultRow.u_itom_tags.value);
 							let itom_tag_keys = Object.keys(itom_tags);
 							itom_tag_keys.forEach((tag_key) => {
-								resultRow.itom_tags.push({key: tag_key, value: itom_tags[tag_key]});
+								let tag = {key: tag_key, value: itom_tags[tag_key]};
+								resultRow.itom_tags.value.push(tag);
 							});
-						} catch (e) {
-
+						} catch (e) {}
+						resultRow.itom_tags.value.sort(sortTags);
+						resultRow.itom_tags.display_value = resultRow.itom_tags.value;
+						if (resultRow.itom_tags.value.length < 5) {
+							resultRow.itom_tags.short_length = true;
+						} else {
+							resultRow.itom_tags.short_length = false;
+							resultRow.itom_tags.display_value = resultRow.itom_tags.value.slice(0, 5);
 						}
-						resultRow.itom_tags.sort(sortTags);
+						resultRow.itom_tags.unfold = false;
 					}
 					if (!updatedTableOrder.includes("itom_tags")) {
 						updatedTableOrder.splice(9, 0, "itom_tags");
@@ -1726,7 +1688,8 @@ createCustomElement('snc-alert-email-message-list', {
 				}
 				if (resultRow.source) {
 					resultRow.source_icon = {
-						label: 'Source Icon',
+						label: "Source Icon",
+						title: resultRow.source.display_value,
 						value: findMatchingSourceIcon(resultRow.source.display_value)
 					};
 					if (!updatedTableOrder.includes("source_icon")) {
@@ -1735,7 +1698,8 @@ createCustomElement('snc-alert-email-message-list', {
 				}
 				if (resultRow.u_applies_to_source) {
 					resultRow.source_icon = {
-						label: 'Source Icon',
+						label: "Source Icon",
+						title: resultRow.u_applies_to_source.display_value,
 						value: findMatchingSourceIcon(resultRow.u_applies_to_source.display_value)
 					};
 					if (!updatedTableOrder.includes("source_icon")) {
@@ -1761,6 +1725,7 @@ createCustomElement('snc-alert-email-message-list', {
 						} else {
 							uniquenessString = "Noise";
 						}
+						resultRow.u_repeated_alerts.title = `${numOfRepeatedAlerts} repeated alerts last 30 days`
 					}
 					resultRow.temp_uniqueness = {display_value: uniquenessString, value: uniquenessString, label: "Uniqueness"};
 					if (!updatedTableOrder.includes("temp_uniqueness")) {
@@ -1787,6 +1752,7 @@ createCustomElement('snc-alert-email-message-list', {
 				if (state.currentList.table == "sn_agent_ci_extended_info" && resultRow['cmdb_ci.sys_class_name']) {
 					resultRow.os_icon = {
 						label: 'OS Icon',
+						title: resultRow['cmdb_ci.sys_class_name'].value,
 						value: findMatchingOsIcon(resultRow['cmdb_ci.sys_class_name'].value)
 					}
 					if (!updatedTableOrder.includes("os_icon")) {
@@ -1909,7 +1875,7 @@ createCustomElement('snc-alert-email-message-list', {
 					action.payload.result.forEach((result) => {
 						if (td.u_tbac_reasoning.alert_clustering_tags.find((act) => act.value == result.sys_id.value)) {
 							let desired_tag = result.additional_info_key.value;
-							let found_tag = td.itom_tags.find((itom_tag) => itom_tag.key == desired_tag);
+							let found_tag = td.itom_tags.value.find((itom_tag) => itom_tag.key == desired_tag);
 							if (found_tag) {
 								td.tbac_cluster_tags.push(found_tag);
 							}
@@ -2012,7 +1978,6 @@ createCustomElement('snc-alert-email-message-list', {
 						value: ""
 					});
 				}
-				console.log("tableRow.application_service: ", tableRow.application_service);
 			});
 			updateState({tableData: updatedTableData});
 			dispatch('START_FETCH_SECONDARY_ALERTS');
@@ -2127,11 +2092,12 @@ createCustomElement('snc-alert-email-message-list', {
 			let updatedTableOrder = state.tableOrder;
 			if (action.payload.result.length > 0) {
 				updatedTableData.forEach((tableRow) => {
-					tableRow.secondary_alerts = {display_value: "0", value: "0", label: "Secondary Alerts"};
+					tableRow.secondary_alerts = {display_value: "0", value: "0", label: "Secondary Alerts", title: `0 Correlated Alerts`};
 					let matchingResult = action.payload.result.find((result) => tableRow.sys_id.value == result.groupby_fields[0].value);
 					if (matchingResult) {
 						tableRow.secondary_alerts.display_value = matchingResult.stats.count;
 						tableRow.secondary_alerts.value = matchingResult.stats.count;
+						tableRow.secondary_alerts.title = `${matchingResult.stats.count} Correlated Alerts`
 					}
 				});
 				if (!updatedTableOrder.includes("secondary_alerts")) {
@@ -2466,11 +2432,12 @@ createCustomElement('snc-alert-email-message-list', {
 				console.log("results: ", results);
 				updateState({addFilterResults: results, showAddFilterResults: true});
 			} else {
-				updateState({addFilterResults: [], showAddFilterResults: false});
+				updateState({addFilterResults: state.typeaheadColumnOptions, showAddFilterResults: true});
 			}
 		},
 		'ADD_FILTER_FOCUS': (coeffects) => {
 			const {action, dispatch} = coeffects;
+			console.log("ADD_FILTER_FOCUS payload: ", action.payload);
 			dispatch('UPDATE_ADD_FILTER_RESULTS', {value: action.payload.value});
 		},
 		'FILTER_FOCUS': (coeffects) => {
@@ -2653,6 +2620,12 @@ createCustomElement('snc-alert-email-message-list', {
 			updatedTableData[action.payload.index].description.unfold = action.payload.value;
 			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
 		},
+		'SET_ITOM_TAGS_UNFOLD': (coeffects) => {
+			const {action, state, updateState} = coeffects;
+			let updatedTableData = state.tableData;
+			updatedTableData[action.payload.index].itom_tags.unfold = action.payload.value;
+			updateState({tableData: updatedTableData, dummyStateChange: !state.dummyStateChange});
+		},
 		'UPDATE_QUICK_SEARCH': (coeffects) => {
 			const {action, state, updateState, dispatch} = coeffects;
 			console.log("UPDATE_QUICK_SEARCH value: ", action.payload.value);
@@ -2698,7 +2671,7 @@ createCustomElement('snc-alert-email-message-list', {
 							let clickedTag = eventPath.find((element) => element.id && element.id.includes("tagindex-"));
 							if (clickedTag) {
 								let clickedTagIndex = clickedTag.id.substring(clickedTag.id.indexOf("-") + 1);
-								contextMenuTag = state.tableData[contextMenuRecordIndex].itom_tags[clickedTagIndex];
+								contextMenuTag = state.tableData[contextMenuRecordIndex].itom_tags.value[clickedTagIndex];
 							}
 						}
 					}
