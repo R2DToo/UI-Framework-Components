@@ -482,6 +482,9 @@ const view = (state, {updateState, dispatch}) => {
 								return <td className={`description break-message data-field-${key}`}>{row[key].display_value}</td>
 							} else if (key == "name") {
 								let url = '/now/nav/ui/classic/params/target/' + state.currentList.table + '.do%3Fsys_id%3D' + row.sys_id.value;
+								if (state.currentList.table == "em_match_rule") {
+									url = `/now/nav/ui/classic/params/target/%24em_event_rule_designer.do%3Fsys_id%3D${row.sys_id.value}%26sysparm_use_polaris%3Dfalse`;
+								}
 								return <td className={`name-message break-message data-field-${key}`}><span className="underline-record-link" onclick={(e) => {e.stopPropagation(); dispatch("RECORD_LINK_CMDB_CI#CLICKED", {value: url});}}>{row[key].display_value}</span></td>
 							} else if (key == "alert_correlation_rule") {
 								return <td className={`name-message data-field-${key}`}>{row[key].display_value}</td>

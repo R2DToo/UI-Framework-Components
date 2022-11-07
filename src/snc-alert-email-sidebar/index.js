@@ -173,6 +173,7 @@ createCustomElement('snc-alert-email-sidebar', {
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_LIST_CATEGORIES_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_LIST_CATEGORIES_SUCCESS': (coeffects) => {
 			const {action, updateState, state, dispatch} = coeffects;
@@ -208,6 +209,7 @@ createCustomElement('snc-alert-email-sidebar', {
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_LIST_OPTIONS_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_LIST_OPTIONS_SUCCESS': (coeffects) => {
 			const { action, updateState, state } = coeffects;
@@ -238,6 +240,7 @@ createCustomElement('snc-alert-email-sidebar', {
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
 			successActionType: 'FETCH_MY_LIST_OPTIONS_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_MY_LIST_OPTIONS_SUCCESS': (coeffects) => {
 			const { action, state, updateState } = coeffects;
@@ -266,6 +269,7 @@ createCustomElement('snc-alert-email-sidebar', {
 			method: 'DELETE',
 			pathParams: ['sys_id'],
 			successActionType: "DELETE_MY_LIST_SUCCESS",
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'DELETE_MY_LIST_SUCCESS': (coeffects) => {
 			const { action, state, updateState, dispatch } = coeffects;
@@ -283,6 +287,10 @@ createCustomElement('snc-alert-email-sidebar', {
 				sysparm_fields: 'columns,condition,table,title,sys_id',
 				sysparm_display_value: 'false'
 			});
-		}
+		},
+		'QUERY_ERROR': (coeffects) => {
+			const { action } = coeffects;
+			console.log('%cQUERY_ERROR: %o', 'color:green;font-size:12px;', action.payload);
+		},
 	}
 });

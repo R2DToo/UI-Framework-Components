@@ -279,7 +279,8 @@ createCustomElement('snc-integration-list', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_INSTANCE_NAME_SUCCESS'
+			successActionType: 'FETCH_INSTANCE_NAME_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_INSTANCE_NAME_SUCCESS': (coeffects) => {
 			const { dispatch, updateState, action } = coeffects;
@@ -299,7 +300,8 @@ createCustomElement('snc-integration-list', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_PUSH_CONNECTORS_SUCCESS'
+			successActionType: 'FETCH_PUSH_CONNECTORS_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_PUSH_CONNECTORS_SUCCESS': (coeffects) => {
 			const { dispatch, updateState, action, state } = coeffects;
@@ -330,7 +332,8 @@ createCustomElement('snc-integration-list', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_PULL_CONNECTORS_SUCCESS'
+			successActionType: 'FETCH_PULL_CONNECTORS_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_PULL_CONNECTORS_SUCCESS': (coeffects) => {
 			const { state, updateState, action, dispatch } = coeffects;
@@ -376,7 +379,8 @@ createCustomElement('snc-integration-list', {
 			method: 'GET',
 			pathParams: ['table'],
 			queryParams: ['sysparm_query', 'sysparm_fields', 'sysparm_display_value'],
-			successActionType: 'FETCH_ACTIVE_PULL_CONNECTORS_SUCCESS'
+			successActionType: 'FETCH_ACTIVE_PULL_CONNECTORS_SUCCESS',
+			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_ACTIVE_PULL_CONNECTORS_SUCCESS': (coeffects) => {
 			const { state, updateState, action } = coeffects;
@@ -404,7 +408,11 @@ createCustomElement('snc-integration-list', {
 				let newSearchedCards = state.integrationCards.filter((integrationCard) => integrationCard.name.toLowerCase().includes(searchValue.toLowerCase()));
 				updateState({searchMatchingCards: newSearchedCards});
 			}
-		}
+		},
+		'QUERY_ERROR': (coeffects) => {
+			const { action } = coeffects;
+			console.log('%cQUERY_ERROR: %o', 'color:green;font-size:12px;', action.payload);
+		},
 	},
 	eventHandlers: [
 		{
