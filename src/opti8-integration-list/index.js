@@ -3,7 +3,7 @@ const {COMPONENT_ERROR_THROWN,COMPONENT_PROPERTY_CHANGED,COMPONENT_BOOTSTRAPPED}
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import {createHttpEffect} from '@servicenow/ui-effect-http';
 import styles from './styles.scss';
-import '../snc-integration-card';
+import '../opti8-integration-card';
 
 import amazonSVG from '../images/aws3.svg';
 import appDynamicsSVG from '../images/AppDynamics.svg';
@@ -110,7 +110,7 @@ export const INTEGRATION_ICONS = [
 ];
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-integration-list state: ', state);
+	console.log('opti8-integration-list state: ', state);
 
 	const activeCards = () => {
 		let cards = state.searchValue == '' ? state.integrationCards : state.searchMatchingCards;
@@ -124,7 +124,7 @@ const view = (state, {updateState, dispatch}) => {
 				</div> */}
 				<div className="card-grid">
 					{activeIntegrations.map((integrationCard) =>
-						<snc-integration-card
+						<opti8-integration-card
 							svgIcon={integrationCard.svgIcon}
 							name={integrationCard.name}
 							active={integrationCard.active}
@@ -151,7 +151,7 @@ const view = (state, {updateState, dispatch}) => {
 				</div>
 				<div className="card-grid">
 					{inactiveIntegrations.map((integrationCard) =>
-						<snc-integration-card
+						<opti8-integration-card
 							svgIcon={integrationCard.svgIcon}
 							name={integrationCard.name}
 							active={integrationCard.active}
@@ -239,7 +239,7 @@ const cleanNames = (name) => {
 	return name;
 }
 
-createCustomElement('snc-integration-list', {
+createCustomElement('opti8-integration-list', {
 	renderer: {type: snabbdom},
 	view,
 	styles,

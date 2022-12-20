@@ -1,5 +1,5 @@
 {
-	"name": "@snc/optimizui-components",
+	"name": "@opti8/optimizui-components",
 	"version": "0.6.0",
 	"private": false,
 	"description": "Custom components for ServiceNow Next Experience. Developed by Optimiz",
@@ -15,8 +15,8 @@
 	},
 	"module": "src/index.js",
 	"dependencies": {
-		"@servicenow/cli-archetype": "20.0.0",
-		"@servicenow/cli-component-archetype": "20.0.0",
+		"@servicenow/cli-archetype": "21.0.7",
+		"@servicenow/cli-component-archetype": "21.0.7",
 		"@servicenow/library-translate": "quebec",
 		"@servicenow/now-avatar": "^19.8.2-ecd",
 		"@servicenow/now-button": "^19.8.2-ecd",
@@ -35,7 +35,7 @@
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
-		"@servicenow/cli-archetype-dev": "20.0.0",
-		"@servicenow/cli-component-archetype-dev": "20.0.0"
+		"@servicenow/cli-archetype-dev": "21.0.7",
+		"@servicenow/cli-component-archetype-dev": "21.0.7"
 	}
 }

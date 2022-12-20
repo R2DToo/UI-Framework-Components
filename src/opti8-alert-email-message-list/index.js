@@ -3,12 +3,13 @@ const { COMPONENT_PROPERTY_CHANGED, COMPONENT_BOOTSTRAPPED, COMPONENT_ERROR_THRO
 import {createHttpEffect} from '@servicenow/ui-effect-http';
 import {snabbdom, Fragment, createRef} from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
-import '../snc-alert-lifecycle';
+import '../opti8-alert-lifecycle';
 import '@servicenow/now-icon';
 import '@servicenow/now-highlighted-value';
 import '@servicenow/now-avatar';
 import '@servicenow/now-rich-text';
 import '@servicenow/now-button';
+import '@servicenow/now-template-message';
 
 import {isEqual} from 'lodash';
 
@@ -131,7 +132,7 @@ const OPERATING_SYSTEM_ICONS = [
 ];
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-message-list state: ', state);
+	console.log('opti8-alert-email-message-list state: ', state);
 
 
 	const fireEvent = (event_name, value) => {
@@ -982,7 +983,7 @@ const view = (state, {updateState, dispatch}) => {
 	const quickSearchRef = createRef();
 
 	return (
-		<div id="snc-alert-email-message-list">
+		<div id="opti8-alert-email-message-list">
 			{state.showLifecycle == false && <main id="main">
 				<div className="header">
 					<div className="table-title">
@@ -1111,12 +1112,19 @@ const view = (state, {updateState, dispatch}) => {
 						</tbody>
 					</table>
 				</div>}
-				{state.tableData.length == 0 && <div className="list2_empty-state-list">
+				{/* {state.tableData.length == 0 && <div className="list2_empty-state-list">
 					<div className="list-flavin"></div>
 					No records to display
+				</div>} */}
+				{state.tableData.length == 0 && <div className="list2_empty-state-list">
+					<now-template-message-empty-state
+						heading={{label: state.tableExists ? "No records found" : "This table does not exist", level: "3"}}
+						illustration="no-data"
+						alignment="vertical-centered"
+					/>
 				</div>}
 			</main>}
-			{state.showLifecycle == true && <snc-alert-lifecycle/>}
+			{state.showLifecycle == true && <opti8-alert-lifecycle/>}
 			<div ref={(contextMenuElement) => updateState({contextMenuRef: contextMenuElement})} class={{'context-menu-container': true, visible: state.showContextMenu}} /*style={{top: state.contextMenuTop, left: state.contextMenuLeft}}*/ style={{/*width: state.contextMenuStyle.width, height: state.contextMenuStyle.height,*/ top: state.contextMenuStyle.top, left: state.contextMenuStyle.left}}>
 				<div className="context-menu">
 					<ul className="context-menu-list">
@@ -1160,17 +1168,35 @@ const view = (state, {updateState, dispatch}) => {
 };
 
 const transformTableOrder = (tableOrder, tableData, currentList) => {
-	console.log("transformTableOrder");
-	console.log("tableOrder: ", tableOrder);
-	console.log("tableData: ", tableData);
-	console.log("currentList: ", currentList);
+	console.log("%ctransformTableOrder START tableOrder: %o", "color:#317ae0", tableOrder);
+	// console.log("%ctableData: %o", "color:#317ae0", tableData);
+	// console.log("%ccurrentList: %o", "color:#317ae0", currentList);
+
+	var tableFields = [];
+	if (tableData.length > 0) {
+		tableFields = Object.keys(tableData[0]);
+	}
+	// console.log("%ctableFields: %o", "color:#317ae0", tableFields);
 
 	if (!tableOrder.includes("Select")) {
 		tableOrder.push("Select");
 	}
 	if (currentList.columns) {
-		currentList.columns.split(",").forEach((column) => {
-			if (column == "sys_id" || column == "cmdb_ci.sys_class_name" || column == "additional_info" || column == "u_itom_tags") {
+		//Get common values between current list columns and table data fields. Then use common values to proceed with logic
+		let currentListColumnsArray = currentList.columns.split(",");
+		let commonFields = currentListColumnsArray;
+		if (tableFields.length > 0) {
+			commonFields = currentListColumnsArray.filter((field) => tableFields.includes(field));
+		}
+
+		commonFields.forEach((column) => {
+			//Ignore these fields from being added to the tableOrder
+			if (
+				column == "sys_id" ||
+				column == "cmdb_ci.sys_class_name" ||
+				column == "additional_info" ||
+				column == "u_itom_tags"
+			) {
 				return;
 			}
 			if (!tableOrder.includes(column)) {
@@ -1178,8 +1204,38 @@ const transformTableOrder = (tableOrder, tableData, currentList) => {
 			}
 		});
 	}
-
-	tableData.forEach((tableRow) => {
+	// var newTableOrder = tableOrder;
+	// Any fields described from the current list that are not in the table data will be removed from the table order
+	// console.log("%cBEFORE SPLICE tableOrder: %o", "color:#317ae0", tableOrder);
+	for (var x in tableOrder) {
+		if (tableFields.length > 0) {
+			if (tableFields.indexOf(tableOrder[x]) == -1 && tableOrder[x] != "Select") {
+				// console.log(`%cSPLICING tableOrder[${x}]: %o`, "color:#317ae0", tableOrder[x]);
+				tableOrder.splice(x, 1);
+			}
+		}
+	}
+	// console.log("%cAFTER SPLICE tableOrder: %o", "color:#317ae0", tableOrder);
+	// If a field not described in the current list appears in table data, add it to the table order
+	if (tableData.length > 0) {
+		for (let i = 0; i < tableFields.length; i++) {
+			//Ignore these fields from being added to the tableOrder
+			if (
+				tableFields[i] == "selected" ||
+				tableFields[i] == "sys_id" ||
+				tableFields[i] == "cmdb_ci.sys_class_name" ||
+				tableFields[i] == "additional_info" ||
+				tableFields[i] == "u_itom_tags"
+			) {
+				continue;
+			}
+			if (!tableOrder.includes(tableFields[i])) {
+				// console.log(`%ctableData pushing field: %o`, "color:#317ae0", tableFields[i]);
+				tableOrder.push(tableFields[i]);
+			}
+		}
+	}
+	/*tableData.forEach((tableRow) => {
 		let fields = Object.keys(tableRow);
 		for (let i = 0; i < fields.length; i++) {
 			if (fields[i] == "selected" || fields[i] == "sys_id" || fields[i] == "cmdb_ci.sys_class_name" || fields[i] == "additional_info" || fields[i] == "u_itom_tags") {
@@ -1189,8 +1245,8 @@ const transformTableOrder = (tableOrder, tableData, currentList) => {
 				tableOrder.push(fields[i]);
 			}
 		}
-	});
-	console.log("returning tableOrder: ", tableOrder);
+	});*/
+	console.log("%ctransformTableOrder END tableOrder: %o", "color:#317ae0", tableOrder);
 	return tableOrder;
 };
 
@@ -1248,7 +1304,7 @@ const findMatchingOsIcon = (class_value) => {
 	return icon;
 };
 
-createCustomElement('snc-alert-email-message-list', {
+createCustomElement('opti8-alert-email-message-list', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
@@ -1408,6 +1464,31 @@ createCustomElement('snc-alert-email-message-list', {
 			console.log('%cQUERY_ERROR: %o', 'color:green;font-size:12px;', action.payload);
 			updateState({isMainQueryRunning: false});
 		},
+		'CHECK_IF_TABLE_EXISTS': createHttpEffect('/api/x_opti8_aiwrkspace/optimiz_workspace_api/does-table-exist', {
+			batch: false,
+			cacheable: true,
+			method: 'GET',
+			queryParams: ['table'],
+			successActionType: "CHECK_IF_TABLE_EXISTS_SUCCESS",
+			errorActionType: 'QUERY_ERROR'
+		}),
+		'CHECK_IF_TABLE_EXISTS_SUCCESS': (coeffects) => {
+			const { dispatch, action, updateState } = coeffects;
+			console.log(`CHECK_IF_TABLE_EXISTS_SUCCESS table: ${action.meta.request.params.table} - exists: ${action.payload.result.tableExists}`);
+			updateState({tableExists: action.payload.result.tableExists});
+			if (action.payload.result.tableExists) {
+				dispatch('REFRESH_MAIN_QUERY', {force: true});
+
+				let labelSysparm = `name=${action.meta.request.params.table}^elementISNOTEMPTY`;
+				console.log("labelSysparm: ", labelSysparm);
+				dispatch('FETCH_ALL_TABLE_COLUMNS', {
+					table: 'sys_dictionary',
+					sysparm_query: labelSysparm,
+					sysparm_fields: 'element,column_label,internal_type',
+					sysparm_display_value: 'true'
+				});
+			}
+		},
 		'FETCH_CURRENT_LIST': createHttpEffect('/api/now/table/:table', {
 			batch: false,
 			cacheable: true,
@@ -1426,23 +1507,15 @@ createCustomElement('snc-alert-email-message-list', {
 					updateState({showLifecycle: true});
 				} else {
 					updateState({showLifecycle: false});
+					dispatch('CHECK_IF_TABLE_EXISTS', {
+						table: action.payload.result[0].table
+					});
 					let newCurrentList = {
 						condition: action.payload.result[0].condition,
 						columns: action.payload.result[0].columns,
 						table: action.payload.result[0].table
 					};
 					updateState({currentList: newCurrentList, tableOrder: [], tableData: [], sortingArray: [], dummyStateChange: !state.dummyStateChange, showInfo: state.showInfo});
-
-					dispatch('REFRESH_MAIN_QUERY', {force: true});
-
-					let labelSysparm = `name=${newCurrentList.table}^elementISNOTEMPTY`;
-					console.log("labelSysparm: ", labelSysparm);
-					dispatch('FETCH_ALL_TABLE_COLUMNS', {
-						table: 'sys_dictionary',
-						sysparm_query: labelSysparm,
-						sysparm_fields: 'element,column_label,internal_type',
-						sysparm_display_value: 'true'
-					});
 				}
 			} else if (action.meta.request.updatedUrl == "/api/now/table/sys_aw_list") {
 				dispatch('FETCH_CURRENT_MY_LIST', {
@@ -1464,6 +1537,10 @@ createCustomElement('snc-alert-email-message-list', {
 		}),
 		'REFRESH_MAIN_QUERY': (coeffects) => {
 			const { state, dispatch, updateState, action } = coeffects;
+			if (!state.tableExists) {
+				console.log("%cTable does not exist in your instance", "color: #9cad2b");
+				return;
+			}
 			let isForced = false;
 			if (action.payload) {
 				isForced = action.payload.force;
@@ -2272,7 +2349,11 @@ createCustomElement('snc-alert-email-message-list', {
 					updatedTableData.forEach((tableRow) => {
 						avatarFields.forEach((avatarField) => {
 							if (tableRow[avatarField] && tableRow[avatarField].value == result.sys_id) {
-								tableRow[avatarField].avatar = result.photo + ".iix";
+								if (result.photo != "") {
+									tableRow[avatarField].avatar = result.photo + ".iix";
+								} else {
+									tableRow[avatarField].avatar = null;
+								}
 							}
 						})
 					});
@@ -2702,7 +2783,7 @@ createCustomElement('snc-alert-email-message-list', {
 					console.log('%cclickedRecordSysID: %o', 'color:green;font-size:12px;', clickedRecordSysID);
 					console.log('%ccontextMenuRecordIndex: %o', 'color:green;font-size:12px;', contextMenuRecordIndex);
 
-					let parentDiv = eventPath.find((element) => element.id && element.id == "snc-alert-email-message-list");
+					let parentDiv = eventPath.find((element) => element.id && element.id == "opti8-alert-email-message-list");
 					console.log('%cParent Div: %o', 'color:green;font-size:12px;', parentDiv);
 
 					//New Positioning Code

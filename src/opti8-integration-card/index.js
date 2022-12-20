@@ -6,7 +6,7 @@ import '@servicenow/now-rich-text';
 
 
 const view = (state, {updateState, dispatch}) => {
-	// console.log('snc-integration-card state: ', state);
+	// console.log('opti8-integration-card state: ', state);
 
 	const copyTextToClipboard = async (text) => {
 		if (navigator.clipboard) {
@@ -45,7 +45,7 @@ const view = (state, {updateState, dispatch}) => {
 	);
 };
 
-createCustomElement('snc-integration-card', {
+createCustomElement('opti8-integration-card', {
 	renderer: {type: snabbdom},
 	view,
 	styles,

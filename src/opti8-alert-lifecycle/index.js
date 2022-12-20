@@ -4,10 +4,10 @@ import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-lifecycle state: ', state);
+	console.log('opti8-alert-lifecycle state: ', state);
 
 	return (
-		<div id="snc-alert-lifecycle">
+		<div id="opti8-alert-lifecycle">
 			<div className="process-wrapper">
 				<div id="progress-bar-container">
 					<ul>
@@ -35,7 +35,7 @@ const view = (state, {updateState, dispatch}) => {
 	);
 };
 
-createCustomElement('snc-alert-lifecycle', {
+createCustomElement('opti8-alert-lifecycle', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
@@ -82,7 +82,7 @@ createCustomElement('snc-alert-lifecycle', {
 	},
 	actionHandlers: {
 		[COMPONENT_ERROR_THROWN]: (coeffects) => {
-			console.log("%csnc-alert-lifecycle ERROR_THROWN: %o", "color:red", coeffects.action.payload);
+			console.log("%copti8-alert-lifecycle ERROR_THROWN: %o", "color:red", coeffects.action.payload);
 		},
 		'STEP_CLICKED': (coeffects) => {
 			const {action, state, updateState} = coeffects;

@@ -7,10 +7,10 @@ import '@servicenow/now-popover';
 import '@servicenow/now-button';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-filter state: ', state);
+	console.log('opti8-filter state: ', state);
 
 	return (
-		<div id="snc-filter">
+		<div id="opti8-filter">
 			<now-popover interaction-type="dialog" hide-tail={true} positions={[{"target":"bottom-center","content":"top-center"}]} container={{}}>
 				<now-button slot="trigger" label="Check out my popover" variant="secondary" size="md"></now-button>
 				<sn-content slot="content" >
@@ -23,7 +23,7 @@ const view = (state, {updateState, dispatch}) => {
 };
 
 
-createCustomElement('snc-filter', {
+createCustomElement('opti8-filter', {
 	renderer: {type: snabbdom},
 	view,
 	styles,

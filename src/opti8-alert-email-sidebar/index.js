@@ -8,7 +8,7 @@ import '@servicenow/now-avatar';
 import '@servicenow/now-rich-text';
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-sidebar state: ', state);
+	console.log('opti8-alert-email-sidebar state: ', state);
 
 	const renderOptions = () => {
 		return state.optionsArray.map((category, index) => {
@@ -36,9 +36,9 @@ const view = (state, {updateState, dispatch}) => {
 						} else {
 							listActive = state.properties.paramListValue == list.sys_id;
 						}
-						return <li class={{'active': listActive}}>
-							<div className="link_text" onclick={() => {dispatch("LIST_OPTION_CLICKED", {categoryIndex: index, listIndex: listIndex})}}>
-								<div>{list.title}</div>
+						return <li class={{'active': listActive, 'hoverable': !list.disabled}}>
+							<div className="link_text" onclick={() => {if (!list.disabled) dispatch("LIST_OPTION_CLICKED", {categoryIndex: index, listIndex: listIndex})}}>
+								<div class={{'disabled': list.disabled}}>{list.title}</div>
 								{category.categoryId == "0" && <svg onclick={(e) => {e.stopPropagation(); dispatch("DELETE_MY_LIST", {sys_id: list.sys_id});}} attrs={{class: "delete-list-icon", xmlns: "http://www.w3.org/2000/svg", height: "24px", width: "24px"}}><path attr-d="M6.4 18.65 5.35 17.6 10.95 12 5.35 6.4 6.4 5.35 12 10.95 17.6 5.35 18.65 6.4 13.05 12 18.65 17.6 17.6 18.65 12 13.05Z"/></svg>}
 							</div>
 						</li>
@@ -56,7 +56,7 @@ const view = (state, {updateState, dispatch}) => {
 						className="logo"
 						size="md"
 						user-name={state.properties.currentUser.fullName}
-						image-src={state.properties.currentUser.avatar}
+						image-src={state.properties.currentUser.avatar ? state.properties.currentUser.avatar : null}
 						presence={state.properties.currentUser.presence}
 					/>
 				</div>
@@ -82,7 +82,7 @@ const findTempIcon = (categoryTitle) => {
 	return icon;
 };
 
-createCustomElement('snc-alert-email-sidebar', {
+createCustomElement('opti8-alert-email-sidebar', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
@@ -120,7 +120,7 @@ createCustomElement('snc-alert-email-sidebar', {
 	actionHandlers: {
 		[COMPONENT_BOOTSTRAPPED]: (coeffects) => {
 			const {state, dispatch} = coeffects;
-			console.log("snc-alert-email-sidebar COMPONENT_BOOTSTRAPPED state: ", state);
+			console.log("opti8-alert-email-sidebar COMPONENT_BOOTSTRAPPED state: ", state);
 			dispatch('FETCH_LIST_CATEGORIES', {
 				table: 'sys_aw_list_category',
 				sysparm_query: `workspace=${state.properties.workspaceId}^sys_idNOT IN${state.properties.excludedMenuCategories.toString()}^active=true^ORDERBYorder`,
@@ -130,7 +130,7 @@ createCustomElement('snc-alert-email-sidebar', {
 		},
 		[COMPONENT_PROPERTY_CHANGED]:(coeffects) => {
 			const {state, dispatch, action} = coeffects;
-			console.log("snc-alert-email-sidebar COMPONENT_PROPERTY_CHANGED: ", action.payload.name);
+			console.log("opti8-alert-email-sidebar COMPONENT_PROPERTY_CHANGED: ", action.payload.name);
 			console.log("sidebar payload: ", action.payload);
 			if (action.payload.name == "uibRefresh") {
 				dispatch('FETCH_LIST_CATEGORIES', {
@@ -212,13 +212,14 @@ createCustomElement('snc-alert-email-sidebar', {
 			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_LIST_OPTIONS_SUCCESS': (coeffects) => {
-			const { action, updateState, state } = coeffects;
+			const { action, updateState, state, dispatch } = coeffects;
 			console.log('FETCH_LIST_OPTIONS_SUCCESS payload: ', action.payload);
 			if (action.payload && action.payload.result) {
 				let updatedOptionsArray = state.optionsArray;
 				updatedOptionsArray.forEach((category, categoryIndex) => {
 					let matchingResults = action.payload.result.filter(result => result.category.value == category.categoryId);
 					matchingResults.forEach(result => {
+						result.disabled = false;
 						category.listOptions.push(result);
 
 						if (state.properties.paramListValue == "") {
@@ -231,6 +232,7 @@ createCustomElement('snc-alert-email-sidebar', {
 					});
 				});
 				updateState({optionsArray: updatedOptionsArray});
+				dispatch('DISABLE_LIST_OPTIONS');
 			}
 		},
 		'FETCH_MY_LIST_OPTIONS': createHttpEffect('/api/now/table/:table', {
@@ -243,12 +245,13 @@ createCustomElement('snc-alert-email-sidebar', {
 			errorActionType: 'QUERY_ERROR'
 		}),
 		'FETCH_MY_LIST_OPTIONS_SUCCESS': (coeffects) => {
-			const { action, state, updateState } = coeffects;
+			const { action, state, updateState, dispatch } = coeffects;
 			console.log("FETCH_MY_LIST_OPTIONS_SUCCESS payload: ", action.payload);
 			if (action.payload && action.payload.result) {
 				let updatedOptionsArray = state.optionsArray;
 				let myListCategory = {categoryTitle: "My Lists", categoryId: "0", listOptions: [], icon: findTempIcon("My Lists")};
 				action.payload.result.forEach((result) => {
+					result.disabled = false;
 					myListCategory.listOptions.push(result);
 
 					if (state.properties.paramListValue == "") {
@@ -287,6 +290,41 @@ createCustomElement('snc-alert-email-sidebar', {
 				sysparm_fields: 'columns,condition,table,title,sys_id',
 				sysparm_display_value: 'false'
 			});
+		},
+		'DISABLE_LIST_OPTIONS': (coeffects) => {
+			const { state, dispatch } = coeffects;
+			var tables = [];
+			for (var i in state.optionsArray) {
+				for (var j in state.optionsArray[i].listOptions) {
+					if (tables.indexOf(state.optionsArray[i].listOptions[j].table) == -1) {
+						tables.push(state.optionsArray[i].listOptions[j].table);
+					}
+				}
+			}
+			for (var t in tables) {
+				dispatch("CHECK_IF_TABLE_EXISTS", {table: tables[t]});
+			}
+		},
+		'CHECK_IF_TABLE_EXISTS': createHttpEffect('/api/x_opti8_aiwrkspace/optimiz_workspace_api/does-table-exist', {
+			batch: false,
+			cacheable: true,
+			method: 'GET',
+			queryParams: ['table'],
+			successActionType: "CHECK_IF_TABLE_EXISTS_SUCCESS",
+			errorActionType: 'QUERY_ERROR'
+		}),
+		'CHECK_IF_TABLE_EXISTS_SUCCESS': (coeffects) => {
+			const { state, action, updateState } = coeffects;
+			console.log(`CHECK_IF_TABLE_EXISTS_SUCCESS table: ${action.meta.request.params.table} - exists: ${action.payload.result.tableExists}`);
+			var updatedOptionsArray = state.optionsArray;
+			for (var c in updatedOptionsArray) {
+				for (var l in updatedOptionsArray[c].listOptions) {
+					if (updatedOptionsArray[c].listOptions[l].table == action.meta.request.params.table) {
+						updatedOptionsArray[c].listOptions[l].disabled = !action.payload.result.tableExists;
+					}
+				}
+			}
+			updateState({optionsArray: updatedOptionsArray, dummyStateChange: !state.dummyStateChange});
 		},
 		'QUERY_ERROR': (coeffects) => {
 			const { action } = coeffects;

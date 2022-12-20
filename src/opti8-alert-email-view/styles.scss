@@ -4,20 +4,20 @@
   box-sizing: border-box;
 }
 
-#snc-alert-email-view {
+#opti8-alert-email-view {
   display: flex;
   align-items: stretch;
   height: 100%;
-  snc-alert-email-sidebar {
+  opti8-alert-email-sidebar {
     width: 11%;
   }
-  snc-alert-email-message-list {
+  opti8-alert-email-message-list {
     width: 89%;
     &.showingInfo {
       width: 50%;
     }
   }
-  snc-alert-email-preview {
+  opti8-alert-email-preview {
     width: 39%;
 
     &.mounted {

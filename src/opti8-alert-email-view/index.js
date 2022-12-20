@@ -1,23 +1,23 @@
 import {createCustomElement} from '@servicenow/ui-core';
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
-import '../snc-alert-email-sidebar';
-import '../snc-alert-email-message-list';
-import '../snc-alert-email-preview';
+import '../opti8-alert-email-sidebar';
+import '../opti8-alert-email-message-list';
+import '../opti8-alert-email-preview';
 
 const view = (state, {updateState}) => {
 	console.log('alert email view state: ', state);
 
 	return (
-		<div id="snc-alert-email-view">
-			<snc-alert-email-sidebar
+		<div id="opti8-alert-email-view">
+			<opti8-alert-email-sidebar
 				currentUser={state.properties.currentUser}
 				paramListValue={state.properties.paramListValue}
 				defaultListId={state.properties.defaultListId}
 				excludedMenuCategories={state.properties.excludedMenuCategories}
 				uibRefresh={state.properties.uibRefresh}
 			/>
-			<snc-alert-email-message-list
+			<opti8-alert-email-message-list
 				class={{showingInfo: state.showInfo}}
 				showInfo={state.showInfo}
 				tableName={state.properties.tableName}
@@ -31,7 +31,7 @@ const view = (state, {updateState}) => {
 				paramQuickSearchValue={state.properties.paramQuickSearchValue}
 			/>
 			{state.showInfo && (
-				<snc-alert-email-preview
+				<opti8-alert-email-preview
 					focusedRecordNumber={state.focusedRecordNumber}
 					actionArray={state.properties.actionArray}
 					currentUser={state.properties.currentUser}
@@ -50,7 +50,7 @@ const logEvent = (incomingActionName, payload) => {
 	console.log("%cEvent Payload: %o", "color:cyan;font-size:20px;", payload);
 }
 
-createCustomElement('snc-alert-email-view', {
+createCustomElement('opti8-alert-email-view', {
 	renderer: {type: snabbdom},
 	view,
 	styles,

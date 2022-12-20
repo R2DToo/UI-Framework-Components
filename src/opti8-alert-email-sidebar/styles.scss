@@ -31,11 +31,18 @@
   list-style: none;
   transition: all 0.4s ease;
 }
-.sidebar .nav-links li:hover{
+.sidebar .nav-links > li:hover {
+  background-color: RGB($now-color--primary-1);
+}
+.sidebar .nav-links li.hoverable:hover {
   background-color: RGB($now-color--primary-1);
 }
 .sidebar .nav-links li.active{
   background-color: RGB($now-color--primary-1);
+}
+.sidebar .nav-links .link_text div.disabled {
+  //color: RGB($now-color_border--primary);
+  text-decoration: line-through;
 }
 .sidebar .nav-links li .icon-link{
   display: flex;

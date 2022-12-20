@@ -1,6 +1,6 @@
 {
 	"components": {
-		"snc-alert-email-view": {
+		"opti8-alert-email-view": {
 			"innerComponents": [
 				"now-icon",
 				"now-input",
@@ -217,7 +217,7 @@
 				}
 			]
 		},
-		"snc-alert-email-timeline": {
+		"opti8-alert-email-timeline": {
 			"innerComponents": [],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
@@ -249,7 +249,7 @@
 				}
 			]
 		},
-		"snc-integration-list": {
+		"opti8-integration-list": {
 			"innerComponents": [
 				"now-rich-text"
 			],
@@ -270,7 +270,7 @@
 				}
 			]
 		},
-		"snc-optimiz-sidemenu": {
+		"opti8-optimiz-sidemenu": {
 			"innerComponents": [
 				"now-rich-text",
 				"now-avatar"
@@ -349,7 +349,7 @@
 				}
 			]
 		},
-		"snc-filter": {
+		"opti8-filter": {
 			"innerComponents": [],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
@@ -362,5 +362,5 @@
 			"actions": []
 		}
 	},
-	"scopeName": "x_snc_optimizui"
+	"scopeName": "x_opti8_uilibrary"
 }

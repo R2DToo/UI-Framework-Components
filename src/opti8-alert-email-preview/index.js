@@ -121,7 +121,7 @@ export const INTEGRATION_ICONS = [
 ];
 
 const view = (state, {updateState, dispatch}) => {
-	console.log('snc-alert-email-preview state: ', state);
+	console.log('opti8-alert-email-preview state: ', state);
 	const ZOOM_LEVEL = '1.6'; // 1 = base level zoom
 
 	const fireEvent = (event_name, value) => {
@@ -1176,7 +1176,7 @@ const addMinutes = (date, minutes) => {
 	return new Date(date.getTime() + minutes * 60000);
 }
 
-createCustomElement('snc-alert-email-preview', {
+createCustomElement('opti8-alert-email-preview', {
 	renderer: {type: snabbdom},
 	view,
 	styles,
